@@ -1,0 +1,19 @@
+{{{c++
+LRESULT XXXXX::OnTrayMessage(WPARAM wParam, LPARAM lParam)
+{
+	if (lParam == WM_LBUTTONDOWN)
+	{
+		ShowWindow(SW_RESTORE);
+		Shell_NotifyIcon(NIM_DELETE, &m_traydata);
+	}
+	if (lParam == WM_RBUTTONDOWN)
+	{
+		m_pSubMenu = (CIconMenu *)m_menu.GetSubMenu(0);
+		CPoint point;
+		::GetCursorPos(&point);
+		m_pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetApp()->m_pMainWnd, 0);
+	}
+
+	return 0;
+}
+}}}

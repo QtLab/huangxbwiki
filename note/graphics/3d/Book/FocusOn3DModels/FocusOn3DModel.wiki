@@ -1,0 +1,6 @@
+== Quake II's MD2 Models ==
+=== Understanding the FILE* Function ===
+* 头文件: C语言 <stdio.h>  C++ 语言 <cstdio>
+* 函数: fopen, fread, fwrite, fscanf, fprint(后两者格式化, 其文本对应的函数为scanf/sscanf, printf/sprintf). 读写单个字符 fputc/fgetc, 读写字符串 fputs/fgets. fseek 移动文件指针. fclose(), _fcloseall() 关闭所有打开的文件.
+
+=== Looking at the Source Code ===

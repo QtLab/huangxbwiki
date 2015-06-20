@@ -1,0 +1,94 @@
+* Ogre::FrameListener --- 接口类, 可用于接收帧事件的通知
+	- 通过 Root::addFrameListener 添加一个 FrameListener 派生类的实例. 可以添加多个监听器. 对于所有的渲染对象只会发生一次帧事件
+	- frameStarted
+	- frameRenderingQueued --- 在所有渲染的目标发出渲染命令之后, 翻转缓存之前调用. 可以在GPU处理队列时, CPU做些有用的工作, 这些工作只影响下一帧.
+	- frameEnded --- 在所有渲染目标更新和缓存翻转之后调用.
+* Ogre::WindowEventListener --- 用于发送窗口事件到客户端app的回调类.
+	- windowMoved
+	- windowResized
+	- windowClosing
+	- windowClosed
+	- windowFocusChange
+* OIS::KeyListener --- 通过 Keyboard::setEventCallback 将回调设置到Keyboard实例中.
+	- keyPressed
+	- keyReleased
+* OIS::MouseListener --- Mouse::setEventCallback
+	- mouseMoved
+	- mousePressed
+	- mouseReleased
+* 上面四个类派生 SampleContext
+* Ogre::FileSystemLayer --- 用于查找Ogre配置文件在哪里以及logs和设置文件写入哪里.
+	- 构造函数 --- 将应用程序所在目录压入配置文件路径容器中. 准备Home路径下的子目录.
+	- getConfigFilePath --- 查找配置文件地址. 首先看Home路径, 其次是配置文件路径容器.
+	- getWritablePath --- Home目录
+	- setConfigPaths
+	- setHomePath
+* Ogre::OverlaySystem --- 该类简化overlay系统的初始化和结束. 要想使得overlay可见, 你必须注册这个实例作为你场景管理器中的RenderQueueListener.
+* SdkTrayListener
+	- buttonHit
+	- itemSelected
+	- labelHit
+	- sliderMoved
+	- checkBoxToggled
+	- okDialogClosed
+	- yesNoDialogClosed
+* 程序主流程 main函数
+	- 创建 OgreBites::SampleBrowser 对象
+		- 基类 SampleContext 构造函数
+			- Ogre::FileSystemLayer 构造函数创建了一个对象
+				- 获得了配置文件夹路径(程序文件所在路径)
+				- 在Home路径创建了配置文件夹
+		- SampleBrowser 构造函数
+	- SampleBrowser::go()函数 ---> 实际调用 SampleContext::go()函数
+		- SampleContext::initApp
+			- SampleContext::createRoot()
+				- 创建 Ogre::Root
+				- 创建 Ogre::OverlaySystem
+			- SampleBrowser::oneTimeConfig()
+				- Ogre::Root::restoreConfig()
+				- Ogre::Root::showConfigDialog()
+			- 如果非第一次运行, 设置渲染器系统
+			- SampleBrowser::setup()
+				- SampleBrowser::createWindow()
+					- Ogre::Root::initialise 创建一个自动窗口
+				- SampleContext::setupInput()
+					- OIS::InputManager::createInputSystem 创建一个输入系统
+					- SampleContext::createInputDevices()
+						- 设置鼠标键盘.
+					- SampleContext::windowResized()
+						- 主要设置鼠标状态的宽度和高度和渲染窗口一致.
+					- OIS:Keyboard::setEventCallback() 和 OIS::Mouse::setEventCallback() 设置回调.
+				- SampleContext::locateResources()
+					- Ogre::ResourceGroupManager::addResourceLocation() --- 添加资源位置
+					- 添加支持的着色器语言
+				- Ogre::ResourceGroupManager::initialiseResourceGroup() --- 先初始化 Essential 组的资源
+				- 创建一个OgreBits::SdkTrayManager对象
+				- OgreBits::SdkTrayManager::showBackdrop 显示背景
+				- 隐藏 TL_NONE 位置的Tray容器
+				- 加载着色器Cache
+				- SampleBrowser::createDummyScene()
+				- SampleBrowser::loadResources()
+				- SampleBrowser::loadSamples()
+				- 设置纹理管理器的默认Mipmaps数.
+				- Ogre::Root::addFrameListener
+				- Ogre::WindowEventUtilities::addWindowEventListener
+				- 材质管理器创建一个材质 SampleThumbnail, 创建该材质的纹理单元状态, Ogre::Pass::createTextureUnitState
+				- SampleBrowser::setupWidget
+				- SampleBrowser::windowResized
+				- 运行启动sample --- OgreBrowser::runSample()
+			- 如果非第一次运行, 恢复上一个sample, 否则如果有初始sample, 则运行该sample
+		- SampleBrowser::loadStartUpSample()
+		- Ogre::Root::startRenderting --- 进入渲染循环
+		- SampleContext::closeApp()
+* 资源监听器
+
+* SdkTray 中鼠标键盘处理
+	- 首先在SampleBrowser中注册了OIS的回调函数
+	- 在回调函数的处理中调用了 SdkTrayManager 的 _inject 对应函数
+	- 在该对应函数中处理所有可见组件的鼠标键盘事件
+	- 在能够处理的组件其函数中, 会调用 SdkTrayListener 对应的处理函数.
+		- 注意, 对于一些组件, 如ok对话框, yesno对话框, 其会将内组件的sdkTrayListener 设置为 SdkTrayManger, 而后在 sdkTrayManger 处理完后在调用 SampleBrowser 的对应函数
+		- 这是由于 SdkTrayManager 和 SampleBrowser　都是 SdkTrayListener 的派生类.
+* 在 SampleBrowser::frameRenderingQueued() 中处理了滚动缩略图菜单.
+* SdkSample 基类之一为 SdkTrayListener
+* 对 SdkCameraMan 进行研究

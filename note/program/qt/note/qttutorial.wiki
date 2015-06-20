@@ -1,0 +1,64 @@
+== Analog Clock Demo ==
+* PaintEvent 绘制时钟
+* QTimer 定时器
+    
+== Calculator Demo ==
+* 计算器, GridLayout, QToolButton
+
+== Calendar Widget Demo ==
+* 显示了日历, 以及一些控件
+* 枚举操作系统中的语言
+	# 得到该语言所表示的整数
+		- QLocale::Language lang = static_cast<QLocale::Language>(_lang);
+	# 然后返回该语言的国家列表
+		- QList<QLocale::Country> countries = QLocale::countriesForLanguage(lang);
+	# 遍历
+		# 得到国家
+			- QLocale::Country country = countries.at(i);
+		# 根据语言序号得到表示该语言的字符串
+			- QString label = QLocale::languageToString(lang);
+		# 根据国家枚举值得到表示该国家的字符串
+			- label += QLocale::countryToString(country);
+		# 判断该Locale是否等于本机器的本地locale
+			- if (this->locale().language() == lang && this->locale().country() == country)
+                
+
+== Character Map Demo ==
+* 自定义一个Widget, 通过重写PaintEvent绘制, 重写函数sizeHint, mouseMoveEvent, mousePressEvent
+* 使用了ScrollArea包含一个Widget
+* 鼠标移动和鼠标按下信息
+* 剪贴板的使用
+    
+== Code Editor Demo ==
+* 直接从QPlainTextEdit派生, 比QTextEdit处理纯文本更加优化.
+* 高亮文本选择
+* 文本框左边边缘处绘制行号
+    
+== Group Boxes Demo ==
+* Group Boxes 常用于组织 check box 和 radio button
+* 如Group Boxes中只含 check boxes, 则只能有一个被选中
+* 不同的按钮, 可添加菜单, 设置不同风格
+    
+== Icons Demo ==
+* QIcon提供了四个模式
+	- QIcon::Normal --- 表示不与该Icon互动, 图标可用
+	- QIcon::Active --- 可互动, 如鼠标在其上或点击
+	- QIcon::Disable --- 不可用
+	- QIcon::Selected --- 当选择该图标的时候显示
+	- QIcon::On 和 QIcon::Off 控制QIcon的状态.
+        
+== Image Viewer Demo ==
+* QSizePolicy::Ignored 可以忽略窗体的变化而不移动或者缩放
+* 菜单项的建立, aboutQt() 为系统slot
+* 文件对话框
+* 消息对话框
+* tr可以用参数 tr("Cannot load %1.").arg(fileName)
+* 从图像文件直接得到pixmap到label中
+	-imageLabel->setPixmap(QPixmap::fromImage(image));
+* 缩放大小 resize
+
+== Line Editor Demo ==
+* 演示 Line Editor的各种属性
+    
+== Movie Demo ==
+* 得到标准图标 style()->standardIcon(QStyle::SP_DialogOpenButton)

@@ -1,0 +1,110 @@
+# 国际字符的支持, wchar_t类型的标准输入对象为 wcin, 标准输出为 wcout, 标准错误为 wcerr.
+# IO对象不可复制或赋值: (1) 由于不可复制, 所以不能存储在 vector(或其他)容器中. (2) 形参或返回类型不能为流类型, 只能为流的引用或者指针类型.
+# IO标准库管理一系列条件状态(condition state)用来标记给定的IO对象是否处于可用状态, 或碰到了哪种特定的错误.
+|                  | IO标准库的条件状态                                              |
+|------------------|-----------------------------------------------------------------|
+| strm::iostate    | 机器相关的整型名, 由各个 iostream 类定义, 用于定义条件状态      |
+| strm::badbit     | strm::iostate类型的值, 用于指出被破坏的流                       |
+| strm::failbit    | strm::iostate类型的值, 用于指出失败的IO操作                     |
+| strm::eofbit     | strm::iostate类型的值, 用于指出流已经到达文件结束符             |
+| s.eof()          | 如果设置了流的eofbit值, 则函数返回true                          |
+| s.fail()         | 如果设置了流的failbit值, 则函数返回true                         |
+| s.bad()          | 如果设置了流的badbit值, 则函数返回true                          |
+| s.good()         | 如果流a处于有效状态, 则函数返回true                             |
+| s.clear()        | 将流s中的所有状态值都冲设为有效状态                             |
+| s.clear(flag)    | 将流s中的某个指定条件状态设置为有效, flag的类型是 strm::iostate |
+| s.setstate(flag) | 给流s添加指定条件, flag的类型是 strm::iostream                  |
+| s.rdstate()      | 返回流s的当前条件, 返回值类型为 strm::iostate                   |
+# 流必须处于无错误状态, 才能用于输入或输出. 检测流是否可用的最简单的方法是检查其真值:
+{{{c++
+if(cin)
+	// 有效状态
+
+while(cin >> word)
+	// 读操作成功
+}}}
+# 各种io错误
+	* badbit: 系统级的故障, 如无法恢复的读写错误. 通常该流不能再继续使用. 
+	* failbit: 可恢复的错误, 如在应输入数值型数据时输入字符.
+	* eofbit: 遇到文件结束符, 此时还同时设置了 failbit.
+# rdstate 成员函数返回一个 iostate类型的值, 表示流当前的整个条件状态
+{{{c++
+istream::iostate old_state = cin.rdstate();
+cin.clear();
+process_input();	// 使用 cin
+cin.clear(old_state);	// 恢复到原来的状态.
+}}}
+# 使用或按位或操作符(OR)打开多个状态位
+{{{c++
+is.setstate(ifstream::badbit | ifstream::failbit);		// 同时打开了 badbit和failbit
+}}}
+# 输出缓冲区, 何时刷新输出缓冲区
+	* 程序正常结束时
+	* 缓冲区满的时候, 写下一个值之前刷新
+	* 使用操纵符(manipulator)显式刷新缓冲区, 例如行结束符 endl;
+	* 每次输出操作执行完后, 用 unitbuf 操纵符设置流的内部状态, 从而清空缓冲区.
+	* 将输出流和输入流关联起来, 读输入流时刷新其关联的输出缓冲区.
+# 两个刷新输出缓冲区的操纵符: flush-刷新流, 但不添加任何字符; ends-插入空字符null, 然后刷新它.
+# 操纵符 unitbuf - 每次执行完写操作后都刷新流, 如:
+{{{c++
+cout << unitbuf << "first" << " second" << nounitbuf;
+// 等价于
+cout << "first" << flush << "second" << flush;
+}}}
+# tie成员函数用于绑定一个 ostream对象到调用该函数的对象上, 其参数为 ostream对象指针. 这样调用的类对象的任何IO操作都会刷新 ostream对象参数的缓冲区. 一个ostream对象一次只能与一个istream对象绑定到一起.
+{{{c++
+cin.tie(cout);		// 缺省
+ostream *old_tie = cin.tie();	// 得到现在绑定的输出对象指针
+cin.tie(0);  // 取消绑定
+cin.tie(&cerr);		
+// ...
+cin.tie(0);
+cin.tie(old_tie);
+}}}
+# 文件输入和输出流的三个类: ifstream, ofstream, fstream. 两个额外的操作函数 open 和 close. 以及形参为要打开的文件名的构造函数. 注意形参为C风格字符串.
+# 关闭流并不能改变文件流的状态, 要调用clear()才能重置状态.
+{{{c++
+ifstream input;
+vector<string>::const_iterator it = files.begin();
+while(it != files.end())
+{
+	input.open(it->c_str());
+	if(!input)
+		break;
+	while(input >> s)
+		process(s);
+	input.close();
+	input.clear();	// 如果不调用该函数, 则输入流的 eofbit 始终被设置.
+	++it;
+}
+}}}
+# 文件模式, 可用位操作符设置一个或多个模式
+| 文件模式 |                                  |
+|----------|----------------------------------|
+| in       | 打开文件做读操作                 |
+| out      | 打开文件做写操作                 |
+| app      | 在每次写之前找到文件尾           |
+| ate      | 打开文件后立即将文件定位到文件尾 |
+| trunc    | 打开文件时清空已存在的文件流     |
+| binary   | 以二进制模式进行IO操作           |
+# out模式等效于同时制定了 out和trunc模式.
+# fstream 可同时读写它所关联的文件, 默认以in和out模式打开, 不清空已存在的文件流. 如只指定out, 则会清空已存在的文件流. 如设定了trunc模式, 无论是否存在in模式都会清空文件流.
+# 有效的文件模式组合: out, out|app, out|trunc, in, in|out, in|out|trunc. 这些模式都可增加 ate 模式.
+# 字符串流 istringstream, ostringstream, stringstream. 该流对象增加了 string形参的构造函数以及名为str的string类型内部成员
+| stringstream特定的操作 |                                |
+|------------------------|--------------------------------|
+| stringstream strm      | 默认构造                       |
+| stringstream strm(s)   | s为string类型                  |
+| strm.str()             | 返回strm中存储的string类型对象 |
+| strm.str(s)            | 将s复制给strm                  |
+# stringstream 常用于数据类型之间实现自动格式化, 使用输入字符串流时, 空白符和换行符都会被忽略. 例如:
+{{{c++
+int val1 = 512, val2 = 1024;
+ostringstream format_message;
+format_message << "Val1: " << val1 << "\n"
+	<< "val2: " << val2 << "\n";
+istringstream input_string(format_message.str());
+string dump;
+input_string >> dump >> val1 >> dump >> val2;
+cout << val1 << " " << val2 << endl;
+}}}

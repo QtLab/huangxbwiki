@@ -1,0 +1,9 @@
+= Phonon Multimedia framework =
+* 三个基本概念: 多媒体对象, sinks, 路径. 
+* 通过对媒体对象开始和管理回放, 发送多媒体流到任意连接到一个路径的sinks. sink此时则向后播放流.
+
+= 对媒体对象 =
+* MediaObject 类的实例.
+* 多媒体源为 MediaSource 的实例. 源的内容可以被多媒体对象解释.
+* 对媒体对象用默认构造函数实例化, 且给其提供一个多媒体源
+* 对多媒体对象的补充, 提供 MediaController.

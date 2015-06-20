@@ -1,0 +1,59 @@
+* 三个目录
+	- ..\bin\$(ConfigurationName)
+	- ..\obj\$(ConfigurationName)
+	- $(OGRE_HOME)\bin\$(ConfigurationName)
+
+* 非 UNICODE 字符
+
+* 库
+	- OgreMain_d.lib OIS_d.lib OgreRTShaderSystem_d.lib
+	- OgreMain.lib OIS.lib OgreRTShaderSystem.lib
+
+* 添加类
+* 添加代码
+	- using namespace Ogre;
+	- using namespace OgreBites;
+
+* 添加目录
+	- ..\..\common\include
+* 添加文件 FileSystemLayerImpl_WIN32.cpp
+
+* 头文件
+	- #include "BaseApplication.h"
+* 派生类 BaseApplication
+* 重写cpp 文件, 添加 main 函数
+
+{{{c++
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+
+	INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
+#else
+	int main(int argc, char **argv)
+#endif
+	{
+		try
+		{
+			BaseApplication app;
+			app.go();
+		}
+		catch (Ogre::Exception& e)
+		{
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+			MessageBoxA(NULL, e.getFullDescription().c_str(), "An exception has occurred!", MB_ICONERROR | MB_TASKMODAL);
+#else
+			std::cerr << "An exception has occurred: " << e.getFullDescription().c_str() << std::endl;
+#endif
+		}
+		return 0;
+	}
+
+#ifdef __cplusplus
+}
+#endif
+}}}

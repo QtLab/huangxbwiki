@@ -1,0 +1,162 @@
+= CEGUI中的编码标准 =
+== 文件 ==
+=== 命名和目录布局 ===
+* 源码存在于两个组: 库源码, 用于样本浏览器和样本应用模块的源码
+	- 库代码: cegui目录中
+	- 样本源码: sample目录中
+* 文件名不应存在空格, 必要时可使用下划线.
+* 文件名每个单词第一个字母大写
+* 文件的命名应当和类或模块有关.
+* CEGUI内的源文件遵循下面惯例:
+	- C++ 头文件应该为 .h 后缀
+	- C++ 源文件应该为 .cpp 后缀
+	- Lua 源文件
+	- 额外的 Doxygen 文档文件应当有 .doxy 后缀.
+=== 结构和布局 ===
+* 所有的源文件要求有一个基本的文件头, 含文件名, 创建日期, 作者名和email地址. 以及标准的版权/许可证通知.
+{{{
+/*******************************************************************************
+Filename: <name of the file, including extension>
+Created: <date the file was created>
+Author: <name and email of the original file author>
+*/
+/***************************************************************************
+Copyright (C) 2004 - 2013 Paul D Turner & The CEGUI Development Team
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+*/
+}}} 
+* 头文件应当有include guards.
+* 确保所有的文件在尾部有一个新行.
+* 尽可能不使用预处理宏, 尽量使用tyedef或enum代替
+* 头文件尽可能包含 Doxygen 文档, 用于所有的类, 数据和函数.
+* 实现代码尽可能位于 .cpp 文件中.
+* 通常头文件的内容有以下次序:
+	- 文件头部
+	- include guard
+	- #include 语句(根据合适的库分组)
+	- 预处理宏定义(尽量避免)
+	- 类前置引用
+	- 全局定义
+	- 类定义
+	- 代码实现
+* 通常源文件的内容有以下次序:
+	- 文件头部
+	- #include 语句(根据合适的库分组)
+	- 预处理宏定义(尽量避免)
+	- 全局定义
+	- 类静态数据定义
+	- 类成员函数定义 
+
+== 编码风格和布局 ==
+=== 用于类, 变量, 成员, 常量的命名惯例 ===
+* 预处理器宏名称应当大写且用下划线分隔
+* 所有类型(命名空间, 类, typedef, 枚举)应当有描述性名称, 且使用 PascalCase. 即每个单词第一个字母大写.
+* 全局变量应当使用camel case. 每个单词除了第一个单词之外, 第一个字母大写. 前缀应当有 G_. 所以有 G_nastyVariable.
+* 类成员变量应当使用 camel case. 如上, 普通成员使用 d_ 前缀, 如 d_thisVariable, 静态成员使用 s_ 前缀. 如 s_thisVariable.
+* 类成员函数应当使用 camel case. 如上, 例如 theFunction.
+* 局部变量应当使用全小写, 且用下划线分隔. 例如 word_count.
+* 参数名称同局部名称对待.
+=== 代码格式风格和其他提示 ===
+* 一行不要太长.
+* Tab 空间为4个空格.
+* 实际上不要使用 tab, 而使用空格代替.
+* 函数内代码, 由空行逻辑分组. 任意控制结构(if, while, do 以及类似)之前应该有一个空行
+* 注释的时候, 首先写注释, 放在有关行或块之前.
+* 任意括号应该有自己的行. 如下
+{{{
+if (something == 1)
+{
+	...
+}
+}}}
+	- 而非如下 
+{{{
+if (something == 1) {
+	...
+}
+}}}
+* 类的public, protected, private 不应当有缩进.
+* 名称空间内容不应有缩进, 如下:
+{{{
+namespace SomeNamespace
+{
+class SomeClass
+{
+public:
+SomeClass();
+}}} 
+	- 而非如下:
+{{{
+namespace SomeNamespace
+{
+	class SomeClass
+	{
+	public:
+		SomeClass();
+}}} 
+* switch case 语句不应当缩进. case内的括号应当保持其位置. 代码如下:
+{{{
+switch (somevar)
+{
+case 1:
+x = x + 1;
+break;
+case 2:
+{
+int y = 2;
+x = x + y;
+break;
+}
+}
+}}} 
+	- 而非如下
+{{{
+switch (somevar)
+{
+	case 1:
+		x = x + 1;
+		break;
+	case 2:
+		{
+			int y = 2;
+			x = x + y;
+			break;
+		}
+}
+}}} 
+* 函数定义与返回值类型在同一行. 
+* 单行代码块可以有也可以没有括号.
+* 不允许单行多个语句.
+* 在控制语句和控制表达式之间有空格
+{{{
+if (something)
+x = y;
+// 不应该是下面
+if(something)
+x = y;
+}}} 
+* 当调用一个函数,函数名和括号之间不应该有空格
+* 括号内左右不分不应该有空格.
+* 操作符左右有空格, 除了逗号只在其后有空格.
+* 使用指针或者引用时, 星号或者引用符号靠在类型一边, 而非变量名一边. 当解引用或者读取地址时, 符号靠在变量上.
+* 字符串以及/或者字符文本不应该出现在产品代码中, 而使用常量定义代替.
+* Magic number 不应当出现在产品代码中, 使用常量定义代替. 能够允许出现在产品代码的数字只有0.
+* NULL不允许, 使用0代替.
+* 构造函数使用类成员初始化列表.
+* 仅使用C++风格的cast转换, 尽量不使用.
+* 不使用任何来自C++11的语言或者STL构造.

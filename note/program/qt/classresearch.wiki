@@ -1,0 +1,34 @@
+* QSplitter
+	- insertWidget() 和 addWidget() 添加组件
+	- indexOf(), widget(), count() 访问内部的widget
+	- setOrientation() 设置排序方向.
+	- setOpaqueResize(false) 要求在重置大小操作的最后部分重置其子widget的大小.
+	- setSizes(), sizes() 大小.
+	- saveState(), restoreState() 保存和恢复状态.
+	- hide(), show() 隐藏和显示其子widget.
+	- 属性:
+		- childrenCollapsible
+		- handleWidth
+		- opaqueResize
+		- orientation
+
+* QFileSystemModel --- 提供用于本地文件系统的数据模型. 可以使用QAbstractItemModel的标准接口访问QFileSystemModel.
+	- fileInfo(), siDir(), name(), path() 提供了模型中项目关联的文件和目录信息.
+	- mkdir(), rmdir() 创建和移除目录.
+	- 代码示例:
+{{{c++
+	QFileSystemModel *model = new QFileSystemModel;
+	model->setRootPath(QDir::currentPath());
+	// tree view
+	QTreeView *tree = new QTreeView(splitter);
+	tree->setModel(model);
+	tree->setRootIndex(model->index(QDir::currentPath()));
+}}} 
+	- Caching 和性能: 在调用 setRootPath() 之前其不会获取任何文件或目录. 可以使用 QFileSystemWatcher 更新.
+	- 属性:
+		- nameFilterDisables
+		- readOnly
+		- resolveSymlinks
+
+* QItemSelectionModel --- 跟踪视图的选择项目, 存储了使用范围.
+	- 使用 QItemSelection::Current的逐位OR以及任何其他的SelectionFlags来更新当前选择的项目. 如果忽略了 QItemSelection::Current, 则会创建一个新的当前选择, 之前的选择则会添加进整个选择.

@@ -1,0 +1,275 @@
+= Chapter 14 Multithreading =
+* 在本章中, 我们先介绍如何派生QThread, 如何使用QMutex, QSemaphore, QWaitCondition进行同步. 在事件循环中如何进行线程之间的通讯.
+
+== 14.1 Creating Threads ==
+* 创建线程
+	- 通过派生类QThread, 重实现函数run()来提供多线程.
+* 本章节例子:
+	- 除了实现run(), 还增加了两个函数 setMessage() 和 stop()
+	- volatile 关键字, 可能会在其他线程修改该变量, 如果不用该关键字, 编译器会优化该变量. 导致产生不正确的结果
+	- 调用 run() 函数开始执行线程. 离开 run() 函数时终止线程.
+	- QThread提供了 terminate()函数, 当线程还在运行的手终止它, 不推荐使用该函数, 其没有给线程任何机会去清理它. 调用start()启动线程.
+* QThread::isRunning() 判断是否运行.
+* 在 QCloseEvent::accept() 之前使用 QThread::wait() 确保所有线程完全退出, 得到一个干净的状态.
+{{{c++
+        threadA.stop();
+        threadB.stop();
+        threadA.wait();
+        threadB.wait();
+}}}
+ 
+== 14.2 Synchronizing Threads ==
+* Qt 提供了以下用于同步的类: QMutex, QReadWriteLock, QSemaphore, QWaitCondition.
+* QMutex 类用于保护一个变量或者一段代码在任何时候只有一个线程能够访问它, 函数 lock(), unlock(). tryLock()函数当该mutex已经锁定时立刻返回.
+* QMutex 提供了 lock() 函数用于锁定该 mutex. 如果该 mutex 未锁定, 当前线程立即捕获它并锁定它. 否则当前线程就会堵塞直至拥有该mutex的线程解锁这个mutex. 也就是, 当 lock() 的调用返回时, 当前线程拥有该 mutex, 直到它调用 unlock() 为止. QMutex 还提供了 tryLock() 函数, 其当该 mutex 已经锁定时也立即返回.
+{{{c++
+	void Thread::run()
+	{
+	    forever {
+	        mutex.lock();
+	        if (stopped) {
+	            stopped = false;
+	            mutex.unlock();
+	            break;
+	        }
+	        mutex.unlock();
+	
+	        std::cerr << qPrintable(messageStr);
+	    }
+	    std::cerr << std::endl;
+	}
+	
+	void Thread::stop()
+	{
+	    mutex.lock();
+	    stopped = true;
+	    mutex.unlock();
+	}
+}}}
+* QMutexLocker 类简化了 mutex 的处理. 其构造函数接受一个 QMutex 作为参数且锁定它. 析构函数解锁该 mutex.
+{{{c++
+	void Thread::run()
+	{
+	    forever {
+	        {
+	            QMutexLocker locker(&mutex);
+	            if (stopped) {
+	                stopped = false;
+	                break;
+	            }
+	        }
+	
+	        std::cerr << qPrintable(messageStr);
+	    }
+	    std::cerr << std::endl;
+	}
+	
+	void Thread::stop()
+	{
+	    QMutexLocker locker(&mutex);
+	    stopped = true;
+	}
+}}} 
+* QReadWriteLock 类允许多个线程同时进行只读访问.
+{{{c++
+	MyData data;
+	QReadWriteLock lock;
+	
+	void ReaderThread::run()
+	{
+	    ...
+	    lock.lockForRead();
+	    access_data_without_modifying_it(&data);
+	    lock.unlock();
+	    ...
+	}
+	
+	void WriterThread::run()
+	{
+	    ...
+	    lock.lockForWrite();
+	    modify_data(&data);
+	    lock.unlock();
+	    ...
+	}
+}}} 
+	- 我们也可使用 QReaderLocker 和 QWriteLocker 类锁定和解锁一个 QReadWriteLock.
+* QSemaphore是 mutexes 另外一个的一般化. 可用于保护一些数量的相同资源.
+{{{c++
+	QSemaphore semaphore(1);
+	semaphore.acquire();
+	semaphore.release();
+
+	// 对应 
+	QMutex mutex;
+	mutex.lock();
+	mutex.unlock();
+}}}
+	- QSemaphore 构造函数可以是任意数字, 表示其控制的资源. 可多次调用 acquire() 获取资源.
+	- QSemaphore 其典型应用使用一定大小的共享循环缓存在两个线程之间传输一定大小的数据.
+{{{c++
+              const int DataSize = 100000;
+              const int BufferSize = 4096;
+              char buffer[BufferSize];
+}}}
+	- 这个例子中, 生产者线程将数据写入 buffer 中, 直到写入到 buffer 的尾部, 而后从 buffer 的开头重新开始覆盖已有的数据. 当数据产生之后, 消费者线程读取数据.
+	- 这个生产者-消费者的例子其对同步的需要有两重: 如果生产者生成的数据太快, 其会覆写消费者尚未读取的数据; 如果消费者读取数据太快, 其会跳过生产者正在写的数据而读取到垃圾数据.
+	- 这里使用两个 QSemaphore 对象解决该问题.
+{{{c++
+              QSemaphore freeSpace(BufferSize);
+              QSemaphore usedSpace(0);
+}}}
+		- freeSpace semaphore 控制生产者可以填充数据的buffer. usedSpace semaphore 控制消费者可以读取的区域. freeSpace semaphore 初始化为 4096, 即意味着可以请求许多的资源. 
+{{{c++
+              void Producer::run()
+              {
+                     for (int i = 0; i < DataSize; ++i) {
+                            freeSpace.acquire();
+                            buffer[i % BufferSize] = "ACGT"[uint(std::rand()) % 4];
+                            usedSpace.release();
+                     }
+              }
+              void Consumer::run()
+              {
+                     for (int i = 0; i < DataSize; ++i) {
+                            usedSpace.acquire();
+                            std::cerr << buffer[i % BufferSize];
+                            freeSpace.release();
+                     }
+                     std::cerr << std::endl;
+              }
+}}}
+		- 通过usedSpace和freeSpace的acquire和release实现资源的共享使用
+* 解决生产者和消费者同步问题的另一个方法是使用 QWaitCondition 和 QMutex. 当达到某些条件时,  一个 QWaitCondition 允许一个线程唤醒其他的线程.
+{{{c++
+			const int DataSize = 100000;
+			const int BufferSize = 4096;
+			char buffer[BufferSize];
+
+			QWaitCondition bufferIsNotFull;
+			QWaitCondition bufferIsNotEmpty;
+			QMutex mutex;
+			int usedSpace = 0;
+
+			void Producer::run()
+			{
+				for (int i = 0; i < DataSize; ++i) {
+					mutex.lock();
+					while (usedSpace == BufferSize)
+						bufferIsNotFull.wait(&mutex);
+					buffer[i % BufferSize] = "ACGT"[uint(std::rand()) % 4];
+					++usedSpace;
+					bufferIsNotEmpty.wakeAll();
+					mutex.unlock();
+				}
+			}
+ 
+			void Consumer::run()
+			{
+				for (int i = 0; i < DataSize; ++i) {
+					mutex.lock();
+					while (usedSpace == 0)
+						bufferIsNotEmpty.wait(&mutex);
+					std::cerr << buffer[i % BufferSize];
+					--usedSpace;
+					bufferIsNotFull.wakeAll();
+					mutex.unlock();
+				}
+				std::cerr << std::endl;
+			}
+}}}
+	- 在生产者中, 我们开始检查缓存是否满的, 如果是满的, 我们则等待"缓存不是满的"条件. 当满足这个条件时, 我们写入一个字节至缓存, 增加 usedSpace 技术, 且唤醒任何等待"缓存不是空的"条件为真的线程.
+	- 这里我们使用一个 mutex 保护 usedSpace 变量的所有访问. QWaitCondition::wait() 函数可以采用一个锁定的mutex作为它的第一个参数, 表示在阻塞当前线程时解锁该mutex, 在返回时锁定该 mutex.
+	- 消费者线程则做完成相反的事情, 其等待"缓存不为空"条件, 且唤醒所有等待"缓存非满"条件的线程.
+	- 对于这个例子, 我们可以进行如下的替换:
+{{{c++
+	while (usedSpace == BufferSize)
+    	bufferIsNotFull.wait(&mutex);
+
+	// 替换为
+	if (usedSpace == BufferSize) {
+    	mutex.unlock();
+   		bufferIsNotFull.wait();
+    	mutex.lock();
+	}
+}}} 
+	- 然而, 只要我们允许多于一个生产者线程, 很容易打破上面想要的结果. 其他生产者线程可以在wait() 调用之后mutex.lock()语句之前立即捕捉到这个mutex, 而后使得"buffer非满"这个条件再次为假. 所以将 mutex 传递给 QWaitCondition 可以避免其他线程捕捉到该 mutex.
+* 到此所有的例子, 我们的线程访问相同的全局变量, 但有些多线程引用需要有个全局变量在不同线程中有不同的值. 即称之为 thread-local storage 或者 thread-specific data. 这里使用 QThreadStorage<T> 类实现.
+* QThreadStorage<T> 常用于 caches. 通过在不同线程中有单独的cache, 我们避免锁定, 解锁的花费, 以及可能等待一个 mutex.
+{{{c++
+       QThreadStorage<QHash<int, double> *> cache;
+
+       void insertIntoCache(int id, double value)
+       {
+              if (!cache.hasLocalData())
+                     cache.setLocalData(new QHash<int, double>);
+              cache.localData()->insert(id, value);
+       }
+
+       void removeFromCache(int id)
+       {
+              if (cache.hasLocalData())
+                     cache.localData()->remove(id);
+       }
+}}}
+	- 这个 cache 变量每个线程有一个指针指向一个 QHash<int, double>. (因为某些编译器的问题, QThreadStorage中该 template 类型必须是一个指针类型), 第一次我们在一个特定的线程中使用这个cache, hasLocalData() 返回false, 以及我们创建一个 QHash<int, double> 对象.
+	- 除了用于 caching, QThreadStorage<T> 可以用于全局错误状态变量(类似于 errno) 以确保一个线程中的修改不会影响其他的线程.
+      
+== 14.3 Communicating with the Main Thread ==
+* 当Qt 应用程序启动之后, 只有一个主线程在运行, 只有主线程才能创建QApplication和QCoreApplication对象, 并调用exec()运行. 而后等待事件和处理事件.
+	- 主线程可以创建其他线程, 这些线程之间的通讯可以使用mutexes, read-write locks, semaphores, wait conditions.
+	- 但是这些技术不能使用主线程与这些线程之间. 这是因为它们会锁定事件循环和冻结用户界面接口.
+	- 解决主线程和辅助线程之间的通讯可以使用signal-slot连接.
+		- signal-slot机制同步操作, 即当发送signal的时候立刻调用slot.
+		- 然而当我们连接的对象生存在其他线程时, 这个机制就会变成异步. (这个行为可通过QObject::connect()的第五个参数改变)
+		- 在背后, 通过分发一个事件实现这些连接. 接收者对象所在线程的事件循环调用该slot. 默认情况下, 一个 QObject 存在于创建它的线程中, 可以通过调用 QObject::moveToThread() 函数改变其所在线程. 
+* 例子代码:
+{{{c++
+    connect(&thread, SIGNAL(transactionStarted(const QString &)),
+            statusBar(), SLOT(showMessage(const QString &)));
+    connect(&thread, SIGNAL(allTransactionsDone()),
+            this, SLOT(allTransactionsDone()));
+}}}
+	- QThread派生类的构造函数和析构函数都是由主线程调用, run()函数则是在自己的线程内执行.
+	- 在基类的析构函数隐式调用之前, 调用 QThread::wait() 函数. 这个例子里构造函数调用了 start() 函数. 当调用 wait() 失败时, 可能会因为此时线程试图访问类成员变量导致崩溃.
+	- 该线程类的run函数, 只有接收到EndTransaction才会跳出循环.
+* 可以使用 QImage::mirrored() 反转图像.
+* QImage的方法:mirrored().
+* Qt多线程的监控和等待条件:
+       http://doc.trolltech.com/qq/qq21-monitors.html
+       http://doc.trolltech.com/qq/qq22-monitors2.html
+      
+== 14.4 Using Qt's Classes in Secondary Threads ==
+* 不同的线程可以同时安全地调用一个函数, 该函数可以说是线程安全的.
+	- 如果不同线程在相同的共享数据上并发地调用两个线程安全的函数, 其结果总是定义好的.
+	- 当一个类被称为是线程安全的, 即表明不同的线程同时调用它所有的函数时不会互相干扰, 即使它们在同一个对象上进行操作.
+	- Qt的线程安全类包括 QMutex, QMutexLocker, QReadWriteLock, QReadLocker, QWriteLocker, QSemaphore, QThreadStorage<T>, QWaitCondition. 以及QThread 的部分API和一些其他的函数都是线程安全的, 特别是 QObject::connect(), QObject::disconnect(), QCoreApplication::postEvent(), QCoreApplication::removePostedEvents().
+* 大部分的Qt 非GUI类都满足一个要求: 其是可再进入的(reentrant).
+* 一个类是再进入的, 即该类的不同句柄可以同时被不同的线程使用. 然而在不同的线程中访问相同的可再进入对象是不安全的.
+* 这种访问应该使用一个 mutex 来保护.
+* 在 Qt 参考文档中标记了那些再进入的类.
+* 任何没有关联全局或其他共享数据的C++类是再进入的
+* QObject是可再进入的, 但是需记住以下内容:
+	- 一个QObject的子对象必须在其父对象所在的线程中创建
+		- 意味着一个辅助线程中创建的Qbject永远不会把QThread作为该QObject的父系. 因为QThread只能在主线程或者其他辅助线程中创建.
+	- 在删除相应的QThread对象之前, 必须删除所有在该辅助线程中创建的QObject.
+		- 这个可以在QThread::run()的堆栈中创建对象来实现自动删除.
+	- QObject必须在其创建的线程中删除.
+		- 如果你需要删除其他线程中的对象, 你可以调用 QObject::deleteLater() 函数来代替, 其分发一个"延迟删除"事件
+* 无GUI对象的派生类如 QTimer, QProcess, 和网络类都是可再进入的, 我们可以在任意线程中使用它们. 只要该线程有一个事件循环.
+	- 对于辅助线程而言, 可以通过调用QThread::exec()开始事件循环. 或者通过函数 QProcess::waitForFinished() 和 QAbstractSocket::waitForDisconnected()开始事件循环.
+Qt 的 GUI 支持构建在底层库上, 由于从这些这些底层库所继承而来的限制. QWidget 和它的派生类都不是再进入的. 其结果就是我们不能直接在辅助线程中调用一个widget的函数.
+	- 如果我们想要在辅助线程中改变一个 QLabel 的文本, 我们可以发送一个信号连接至 QLabel::setText() 或者从该线程中调用 QMetaObject::invokeMethod().
+{{{c++
+	void MyThread::run()
+	{
+		...
+		QMetaObject::invokeMethod(label, SLOT(setText(const QString &)),
+		Q_ARG(QString, "Hello"));
+		...
+	}
+}}}
+* 许多 Qt 的 non-GUI 类, 包括 QImage, QString, 和容器类, 使用隐式共享作为一个优化技术. 虽然这个优化技术通常使得一个类成为非再进入的, 但在Qt中这不是一个问题, 因为Qt使用原子的汇编语言指令实现线程安全的关联计数, 这样使得 Qt 的隐式共享类是可再进入的类.
+* Qt的 QtSql模块也可用于多线程技术, 但其有自身限制, 这些限制每个数据库都有所不同, 可见文档
+       http://doc.trolltech.com/4.3/sql-driver.html.
+       http://doc.trolltech.com/4.3/threads.html

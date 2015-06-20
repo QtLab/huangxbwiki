@@ -1,0 +1,298 @@
+= Chapter 9 Drag and Drop =
+* 拖放是在一个程序内部或者多个不同程序之间转移信息的直观方法. 拖曳另外还提供用于移动和拷贝数据的剪贴板支持.
+* 本章节的主要内容: 给一个应用程序添加拖放以及如何处理自定义格式. 如何重用拖放代码来添加剪贴板支持.
+	- 拖放代码能够重用两者都用了基于QMimeData类的机制. QMimeData提供了一些格式的数据
+
+== 9.1 Enabling Drag and Drop ==
+* 拖放包含两个动作: 拖和放, Qt的Widget可以作为拖的地点, 也可以作为放的地点, 或者两者都是.
+	- 本章节第一个例子是一个主窗口有一个QTextEdit, 从桌面或者文件浏览器拖一个文本文件至该应用程序, 而后应用程序加载该文件至QTextEdit
+* 重新实现QWidget的两个函数 dragEnterEvent 和 dropEvent
+	- QWidget::setAcceptDrops --- 表示是否接受拖放的放
+	- 当拖动一个对象至一widget时调用dragEnterEvent函数.
+	- QDragEnterEvenet::acceptProposedAction() 可以表示用户可以将该拖曳对象放置到该widget之上.
+* QDragEnterEvent::mimeData() 可以得到其QMimeData信息. text/uri-list的MIME类型用于存储一个一致资源标识符(uniform resource identifiers)的列表, 其可以是文件名称, URL, 或者全局资源列表.
+	- 由 Internet Assigned Numbers Authority(IANA)来定义这些标准的MIME类型.
+	- 由用斜线分隔类型的类型以及子类型组成. 
+	- 剪贴板和拖放系统使用MIME类型来标识不同类型的数据.
+	- 要查询官方的MIME类型列表可见网址: http://www.iana.org/assignments/media-types/
+	- QMimeData::urls() 可以得到QUrls的列表, 用于读取其本地地址, hasFormat得到其格式类型
+* 当用户放置一个物体在widget之上时, 调用dropEvent() 处理函数.
+	- QMimeData::urls() 获取一个 QUrls的列表.
+* 还可实现dragMoveEvent() 和 dragLeaveEvent(), 但大多数程序用不上
+* QListWidget用于第二个例子, 实现列表元素的拖放, 五个重实现的事件处理函数:
+	- void mousePressEvent(QMouseEvent *event);
+	- void mouseMoveEvent(QMouseEvent *event);
+	- void dragEnterEvent(QDragEnterEvent *event);
+	- void dragMoveEvent(QDragMoveEvent *event);
+	- void dropEvent(QDropEvent *event);
+* QWidget::setAcceptDrops() --- 设置是否可以接受拖放.
+* QApplication::startDragDistance() --- 应用程序允许拖放的最小距离, 一般为四个像素
+* QPoint::manhattanLength () --- 计算该向量的 manhattan 长度, 用于快速计算该向量的近似长度
+* 实现拖放功能
+	- 创建一个QDrag对象, 并调用setMimeData 设置一个 QMimeData 对象
+		- 创建一个QMimeData对象, 调用setText设置文本.
+		- QMimeData 可以处理许多类型对象的拖放(images, URLs, colors, etc), 以及可以把任意的MIME类型表示成QByteArrays.
+	- 调用QDrag::setPixmap 设置当拖放发生时光标上显示的图像
+	- QDrag::exec() 启动拖放并进行拖放, 阻塞应用程序直至用户完成拖放或者拖放取消.
+		- 其将所支持拖放动作的组合值值作为参数, 如Qt::CopyAction, Qt::MoveAction, Qt::LinkAction
+		- 并返回当前所执行的拖放动作. 当没有执行的话则返回 Qt::IgnoreAction
+		- 执行什么拖放动作要看源widget和目标widget允许支持什么, 以及当拖放发生时哪些modifier键被按下(Ctrl, Alt, Shift)
+	- 在QDrag::exec() 执行之后, Qt拥有拖放对象的所有权, 一般不再需要它以及删除掉它.
+	- QDragEnterEvent::source()可以得到拖放的来源widget, QDragEnterEvent::accept() --- 接受拖放, etDropAction() --- 设置拖放动作
+	- 重写dragMoveEnter和dragEnter函数, 两者内部代码一致.
+	- 重写dropEvent()处理函数处理drop动作.
+* 如果我们仅仅想要在应用程序的一个widget内部移动数据, 可以使用mousePressEvent() 和 mouseReleaseEvent() 实现
+
+== 9.2 Supporting Custom Drag Types ==
+* 如果想要拖放自定义数据, 我们需要选择以下可选的步骤:
+	- 我们可以将任意数据使用QMimeData::setData()保存为QByteArray, 而后使用QMimeData::data() 读取
+	- 我们可以实现QMimeData的派生类, 且重新实现 formats() 和 retrieveData()函数 来处理我们的自定义数据类型
+	- 为了在单个应用程序的拖放操作, 我们可以实现QMimeData的派生类, 使用我们所需的任意数据结构来保存数据
+* 第一个方法不用派生任何类, 但是其有几个缺点: 即便拖放最后没有接受, 我们也需要转转数据类型为 QByteArray. 且如果我们想要很好地提供一些MIME类型与大范围应用程序的交互, 我们则需要多次存储数据(每个MIME类型一次). 如果数据很大, 则其会减缓应用. 
+* 第二个和第三个方法则可以避免或者最小化这些的问题, 如果配合使用这两个方法可以让我们完全控制数据
+* 第一个例子可以支持的MIME类型有: text/plain, text/html, text/cav, 首先使用第一个方法
+	- QMimeData 调用 setText 和 setHtml , setData 存放不同的数据(如 text/csv 类型)
+	- setSelectionMode 设置widget的选择模式, 这里使用 QAbstractItemView::SelectionMode 选择模式.
+* QMimeData的派生类, 重实现 formats() 和 retrieveData() 方法.
+	- formats() 返回支持的格式, 类型为 QStringList. 最好将"最好"的格式放在列表中第一项.
+	- retrieveData() 返回给定MIME类型的数据.
+	- 不要假定支持某返回MIME类型.	
+* 本例中, 我们使用 UTF-8编码来编码CSV文本. 如果我们想要能够确定使用正确的编码, 我们可以使用 text/plain MIME 类型的字符集参数来指定一个显式的编码. 这里有一些例子:
+{{{
+	text/plain;charset=US-ASCII
+	text/plain;charset=ISO-8859-1
+	text/plain;charset=Shift_JIS
+	text/plain;charset=UTF-8
+}}}
+
+== 9.3 Clipboard Handling ==
+
+* QApplication::clipboard() 得到剪贴板 QClipboard对象, 处理该系统对象非常简单: setText, setImage, setPixmap, text, image, pixmap.
+* 如果想要通过剪贴板处理许多格式的数据, 我们可以参照上节使用QMimeData完成这个功能. 派生 QMimeData 类, 并重实现一些虚函数.
+* 如果我们在拖放过程中已经实现了 QMimeData的派生类, 则自定义的数据可以通过setMimeData和mimeData方法对剪贴板进行读写.
+* X11系统, 可以通过点击中间滚轮粘贴一个选择内容. 如果想要实现这个功能, 就需要将 QClipboard::Selection 作为额外的参数传递给各种剪贴板的调用. 例如:
+{{{c++
+void MyTextEditor::mouseReleaseEvent(QMouseEvent *event)
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    if (event->button() == Qt::MidButton
+            && clipboard->supportsSelection()) {
+        QString text = clipboard->text(QClipboard::Selection);
+        pasteText(text);
+    }
+}
+}}}
+* 只有在X11系统上, supportsSelection() 函数才会返回为真.
+* 如果你想要当剪贴板内容变化时被通知到, 则让QClipboard::dataChanged() 信号连接至自定义的slot
+
+= Chapter 10 Item View Classes =
+* 通过使用 Qt的item view类来处理数据集.
+* model-view-controller(MVC)结构.
+	- model:表示数据集模型，负责读取和修改数据. 每个数据集类型都有其模型. 但它们给视图都是统一的API接口无需考虑其内部的数据集.
+	- view: 向用户显示数据.
+	- controller: 用于视图和模型之间的纽带. 转换用户动作为请求浏览或者编辑数据
+* 在Qt中, 不使用controller, 而是提供delegate, delegate可以控制如何渲染和编辑一个条目(item), Qt 提供了每个view类型的默认代理, 对于大多数应用来说已经足够了.
+* 使用模型-视图结构, 可以在模型中只获取那些显示在视图的数据.  
+* 一个模型可以有多个视图, 用户可以以不同的方式与数据交互, 当模型发生变化时, 多个视图会更新内容显示正确的数据.
+* 在许多情况下, 我们只需要显示少量的相关条目给用户. 我们可以用一些条目视图类(QListWidget, QTableWidget, QTreeWidget), 以及在这些类中直接放置条目. 在内部, 这些便利类使用自定义模型, 使得items在views上可见.
+	- 我们可以使用Qt的视图(QListView, QTableView, QTreeView)连接一个数据模型, 数据模型可以是一个自定义模型或者一个Qt的预定义模型.
+	- 如果数据集在数据库中, 可以组合QTableView和QSqlTableModel
+    
+== 10. 1 Using the Item View Convenience Classes ==
+* 使用Qt的item view类的派生类要比定义一个自定义模型简单得多. 当我们不需要分离视图模型时这种方法更加合适.
+* QListWidget::setIconSize() 可以设置图标的大小.
+* QListWidget, QListWidgetItem
+	- QListWidgetItem 有一些 role, 每个role都有其关联的QVariant,
+		- 常用的role有 Qt::DisplayRole, Qt::EditRole, Qt::IconRole. 对于这些role还有便利的方法设置和读取数据, 如 setText,setIcon 等函数
+		- 我们还可通过Qt::UserRole常量所表示的数字值或者更大的数字值来定义自定义role.
+* QDialog 类, 可以重实现done()方法. 当点击OK或者Cancel按钮时会调用该函数
+	- 如果我们对ListWidget的条目中的字符串感兴趣的话, 则可以通过两个方法得到: item->data(Qt::DisplayRole).toString() 和 item->text()
+	- 缺省情况下, QListWidget为只读属性, 如果我们想要编辑条目, 则使用QAbstractItemView::setEditTriggers() 来设置视图编辑的触发.
+		- 例如: QAbstractItemView::AnyKeyPressed 表示用户可以通过键盘输入来开始编辑.
+		- 当然我们也可通过编辑按钮(也许为添加和编辑按钮)以及Signals和Slots的连接来处理编辑操作.
+* QTableWidget::setHorizontalHeaderLabels 设置列头, 默认情况 QTableWidget 提供一个垂直的头列, 其有行号的标签, 从1开始.
+* 缺省情况下 QTableWidget允许编辑, 按下F2或者直接键盘输入内容即可. view中用户所做的虽有改变都会自动地反射至 QTableWidgetItem中.
+	- 可通过调用setEditTriggers(QAbstractItemView::NoEditTriggers) 禁止编辑
+	- QTableWidget::rowCount() --- 行数
+	- QTableWidget::insertRow() --- 插入一行
+	- QTableWidget::setItem() --- 设置某个位置的item
+	- QTableWidgetItem::setTextAlignment() --- 设置item的对齐方式
+	- QTableWidget::setCurrentItem() --- 设置当前item
+* QTreeWidget 默认只读
+* tree widget的head view 控制 tree 列的大小. 这里设置大小重置模式为 Stretch. 即表示列可以填充可用的空间, 这种模式, 用户或者程序上不能重置列的大小. 
+	- QTreeWidget::header()
+	- QHeaderView::setResizeMode --- 设置重置大小模式  
+	- QTreeWidget::sortByColumn() --- 设置按照哪个列进行排序.
+	- QTreeWidget::setFocus() --- 设置焦点.
+	- QSettings --- 用于跨平台的应用程序设置
+		- beginGroup
+		- childGroups
+		- childKeys
+		- endGroup
+	- QTreeWidget
+		- invisibleRootItem --- 得到不可见的根项目, 即默认根
+		- setFocus
+		- setHeaderLabels --- 设置列头的标签
+		- sortByColumn        
+* 这里简单的方法总结为, 读取整个数据集至item view widget, 使用 item 对象表示数据元素, (如果item可以编辑)可以写回数据源.
+        
+== 10.2 Using Predefined Models ==
+* Qt可用于视图类的预定义模型
+	- QStringListModel --- 存储字符串列表.
+	- QStandardItemModel --- 存储任意的有层次的数据.
+	- QDirModel --- 封装一个本地文件系统.
+	- QSqlQueryModel --- 封装SQL的一个结果集.
+	- QSqlTableModel --- 封装一个SQL表格.
+	- QSqlRelationalTableModel --- 封装一个带foreign keys的SQL表格.
+	- QSortFilterProxyModel --- 排序以及或过滤另一个模型.
+* QStringListModel
+	- setStringList --- 设置模型中的字符串列表
+	- stringList --- 返回模型中的字符串列表
+	- inserRows --- 插入一些行
+	- removeRows --- 移除一些行
+* QListView
+	- setEditTriggers 设置触发编辑的操作 
+	- setModel 设置Model模型
+	- setCurrentIndex --- 设置当前的 QModelIndex 对象.
+	- edit() --- 进入编辑模式
+	- currentIndex --- 返回当前的 QModelIndex 对象.
+* QModelIndex
+	- row() --- 返回该index所在行.
+* QAbstractItemModel
+	- insertRows() --- 插入一些行
+	- removeRows() --- 删除一些行
+* 模型中的每个数据条目都有一个对应的"model index", 有一个QModelIndex对象表示.
+	- QModelIndex有三个组成部分: row, column, 和指向该模型的指针. 对于一维列表模型, column通常为0
+	- 在模型上实行插入操作, 其会自动反映到视图.
+* 使用 QDirModel 类用于实现文件目录对话框. 该对话框可显示文件和目录列表. 其封装了电脑的文件系统, 可显示和隐藏不同的文件属性. 可过滤文件, 进行多种排序.
+* QDirModel
+	- setReadOnly --- 设置是否只读
+	- setSorting --- 设置排序
+	- index --- 获取索引
+	- rmdir --- 删除一个目录
+	- remove --- 删除一个文件
+	- mkdir --- 创建一个目录
+	- fileInfo --- 获取信息, 比如是目录还是文件.
+* QTreeView
+	- setModel --- 设置模型
+	- header --- 获取头
+	- currentIndex 
+	- expand --- 展开一个索引
+	- scrollTo --- 滚动至该索引
+	- resizeColumnToContents --- 使得该列长度符合内容.
+* QHeaderView --- 设置头的一些属性
+	- setStretchLastSection
+	- setSortIndicator
+	- setSortIndicatorShown
+	- setClickable
+* QModelIndex
+	- expand --- 展开该目录
+	- scrollTo
+	- resizeColumnToContents
+	- isValid
+	- fileInfo
+* QFileInfo
+	- isDir
+* QDir::currentPath() --- 获取当前目录
+* QMessageBox::information 用于显示信息
+* 最后一个例子, 显示如何使用 QSortFilterProxyModel, 不同于其他预定义Model,该model包装了其他已有mdoel并操作在模型内部和视图之间传递的数据.
+	- 通过 QColor::colorNames() 获取颜色名称列表
+	- 三个 QRegExp::PatternSyntax 值: QRegExp::RegExp, QRegExp::Wildcard, QRegExp::FixedString.
+	- QStringListModel
+		- setStringList
+	- QSortFilterProxyModel
+		- setFilterKeyColumn --- 设置要过滤的列
+		- setFilterRegExp --- 设置过滤正则表达式
+		- setSourceModel --- 设置源model
+	- QListView
+		- setEditTriggers
+	- QComboBox
+		- addItem
+	- QRegExp::PatternSyntax
+* 首先创建一个 ORegExp::PatternSyntax 对象表示组合框中的当前选项. 而后根据该对象创建一个 QRegExp 对象, 最后 QSortFilterProxyModel 使用该QRegExp对象作为一个参数调用 setFilterRegExp() 方法.
+    
+== 10.3 Implementing Custom Models ==
+* 使用自定义模型, 首先介绍Qt的模型/视图结构的核心概念 
+	- 模型中的每个数据元素都有一个model index和一系列属性, 属性称之为roles.
+	- 之前我们常见的role有 Qt::DisplayRole 和 Qt::EditRole. 还有一些role用于辅助数据(如Qt::ToolTipRole, Qt::StatusTipRole 和 Qt::WhatsThisRole), 以及控制基本显示属性的role(Qt::FontRole, Qt::TextAlignmentRole, Qt::TextColorRole 和 Qt::BackgroundColorRole)
+	- 对于列表(list)模型而言, 唯一相关的索引组成是行号, 通过 QModelIndex::row() 得到.
+	- 对于表格(table)模型而言, 唯一相关的索引组成就是行号和列号, 通过 QModeleIndex::row() 和 QModelIndex::column()得到
+	- 对于列表和表格模型, 每个元素的父母都是根元素. 该根元素是一个无效的QModelIndex.
+	- 对于tree模型而言, 除了顶层元素只有根目录, 其余的都有父母元素, 通过 QModeIndex::parent()得到.
+		- 每个元素都有它的role数据, 有零个或多个孩子.
+* Qt 提供的模型基类: QAbstractListModel, QAbstractTableModel, QAbstractItemModel. QAbstractItemModel 支持许多的模型, 包括基于递归数据结构的模型. 当使用一维或二维数据集时, QAbstractListModel和QAbstractTableModel类则提供了便利.
+* 派生自 QAbstractTableModel --- 提供了一个抽象模型, 可用于派生自定义表格模型.
+	- 重写的函数, 必须重写的函数有rowCount(), columnCount(), data(), 本例我们还实现了 headerData().
+	- data() 方法实现 --- 在 Display Role 中, 根据Index获取行号和列号所对应的货币种类, 而后得到两者的货币汇率比.
+	- 可以通过字符串控制显示的浮点数格式.
+	- headerData() 可以用于设置头行或头列的显示.
+	- QAbstractItemModel::reset() 告知那些正在使用model的view, 其数据已经失效, 需要重新请求数据.
+	- index() 和 parent()由QAbstractTabelMode缺省实现.
+	- 下面函数的实现注意一些情况, 主要是是能够更新视图.
+		- insertRows() --- 必须在插入新的一行之前调用 beginInsertRows(), 在之后调用 endInsertRows()
+		- insertColumns() --- 必须在插入新的一行之前调用 beginInsertColumns(), 在之后调用 endInsertColumns()
+		- removeRows() --- 必须在删除一行之前调用 beginRemoveRows(), 在之后调用 endRemoveRows()
+		- removeColumns() --- 必须在删除一行之前调用 beginRemoveColumns(), 在之后调用 endRemoveColumns()
+* 抽象模型类
+	- 继承关系: QObject ---> QAbstractItemModel ---> (QAbstractListModel, QAbstractTableModel)
+	- 对于只读表格模型, 我们必须实现三个函数 rowCount(), columnCount(), data(), 本例还实现了 headerData()
+	- 对于 rowCount, columnCount函数来说, 在QAbstractTableMset guifont=Bitstream_Vera_Sans_Mono:h11:cANSIodel中, 其函数参数parent没意义
+	- QModelIndex可通过方法 row(), column()获得行序号和列序号
+	- 当放置行和列的头时会调用headerData() 函数, 第一个参数为行和列序号.
+	- QAbstractItemModel::reset() 用于告知所有使用模型的视图它们的数据是无效的, 强迫它们更新数据.
+* 第二个例子, 增加了几个函数的实现, 如setData()和flags()
+	- 如果需要编辑模式则还要实现 QAbstractTableModel::setData(), 以及 QAbstractTableModel::flags()用于返返回 Qt::ItemIsEditable内的值
+	- 当用户编辑item时, 会调用 setData() 函数, 如提供的模型索引有效, 两个城市为不同城市, 要修改的数据元素的role为 Qt::EditRole, 则该函数存储用户输入的值至distances vector中.
+	- QAbstractItemModel::createIndex 根据列号和行号创建一个索引. 这里是在对角线的另一端创建一个相同两个城市的索引.
+	- 当模型索引的item发生变化时, 我们发送 dataChanged() 信号.
+	- 重写flags()方法, 用于告知item可以做什么. 默认实现为 Qt::ItemIsSelectable | Qt::ItemIsEnabled. 本例则在非对角线的位置上添加 flag Qt::ItemIsEditable.
+	- setData() 方法返回true或者false来表示编辑是否成功.
+	- QVector::resize() 重置大小, QVector::fill() 填充
+	- QAbstractItemModel::reset() 通知view它们的可见item必须重新进行获取.
+	- qSwap() 交换两个变量. 
+* 最后一个例子展示一个指定布尔表达式的分析树. 一个布尔表达式不但是简单字符数字的标识符, 如"bravo", 同时使用"&&", "||", "!"操作符还有括号的简单表达式构造出一个复杂的表达式. 如 "a || (b && !c)".
+* 布尔分析器应用程序由四个类组成:
+	- BooleanWindow 是一个可以让用户输入布尔表达式及显示对应分析树的窗口.
+	- BooleanParser 从一个布尔表达式生成一个分析树
+	- BooleanModel 是封装一个分析树的一个树模型
+	- Node 在一个分析树中表示一个item
+* 代码
+	- 每个节点都有一个类型名, 一个字符串(也许为空), 一个父节点(也许为空), 一个子节点列表(也许为空).
+	- qDeleteAll() 用于删除一个容器指针. 该函数不会设置这些指针为0, 如避免在析构函数外部误用, 最好使用clear() 方法
+	- 本例使用QAbstractItemModel, 可以实现一个有等级关系的模型, 此次还需要实现index()和parent()
+	- setRootNode() 函数用来设置根节点.
+	- 重实现index() 函数. 当为某个子item(或者父item为无效QModelIndex的顶层item)创建一个 QModelIndex 时调用该函数. 对于表格和列表模型, 我们不需要重实现该方法, 因为 QAbstractListModel 和 QAbstractTableModel的默认实现足够了.
+	- 我们可以在 QModelIndex 中存储一个内部节点的指针. QModelIndex 让我们可以存储一个void*指针或者表示列号行号的整数值.
+{{{c++
+	return static_cast<Node *>(index.internalPointer());
+}}}
+	- 获取父节点的QModelIndex需要知道父节点的row, 即相对于祖父节点的row.
+	- QTreeView 类没有垂直的头列.
+* 为了发现和解决自定义数据模型的问题, 可以使用Trolltech Labs的 ModelTest 类. 
+    
+== 10.4 Implementing Custom Delegates ==
+* 使用delegate渲染和编辑各自的item.
+	- 如果我们想要更好的渲染, 可在data()的内部实现中, 处理Qt::FontRole, Qt::TextAlignmentRole, Qt::TextColorRole, Qt::BackgroundColorRole,
+	- 如想要更自由的控制, 我们可以实现自己的delegate类.
+	- 本例的时间item则划分为分和秒, 并可用QTimeEdit 进行编辑
+* 例子
+	- 本例的TableWidget不使用默认的deletegate, 而使用自定义的deletgate.
+	- TrackDelegate的基类为 QItemDelegate
+		- 为了可以编辑数据, 我们必须重新实现createEditor(), setEditorData(), setModelData().
+		- 我们也可实现paint()函数改变渲染
+		- 在paint()可以使用QItemDelegate::drawDisplay() 和QItemDelegate::drawFocus()函数绘制文本和焦点矩形, 更加方便一些. 当然我们也可以使用QPainter进行绘制.
+			- 本例在其中设置了时间格式字符串以及文本的对齐方式.
+	- 重写QItemDelegate::createEditor()函数里, 调用 QTimeEditor 设置需要的元素.
+		- 其还要连接信号 editingFinished() 至自定义的slot commitAndCloseEditor()
+	- slot commitAndCloseEditor() 发送 信号 commitData() 和 closeEditor() 来关闭该编辑器
+	- 当用户按下回车键或者移动焦点至QTimeEdit之外(但不包括按下 Esc), 则会发送 eidtingFinished() 信号. 
+	- commitData() 用于通知 view, 告知其用编辑的数据替换已有的数据. closeEditor() 信号则用来通知 view 不再需要eidtor, 此时 model 会删除这个eidtor.
+	- 当用户按下 Esc 时, view则删除该eidtor.
+* Qt 4.4 希望引入 QStyledItemDelegate 类, 并使用它作为默认的代理. 不想 QItemDelegate, QStyledItemDelegate 依赖于绘制其 items 的当前 style.
+* 当用户开始编辑时, view调用createEditor()创建一个editor, 而后setEditorData() 使用item的当前数据初始化该editor. 
+* 当用户完成编辑(例如, 在editor widget之外左键点击, 或者按下回车或Tab键), 而不是取消时, model 必须更新 editor 的数据. 这里重实现 setModelData() 方法.
+* 可以创建一个自定义 delegate 以更好地控制对模型中任意item的编辑和渲染. 由于 QModelIndex 可以传送给我们重新实现的 QItemDelegate 函数, 我们可以根据列, 行, 矩形区域, 父节点, 或者它们的任意组合, 甚至单个item, 来进行这些items的编辑和渲染.
+* model/view 架构还可以创建自定义的view, 使得其item不以列表, 表格, 或者树的形式渲染. 例如 examples/itemviews/chart 的 Chart 例子. 这个自定义的view 以扇形图标的形式渲染模型数据.
+* 相同的模型可以用多个views来查看. 这个架构还支持选择, 即两个或多个views使用相同的模型时, 每个view可以设置有其自己独立的选择, 或者这些选择可以被这些views共享.
+* 查看相关 模型/视图 类 http://doc.trolltech.com/4.3/model-view-programming.html
+* 查看相关例子 http://doc.trolltech.com/4.3/model-view-programming.html

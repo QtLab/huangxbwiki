@@ -1,0 +1,41 @@
+= 代码主要改动 =
+== RacingGameManager.cs ==
+	* 行 303: 自定义变量和属性
+	* 行 338: 修改程序显示的菜单屏幕
+== CarPhysics.cs ==
+	* 这里使用判断车子类型为 Player.CarRunType.AutoDrive 来确定是否处于超车的游戏界面, 判断代码: if (RacingGameManager.Player.CurrentCarType == Player.CarRunType.AutoDrive)
+	* 行 411: 自定义变量和属性
+	* 行 618: 超车Demo中, 增加左右键和H,J键的控制
+	* 行 927: 修改代码, 实现玩家的超车功能, 具体有PlayerMahine实现
+	* 行 1056: 修改车子位置, 以免撞向路栏
+	* 行 1452: 修改代码, 这样是左键右键能够旋转相机
+	* 重要的代码位于946行, 该处调用状态机进行更新矩阵和速度
+== NPCCar.cs ==
+	* 新增文件, 用于控制NPC车
+== Player.cs ==
+	* 行 77: 自定义变量和属性
+== OvertakeMenu.cs ==
+	* 根据 Menu.cs 改进而来
+	* 行 183: 注释掉按钮下的文字
+	* 行 256: 修改前两个按钮的功能
+== OvertakeScreen.cs ==
+	* 由GameScreen.cs 改进而来
+	* 行 96: 绘制NPC车辆
+== TrackSelection.cs ==
+	* 跑道选择界面
+	* 行 213: 增加进入超车界面的代码
+== UIRenderer.cs ==
+	* 行 715: 在超车界面中不会屏幕上显示太多无用的信息
+== FuzzyLogic.cs ==
+	* 用于逻辑判断的类
+== NPCMachine.cs ==
+	* NPC车的状态机, 控制NPC车的所有状态, 这些状态可以更新NPC车的矩阵和速度
+== PlayerMachine.cs ==
+	* 玩家车的状态机, 控制玩家车的所有状态, 这些状态可以更新玩家车的矩阵和速度
+
+= 其他 =
+* 演示超车系统最好第一张地图, 第二张第三张地图由于难度高, 所以很多地方比较窄, 只能在前面一点路进行超车
+* NPC车的速度恒定为70mph, 所以演示的时候玩家车子注意左下角的速度
+* 方向键左键和右键可以旋转相机, 可以看到NPC车如何进行超车, 其他的可以通过pagedown, pageup键拉长和缩短相机与NPC车的距离, H键, J键拉高和拉低相机高度
+* 注意修改AssemblyInfo.cs文件, 
+	* 比如 assembly: AssemblyCompany("POYANGLAKE") 为公司名称, 其他的可以根据个人信息修改

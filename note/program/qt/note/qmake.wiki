@@ -1,0 +1,65 @@
+= Getting Started =
+* 变量 SOURCES, HEADERS
+{{{class="brush: c++"
+HEADERS += hello.h
+SOURCES += hello.cpp
+SOURCES += main.cpp
+}}}
+* make 风格
+{{{class="brush: c++"
+SOURCES = hello.cpp \
+          main.cpp
+}}}
+* TARGET 设置生成名, 否则为 pro 名
+* 生成 Makefile 文件
+{{{class="brush: c++"
+qmake -o Makefile hello.pro
+}}}
+* 生成 vs 文件
+{{{class="brush: c++"
+qmake -tp vc hello.pro
+}}}
+* 设置为调试版本, CONFIG 变量加上 debug
+{{{class="brush: c++"
+CONFIG += debug
+}}}
+* 使用 scope 添加平台特有的文件
+{{{class="brush: c++"
+win32 {
+    SOURCES += hellowin.cpp
+}
+}}}
+* exists() 检查文件存在, error() 停止 qmake
+{{{class="brush: c++"
+!exists( main.cpp ) {
+    error( "No main.cpp file found" )
+}
+}}}
+* 多个条件, win32 和 debug 条件下设置控制台
+{{{class="brush: c++"
+win32 {
+    debug {
+        CONFIG += console
+    }
+}
+}}}
+	- 可以用冒号连接嵌套 scope
+* 最终内容
+{{{class="brush: c++"
+CONFIG += debug
+HEADERS += hello.h
+SOURCES += hello.cpp
+SOURCES += main.cpp
+win32 {
+    SOURCES += hellowin.cpp
+}
+unix {
+    SOURCES += hellounix.cpp
+}
+!exists( main.cpp ) {
+    error( "No main.cpp file found" )
+}
+win32:debug {
+    CONFIG += console
+}
+}}}

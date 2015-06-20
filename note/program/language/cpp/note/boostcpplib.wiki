@@ -1,0 +1,43 @@
+= Boost C++ Library =
+== Chapter 1: Introduction ==
+=== 1.3 Installation ===
+* 使用Boost Jam进行编译, 使用build.bat生成bjam.exe, 参数 vc7, vc8, vc9
+	- bjam的命令行选项
+		# 目录默认stage或者系统目录, 使用--prefix
+		# 选择编译器 --toolset, 使用vs2008: --toolset=msvc-9.0
+		# --build-type  用于决定构建哪些库. 缺省 minimal, 表示只创建release版本. complete选项生成debug和release版本.
+		# 例子: bjam --toolset=msvc-9.0 --build-type=complete --prefix=D:\Boost instal
+		# 作者常用: bjam --toolset=msvc-9.0 debug release link=static runtime-link=shared install
+			- debug和release表示两者都生成, link=static表示只创建静态库. runtime-link=shared表示C++运行库动态链接(该选项是缺省设置).
+=== 1.4 Overview ===
+	* 1.42 版本含有90多个库, 本书介绍一下几个库
+		- Boost.Any --- 提供数据类型 boost::any, 允许存储任意类型.
+		- Boost.Array --- 像容器一样处理C++数组
+		- Boost.Asio --- 允许应用程序异步处理数据, 如网络程序
+		- Boost.Bimap --- 提供了一个类 boost::bimap, 类似 std::map. 不同的是boost::bimap可以查找关键词和值.
+		- Boost.Bind --- 适配器, 将一个函数作为模板参数
+		- Boost.Conversion --- 用于执行向下转换, 交叉转换, 以及在不同数值类型之间进行转换.
+		- Boost.DateTime --- 可以处理, 读取和写入时间和日期值, 其可用不同的格式
+		- Boost.Exception --- 用于在抛出异常时增加额外的数据.
+		- Boost.Filesystem --- 类, 处理路径信息, 包含一些函数用于访问文件和路径
+		- Boost.Interprocess --- 通过共享内存进行通讯
+		- Boost.Lambda --- 定义匿名函数
+		- Boost.Multiindex --- 允许定义一个新的容器, 可支持多个接口, 如std;;vector和std::map
+		- Boost.NumericConversion --- 不同数值类型之间的安全转换操作. 不会生成溢出和下溢出情况
+		- Boost.PointerContainer --- 提供了一些容器, 其对动态分配对象进行了优化
+		- Boost.Ref --- Boost.Ref的适配器允许给一不可拷贝对象传递引用给函数
+		- Boost.Regex --- 通过正则表达式查找文本
+		- Boost.Serialization --- 可将对象序列化保存进文件, 并可在之后进行加载
+		- Boost.Signals --- 基于signal-slot概念的事件处理框架.
+		- Boost.SmartPointer --- 提供许多智能指针来管理动态分配对象.
+		- Boost.Spirit --- 使用类似EBNF的语法生成分析器.(Extended Backus Neur Form) --- 扩充巴科斯诺尔范式
+		- Boost.StringAlgorithm --- 提供了许多函数便于处理字符串
+		- Boost.System --- 系统处理的框架, 以及应用程序的错误代码
+		- Boost.Thread --- 用于开发多线程函数
+		- Boost.Tokenizer --- 迭代字符串的各个组成部分
+		- Boost.Tuple --- std::pair的一般化版本, 允许组任意数量的数据
+		- Boost.Unordered --- 通过 boost::unordered_set 和 boost_unordered_map 扩大C++的标准容器
+		- Boost.Variant --- 允许定义数据类型. 类似union. 组织多个数据类型为一组. 比union好的地方就是可以包括类.
+		
+== Chapter 2 Smart Pointers ==
+

@@ -1,0 +1,7 @@
+= 2 Overview of OpenGL Shading =
+== 2.1 Vertex Processor ==
+* 顶点处理其操作其一次处理一个顶点, 并不替换一次要求数个顶点信息的操作.
+== 2.2 Tessellation Control Processor ==
+* 在一小片输入顶点和其相关数据上操作, 发送一个新的输出片.
+
+= 3 Basics =

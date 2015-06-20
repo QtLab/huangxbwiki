@@ -1,0 +1,5 @@
+* 程序入口
+	- 参数1 是否为 nograb
+	- 是否有启动索引的参数
+	- OgreBites::SampleBrowser 对象
+		- OgreBites::SampleBrowser::go()

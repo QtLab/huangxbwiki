@@ -1,0 +1,22 @@
+= 系统 =
+	* _CrtSetDlgFlag --- 设置调试堆管理
+	* atexit
+	* memset
+
+= 字符串操作 =
+	* strstr --- 查找子串
+	* strrchr --- 反向查找单个字符
+	* atof
+	* atoi
+	* strdup --- 复制字符串, 可用 free 释放其返回的指针
+	* lstrlen --- 用于 TCHAR 的求字符串长度函数, 还有 _tcslen
+
+= 输出输入 =
+	* vsprintf
+	* sscanf
+	* fread
+	* feof
+	* fgets
+	
+= 其他 =
+	* srand --- 设置随机数

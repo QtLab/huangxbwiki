@@ -1,0 +1,71 @@
+= 第12章 交互式图形 =
+1. 选择(selection) --- 在窗口的某个位置用鼠标进行点击, 而后确定其所点击的是哪个物体<br />
+	挑选(picking) --- 在场景中选择一个特定物体<br />
+	选择 --- 指定一个可视区域来确定哪些物体位于这个可视区域之中<br />
+	函数 gluPickMatrix --- 生成该可视区域的矩阵, 用于挑选<br />
+2. 反馈(feedback) --- 从 OpenGL 获得信息, 了解顶点绘制到帧缓冲区时是如何进行转换和光照的<br />
+3. 选择是一种渲染模式, 其像素并不绘制到帧缓冲区, 其绘制的图元产生一个点击记录<br />
+4. 在选择模式下出现一次鼠标点击事件时, 当前位于名字堆栈中的所有名字都被添加到选择缓冲区的尾部. 所以一般使用 glLoadName 替换栈顶的名称<br />
+5. 选择缓冲区: 名字堆栈中名字的数量-->顶点最小和最大z窗口[0, 1]-->名字堆栈的底部-->名字堆栈下一个元素--->...<br />
+6. 渲染模式从 GL_SELECT 切换回 GL_RENDER 之时, glRenderMode的返回值为选择缓冲区点击记录的数量<br />
+7. OpenGL 窗口坐标与系统的窗口坐标相反, 视口的高度减去鼠标的y坐标, 产生OpenGL所用的窗口垂直坐标<br />
+8. 使用 gluPickMatrix 的步骤: <br />
+	1) 当前投影矩阵压栈 2) glLoadIdentity 创建单位可视区域 3) gluPickMatrix 4) 正确的投影  5) 渲染 6) 返回GL_RENDER渲染模式, 根据返回值得到点击数<br />
+	7) 恢复投影矩阵(glMatrixMode(GL_PROJECTION))<br />
+9. 名字堆栈可以压入多个名字, 而不仅仅是替换栈顶的名字. 例如: 点击一个螺钉时, 不仅需要知道是哪个螺钉, 还要知道螺钉属于哪个轮胎, 哪辆汽车<br />
+10. 反馈渲染模式---GL_FEEDBACK, 信息写入反馈缓冲区<br />
+11. void glFeedbackBuffer(GLsizei size, GLenum type, GLfloat* buffer)<br />
+	type 的类型: GL_2D, GL_3D, GL_3D_COLOR, GL_3D_COLOR_TEXTURE, GL_4D_COLOR_TEXTURE<br />
+12. 反馈缓冲区包含一个标记列表, 顶点数据以及有可能出现的颜色和纹理数据. 如果使用多重纹理, 则只反馈第一个纹理单元的纹理坐标<br />
+	标记: GL_*_TOKEN(*为POINT, LINE, LINE_RESET, POLYGON, BITMAP, DRAW_PIXEL, COPY_PIXEL, PASS_THROUGH)<br />
+		直线标记返回两组顶点数据, 多边形标记后面是顶点的数量, GL_PASS_THROUGH_TOKEN 后面是一个用户定义的浮点值<br />
+	反馈模式在图元之间设置标记, void glPassThrough(GLfloat token); // 类似于在选择模式下为图元命名<br />
+	反馈的用途: 根据你所渲染的任何物体获取窗口坐标信息<br />
+<br />
+= 第16章 缓冲区对象 =
+1. 显卡内存可存储的内容: 前缓冲区, 后缓冲区, 深度缓冲区, 其他缓冲区, 纹理缓存, 缓冲区对象<br />
+2. 缓冲区对象的管理<br />
+	glGenBuffers(1, &bufferID);<br />
+	...<br />
+	glBindBuffer(GL_ARRAY_BUFFER, bufferID);<br />
+	...<br />
+	glDeleteBuffers(1, &bufferID);<br />
+3. 使用缓冲区对象, 用偏移量指定数据<br />
+	glNormalPointer(GL_FLOAT, 0, 0);<br />
+	glVertexPointer(GL_FLOAT, 0, 0);<br />
+4. glBufferData() 读取数据, glBufferSubData() 更新数据<br />
+5. 用法技巧: 如果是静态数据, 直接使用 glBufferData() 读取, 如果是动态数据, 先用NULL参数调用 glBufferData(), 而后使用 glBufferSubData() 更新<br />
+6. glBufferData() 最后一个参数用于用法提示<br />
+	GL_DYNAMIC_DRAW --- 缓冲区对象数据经常变化<br />
+	GL_STATIC_DRAW --- 缓冲区对象不经常变化<br />
+	GL_STREAM_DRAW --- 缓冲区对象数据一般只使用一次就会变化, 更加频繁.<br />
+7. glMapBuffer() 函数 --- 获得一个指向缓冲区对象数据的指针<br />
+	三种访问模式: GL_READ_ONLY, GL_READ_WRITE, GL_WRITE_ONLY<br />
+	glUnMapBuffer() 函数 --- 解除映射, 解除之前不能使用该缓冲区对象进行绘图, 该命令告知 OpenGL 数据修改完毕<br />
+		// 如果返回值为 GL_FALSE, 程序应当重新负责提供所有的数据<br />
+8. 用于缓冲区查询的函数<br />
+	glGetBufferParameteriv, glGetBufferPointerv, glGetBufferSubData, glIsBuffer<br />
+9. 使用GL_ELEMENT_ARRAY_BUFFER 代替 GL_ARRAY_BUFFER 则可以使用数据索引<br />
+<br />
+= 第17章 遮挡查询 =
+1. 遮挡检测的理论: 如果一个物体的边界区域(bounding volume)并不可见, 那么这个物体也不可见<br />
+2. 设置简单的边界区域: 四面体, 六面体, 八面体, 十二面体, 二十面体. 关掉所有不必要的功能, 包括写入颜色缓冲区中 glColorMask(0, 0, 0, 0).<br />
+3. 生成和删除遮挡查询名称<br />
+	glGenQueries(27. queryIDs);<br />
+	...<br />
+	glDeleteQueries(27, queryIDs);<br />
+	开始和结束查询: glBeginQuery() 和 glEndQuery()<br />
+4. glGetQueryObjectiv() 函数判断计数器是否为0, 为0表示不需要绘制<br />
+5. 查询 GL_QUERY_RESULT_AVAILABLE 判断遮挡查询就诶过是否已就绪, 如果未就绪, 可以查询 GL_QUERY_RESULT, 一直等到结果就绪<br />
+6. 在 glBeginQuery/glEndQuery 之间可以查询当前遮挡查询名称, 还可以查询当前OpenGL的遮挡查询计数器的位数<br />
+	glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BI);	// 查询计数器位数<br />
+	glIsQuery --- 检查一个指定的名称是否为一个现有的查询对象的名称<br />
+	<br />
+= 第18章 深度纹理和阴影 =
+1. 根据光源的视点来绘制场景<br />
+	gluLookAt(lightPos[0], lightPos[1], lightPos[2], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);<br />
+2. 根据光源距场景中最近和最远物体的距离来设置近裁剪平面和远裁剪平面<br />
+3. 关闭所有不必要的功能(光照, 法线化, 材质颜色跟踪, 屏蔽颜色缓冲区的写入)<br />
+4. glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 0, 0, shadowSize, shadowSize, 0);<br />
+5. 绘制阴影, 用暗淡的环境光和光照绘制一遍, GL_ARB_shadow_ambient 扩展可以不用这一步, 可同时绘制阴影区域和光照区域<br />
+6. <br />

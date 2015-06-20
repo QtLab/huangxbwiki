@@ -1,0 +1,382 @@
+= 4.1 预备知识 =
+== 4.1.1 Direct3D Overview ==
+* Direct3D 11 设备实现整个 Direct3D 11 capability set.
+== 4.1.2 COM ==
+* Component Object Model(COM) 看成一个接口, 可看成和当作一个C++类. 我们通过专用函数或其他COM接口的方法得到指向COM接口的指针, 我们并不通过C++的new关键字创建一个COM接口. 当我们完成工作, 则使用 Release 方法释放它.
+=== 4.1.3 Textures and Data Resource Formats ===
+* 一个纹理不能存储任意类型的数据, 只能存储 DXGI_FORMAT 枚举类型中描述的数据类型.
+	# DXGI_FORMAT_R32G32B32_FLOAT
+	# DXGI_FORMAT_R16G16B16A16_UNORM
+	# DXGI_FORMAT_R32G32_UINT
+	# DXGI_FORMAT_R8G8B8A8_UNORM
+	# DXGI_FORMAT_R8G8B8A8_SNORM
+	# DXGI_FORMAT_R8G8B8A8_SINT
+	# DXGI_FORMAT_R8G8B8A8_UINT
+* DXGI_FORMAT_R32G32B32_FLOAT 有3个浮点成分可以存储一个3D向量.
+* 还有typeless 类型, 用于预先保留内存以便之后使用. 如 DXGI_FORMAT_R8G8B8A8_TYPELESS
+=== 4.1.4 The Swap Chain and Page Flipping ===
+* 交换前后缓存称之为 presenting.
+* 前缓存和后缓存形成一个 swap chain. 在 Direct3D 中, 一个 swap chain 由 IDXGISwapChain 接口表示. 这个接口存储了前后缓存纹理, 用于重置缓存大小的方法(IDXGISwapChain::ResizeBuffers), 以及显示缓存的方法(IDXGISwapChain::Present).
+* 两个缓存称之为 double buffering, 三个缓存称之为 triple buffering.
+=== 4.1.5 Depth Buffering ===
+* 可以用于深度缓存的格式:
+	- DXGI_FORMAT_D32_FLOAT_S8X24_UINT
+	- DXGI_FORMAT_D32_FLOAT
+	- DXGI_FORMAT_D24_UNORM_S8_UINT
+=== 4.1.6 Texture Resource Views ===
+* 纹理可以绑定至渲染管线的不同阶段. 常用于作为一个渲染目标和着色器资源.
+{{{c++
+	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
+}}} 
+* 通常我们并不直接绑定资源到管线阶段. 而是绑定资源视图到不同的管线阶段. 初始化时创建纹理的一个资源视图. 有 ID3D11RenderTargetView, ID3D11ShaderResourceView.
+	- 视图用于告知如何处理资源以及确定类型.
+* 创建一个资源的具体view, 则该资源的创建必须有该具体绑定flag. 例如 D3D11_BIND_DEPTH_STENCIL 和 ID3D11DepthStencilView.
+* 一个反锯齿技术: supersampling. 
+* 另一个技术为: multisampling. 比如4X, 创建一个比屏幕大四倍的纹理, 而后求解出屏幕上每个像素的颜色信息, 而后根据像素的可见性和覆盖率在纹理对应四个像素上共享该颜色信息.
+* 结构体 DXGI_SAMPLE_DESC, 求解质量范围的函数
+{{{c++
+HRESULT ID3D11Device::CheckMultisampleQualityLevels(
+	DXGI_FORMAT Format, UINT SampleCount, UINT *pNumQualityLevels);
+}}} 
+* 每个像素可采样样本的最大数量为
+{{{c++
+	#define D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT ( 32 )
+}}} 
+* 如果不想用多重采样, 设置样本数为1, 质量为0.
+* Feature Levels
+{{{c++
+typedef enum D3D_FEATURE_LEVEL
+{
+D3D_FEATURE_LEVEL_9_1 = 0x9100,
+D3D_FEATURE_LEVEL_9_2 = 0x9200,
+D3D_FEATURE_LEVEL_9_3 = 0x9300,
+D3D_FEATURE_LEVEL_10_0 = 0xa000,
+D3D_FEATURE_LEVEL_10_1 = 0xa100,
+D3D_FEATURE_LEVEL_11_0 = 0xb000,
+} D3D_FEATURE_LEVEL;
+}}} 
+	- 只要用于硬件可以支持的功能集, 如果不支持则返回旧的版本.
+== 4.2 初始化 Direct3D ==
+* 步骤
+	# D3D11CreateDevice 函数创建 ID3D11Device 和 ID3D11DeviceContext 接口.
+	# ID3D11Device::CheckMultisampleQualityLevels 检查 4X MSAA quality 支持
+	# 填充 DXGI_SWAP_CHAIN_DESC 结构体
+	# 查询 IDXGIFactory  实例, 创建 IDXGISwapChain 实例.
+	# 创建back buffer的渲染目标视图
+	# 创建深度/stencil缓存和其关联的 depth/stencil view.
+	# 将 render target view 和 depth/stencil view 绑定至渲染关键的输出 merger stage.
+	# 设置视口
+
+=== 4.2.1 初始化设备和上下文 ===
+* ID3D11Device --- 用于检查支持功能, 分配资源
+* ID3D11DeviceContext --- 用于设置渲染状态, 绑定资源至图形管线, 发出渲染命令
+{{{c++
+HRESULT D3D11CreateDevice(
+	IDXGIAdapter *pAdapter, // null 表示主display adapter
+	D3D_DRIVER_TYPE DriverType,
+	HMODULE Software,
+	UINT Flags,
+	CONST D3D_FEATURE_LEVEL *pFeatureLevels,
+	UINT FeatureLevels,
+	UINT SDKVersion,
+	ID3D11Device **ppDevice,
+	D3D_FEATURE_LEVEL *pFeatureLevel,
+	ID3D11DeviceContext **ppImmediateContext
+);
+}}} 
+	- DriverType: 通常用 D3D_DRIVER_TYPE_HARDWARE 表示使用3D硬件加速器渲染.
+		- D3D_DRIVER_TYPE_REFERENCE: 创建一个名为 reference device 的设备. 软件实现.
+			- 测试硬件不支持的代码.
+			- 测试驱动器bug.
+		- D3D_DIRVER_TYPE_SOFTER: 创建用于枚举 3D 硬件的软件驱动器.
+		- D3D_DRIVER_TYPE_WARP: 创建一个高性能 Direct3D 10.1 软件驱动器.
+	- Software: 用null表示, 因为我们使用硬件渲染.
+	- Flags, 常用flag
+		- D3D11_CREATE_DEVICE_DEBUT
+		- D3D11_CREATE_DEVICE_SINGLETHREADED: 如保证 Direct3D 不会从多线程中调用, 则可以提升性能. 如允许该 flag, 则 ID3D11Device::CreateDeferredContext 方法则会失败.
+	- pFeatureLevels: D3D_FEAURE_LEVEL 元素数组. null 表示选择支持的最高feature level.
+	- FeatureLevels: 上面数组的数量.
+	- SDKVersion: 永远为 D3D11_SDK_VERSION
+	- ppDevice: 返回创建的设备.
+	- pFeatureLevel: 返回支持的第一个feature level.
+	- ppImmediateContext: 返回创建的设备上下文.
+* 观察指向设备上下文它的中间上下文的指针
+{{{c++
+	ID3D11DeviceContext* md3dImmediateContext;
+}}} 
+	- 这也看成一个 defered context(ID3D11Device::CreateDeferedContext) 这为Direct3D 11 多线程支持的一部分.
+		- 在渲染的主线程中有一个 immediate context
+		- 在单独的工作线程中有任意的额外的deferred contexts.
+			- 每个工作者线程可以将图形命令记录到一个命令列表上(ID3D11CommandList)
+			- 来自每个工作线程的命令列表可以在渲染主线程中执行.
+
+=== 4.2.2 Check 4X MSAA Quality Support ===
+=== 4.2.3 Describe the Swap Chain ===
+* 填充 DXGI_SWAP_CHAIN_DESC 结构
+{{{c++
+typedef struct DXGI_SWAP_CHAIN_DESC {
+	DXGI_MODE_DESC BufferDesc;
+	DXGI_SAMPLE_DESC SampleDesc; // 多重采样和质量level的数量.
+	DXGI_USAGE BufferUsage; // DXGI_USAGE_RENDER_TARGET_OUTPUT
+	UINT BufferCount; // back buffer 的数量, 通常为1
+	HWND OutputWindow; // 渲染的窗口句柄
+	BOOL Windowed; // DXGI_SWAP_EFFECT_DISCARD 选择最有效率的presentation method>
+	DXGI_SWAP_EFFECT SwapEffect;
+	UINT Flags;
+} DXGI_SWAP_CHAIN_DESC;
+
+typedef struct DXGI_MODE_DESC
+{
+	UINT Width; // desired back buffer width
+	UINT Height; // desired back buffer height
+	DXGI_RATIONAL RefreshRate; // display mode refresh rate
+	DXGI_FORMAT Format; // back buffer pixel format
+	DXGI_MODE_SCANLINE_ORDER ScanlineOrdering; // display scanline mode
+	DXGI_MODE_SCALING Scaling; // display scaling mode
+} DXGI_MODE_DESC;
+}}} 
+	- BufferDesc: back buffer 的属性, 主要有高宽, 像素格式.
+	- Flags --- DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH: 全屏时, 选择最匹配当前back buffer setting的显示模式. t通常不设置该flag.
+
+=== 4.2.4 Create the Swap Chain ===
+* 通过 IDXGIFactory 实例创建一个swap chain 接口(IDXGISwapChain), 其使用方法 IDXGIFactory::CreateSwapChain
+{{{c++
+HRESULT IDXGIFactory::CreateSwapChain(
+	IUnknown *pDevice, // Pointer to ID3D11Device.
+	DXGI_SWAP_CHAIN_DESC *pDesc, // Pointer to swap chain description.
+	IDXGISwapChain **ppSwapChain); // Returns created swap chain interface.
+}}} 
+	- 可通过 CreateDXGIFactory 创建一个 IDXGIFactory 实例, 但如果用这个直接调用上面的函数则会出错.
+	- 我们需要使用之前创建device的 IDXGIFactory 实例. 我们使用如下的COM查询得到
+{{{c++
+	IDXGIDevice* dxgiDevice = 0;
+	HR(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice));
+	IDXGIAdapter* dxgiAdapter = 0;
+	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter));
+	// Finally got the IDXGIFactory interface.
+	IDXGIFactory* dxgiFactory = 0;
+	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+	// Now, create the swap chain.
+	IDXGISwapChain* mSwapChain;
+	HR(dxgiFactory->CreateSwapChain(md3dDevice, &sd, &mSwapChain));
+	// Release our acquired COM interfaces (because we are done with them).
+	ReleaseCOM(dxgiDevice);
+	ReleaseCOM(dxgiAdapter);
+	ReleaseCOM(dxgiFactory);
+}}} 
+
+=== 4.2.5 创建 Render Target View ===
+* 为了将back buffer 绑定至管线的output merger stage, 我们需要创建一个back buffer的render target view.
+{{{c++
+	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11Texture2D* backBuffer;
+	mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+		reinterpret_cast<void**>(&backBuffer));
+	md3dDevice->CreateRenderTargetView(backBuffer, 0, &mRenderTargetView);
+	ReleaseCOM(backBuffer);
+}}} 
+	- 使用 IDXGISwapChain::GetBuffer 方法得到指向 swap chain 其 back buffer 的指针.
+	- 使用 ID3D11Device::CreateRenderTargetView 方法创建 render target view.
+	- IDXGISwapChain::GetBuffer 增加了该back buffer的COM关联数, 所以在最后需要释放它.
+
+=== 4.2.6 Create the Depth/Stencil Buffer and View ===
+* 这两个buffer为2D纹理. 创建纹理需要填充 D3D11_TEXTURE2D_DESC 结构. 而后调用 ID3D11Device::CreateTexture2D 方法.
+{{{c++
+	typedef struct D3D11_TEXTURE2D_DESC {
+		UINT Width;
+		UINT Height;
+		UINT MipLevels;
+		UINT ArraySize;
+		DXGI_FORMAT Format;
+		DXGI_SAMPLE_DESC SampleDesc;
+		D3D11_USAGE Usage;
+		UINT BindFlags;
+		UINT CPUAccessFlags;
+		UINT MiscFlags;
+	} D3D11_TEXTURE2D_DESC;
+}}} 
+	-  D3D11_USAGE 枚举类型
+		- D3D11_USAGE_DEFAULT --- GPU 读写资源
+		- D3D11_USAGE_IMMUTABLE --- 创建时初始化, 之后不变. 只有GPU读取.
+		- D3D11_USAGE_DYNAMIC --- 可由GPU读取, CPU写入
+		- D3D11_USAGE_STAGING --- CPU需要读取资源的一个拷贝.
+	- BindFlags: 资源在管线中绑定的位置. 对于 depth/stencil buffer, 其为 D3D11_BIND_DEPTH_STENCIL.
+		- D3D11_BIND_RENDER_TARGET
+		- D3D11_BIND_SHADER_RESOURCE
+	- CPUAccessFlags --- CPU 如何访问资源. 可有 D3D11_CPU_ACCESS_WRITE, D3D11_CPU_ACCESS_READ.
+* 创建 depth/stencil 纹理和其对应view
+{{{c++
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	depthStencilDesc.Width = mClientWidth;
+	depthStencilDesc.Height = mClientHeight;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	// Use 4X MSAA? --must match swap chain MSAA values.
+	if( mEnable4xMsaa )
+	{
+		depthStencilDesc.SampleDesc.Count = 4;
+		depthStencilDesc.SampleDesc.Quality = m4xMsaaQuality-1;
+	}
+	// No MSAA
+	else
+	{
+		depthStencilDesc.SampleDesc.Count = 1;
+		depthStencilDesc.SampleDesc.Quality = 0;
+	}
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+	ID3D11Texture2D* mDepthStencilBuffer;
+	ID3D11DepthStencilView* mDepthStencilView;
+	HR(md3dDevice->CreateTexture2D(
+		&depthStencilDesc, // Description of texture to create.
+		0,
+		&mDepthStencilBuffer)); // Return pointer to depth/stencil buffer.
+	HR(md3dDevice->CreateDepthStencilView(
+		mDepthStencilBuffer, // Resource we want to create a view to.
+		0,
+		&mDepthStencilView)); // Return depth/stencil view
+}}} 
+
+=== 4.2.7 Bind the Views to the Output Merger Stage ===
+{{{c++
+	md3dImmediateContext->OMSetRenderTargets(
+		1, &mRenderTargetView, mDepthStencilView);
+}}}
+	- 我们可以设置render target view数组, 但只有一个 depth/stencil view
+
+=== 4.2.8 Set the Viewport ===
+* 有时候只将场景渲染至 back buffer 的子矩形
+{{{c++
+	typedef struct D3D11_VIEWPORT {
+		FLOAT TopLeftX;
+		FLOAT TopLeftY;
+		FLOAT Width;
+		FLOAT Height;
+		FLOAT MinDepth;
+		FLOAT MaxDepth;
+	} D3D11_VIEWPORT;
+}}} 
+* ID3D11DeviceContext::RSSetViewports 方法设置视口.
+{{{c++
+	D3D11_VIEWPORT vp;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	vp.Width = static_cast<float>(mClientWidth);
+	vp.Height = static_cast<float>(mClientHeight);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	md3dImmediateContext->RSSetViewports(1, &vp);
+}}} 
+
+== 4.3 Timing and Animation ==
+=== 4.3.1 The Performance Timer ===
+* 使用 performance timer 计时.
+{{{c++
+	__int64 currTime;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+
+	__int64 countsPerSec;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+
+	mSecondsPerCount = 1.0 / (double)countsPerSec;
+	valueInSecs = valueInCounts * mSecondsPerCount;
+}}} 
+=== 4.3.2 Game Timer Class ===
+{{{c++
+	class GameTimer
+	{
+	public:
+		GameTimer();
+		float GameTime()const; // in seconds
+		float DeltaTime()const; // in seconds
+		void Reset(); // Call before message loop.
+		void Start(); // Call when unpaused.
+		void Stop(); // Call when paused.
+		void Tick(); // Call every frame.
+	private:
+		double mSecondsPerCount;
+		double mDeltaTime;
+		__int64 mBaseTime;
+		__int64 mPausedTime;
+		__int64 mStopTime;
+		__int64 mPrevTime;
+		__int64 mCurrTime;
+		bool mStopped;
+	};
+}}}
+
+=== 4.3.3 Time Elapsed Between Frames ===
+=== 4.3.4 Total Time ===
+
+== 4.4 THE DEMO APPLICATION FRAMEWORK ==
+=== 4.4.1 D3DApp ===
+{{{c++
+	class D3DApp
+	{
+	public:
+	D3DApp(HINSTANCE hInstance);
+	virtual ~D3DApp();
+	HINSTANCE AppInst()const;
+	HWND MainWnd()const;
+	float AspectRatio()const;
+	int Run();
+	// Framework methods. Derived client class overrides these methods to
+	// implement specific application requirements.
+	virtual bool Init();
+	virtual void OnResize();
+	virtual void UpdateScene(float dt)=0;
+	virtual void DrawScene()=0;
+	virtual LRESULT MsgProc(HWND hwnd, UINT msg,
+	WPARAM wParam, LPARAM lParam);
+	// Convenience overrides for handling mouse input.
+	virtual void OnMouseDown(WPARAM btnState, int x, int y){ }
+	virtual void OnMouseUp(WPARAM btnState, int x, int y){ }
+	virtual void OnMouseMove(WPARAM btnState, int x, int y){ }
+	protected:
+	bool InitMainWindow();
+	bool InitDirect3D();
+	void CalculateFrameStats();
+	protected:
+	HINSTANCE mhAppInst; // application instance handle
+	HWND mhMainWnd; // main window handle
+	bool mAppPaused; // is the application paused?
+	bool mMinimized; // is the application minimized?
+	bool mMaximized; // is the application maximized?
+	bool mResizing; // are the resize bars being dragged?
+	UINT m4xMsaaQuality; // quality level of 4X MSAA
+	// Used to keep track of the "delta-time" and game time (§4.3).
+	GameTimer mTimer;
+	// The D3D11 device (§4.2.1), the swap chain for page flipping
+	// (§4.2.4), the 2D texture for the depth/stencil buffer (§4.2.6),
+	// the render target (§4.2.5) and depth/stencil views (§4.2.6), and
+	// the viewport (§4.2.8).
+	ID3D11Device* md3dDevice;
+	ID3D11DeviceContext* md3dImmediateContext;
+	IDXGISwapChain* mSwapChain;
+	ID3D11Texture2D* mDepthStencilBuffer;
+	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11DepthStencilView* mDepthStencilView;
+	D3D11_VIEWPORT mScreenViewport;
+	// The following variables are initialized in the D3DApp constructor
+	// to default values. However, you can override the values in the
+	// derived class constructor to pick different defaults.
+	// Window title/caption. D3DApp defaults to "D3D11 Application".
+	std::wstring mMainWndCaption;
+	// Hardware device or reference device? D3DApp defaults to
+	// D3D_DRIVER_TYPE_HARDWARE.
+	D3D_DRIVER_TYPE md3dDriverType;
+	// Initial size of the window's client area. D3DApp defaults to
+	// 800x600. Note, however, that these values change at runtime
+	// to reflect the current client area size as the window is resized.
+	int mClientWidth;
+	int mClientHeight;
+	// True to use 4X MSAA (§4.1.8). The default is false.
+	bool mEnable4xMsaa;
+	};
+}}}
+
+* IDXGISwapChain::ResizeBuffers --- 重置 back buffer 大小.
+* IDXGISwapChain::Present --- 显示 back buffer.

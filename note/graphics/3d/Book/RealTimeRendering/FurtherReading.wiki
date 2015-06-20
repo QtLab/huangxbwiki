@@ -1,0 +1,7 @@
+= Ogre ตฺศýีย =
+* The Direct3D 10 System --- Blythe, David
+* A Fixed Function Shader in HLSL --- Sander, Pedro V.
+* OpenGL Shading Language 
+* Integrating Shaders into Application --- ORorke, John
+* GPU Gems, ShaderX, Game Programming Gems
+* Direct SDK Samples

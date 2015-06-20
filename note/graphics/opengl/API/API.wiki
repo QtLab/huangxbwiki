@@ -1,0 +1,80 @@
+= 第2章 状态管理和绘制几何体 =
+- glClear(red, green, blue, alpha)
+- glClear(mask)
+- glFlush()
+- glFinish()
+- glRect*()
+- glVertex*()
+- glBegin()
+	- glVertex*
+	- glColor*
+	- glIndex*
+	- glSecondaryColor*
+	- glNormal*
+	- glMaterial*
+	- glFogCoord*
+	- glTexCoord*
+	- glMultiTexCoord*
+	- glVertexAttrib*
+	- glEdgeFlag*
+	- glArrayElement
+	- glEvalCoord*, glEvalPoint*
+	- glCallList, glCallLists
+- glEnd()
+- glEnable(), glDisable(), glIsEnabled()
+- glGetBooleanv(), glGetIntegerv(), glGetFloatv(), glGetDoublev(), glGetPointerv()
+- glPointSize()
+- glLineWidth()
+- glLineStipple()
+- glPolygonMode() --- 点, 线, 填充
+- glFrontFace() --- 顺时针, 逆时针
+- glCullFace() --- 事先允许 GL_CULL_FACE
+- glPolygonStipple()
+- glEdgeFlag(), glEdgeFlagv() --- 一个顶点是否多边形一条边界边的起点.
+- glNormal3*
+- GL_NORMALIZE, GL_RESCAL_NORMAL
+- glEnableClientState, glDisableClientState
+- glVertexPointer(), glColorPointer(), glSendaryColorPointer(), glIndexPointer(), glNormalPointer(), glFogCoordPointer(), glTexcoordPointer(), glEdgetFlagPointer()
+- glArrayElement(), glDrawElements(), glMultiDrawElements(), glDrawRangeElements(), glDrawArrays, glMultDrawArrays
+- glInterleavedArrays
+- glGenBuffers
+- glIsBuffer
+- glBindBuffer
+- glBufferData
+- glBufferSubData
+- glMapBuffer
+- glUnmapBuffer
+- glDeleteBuffer
+- glPushAttrib, glPopAttrib
+- glPushClientAttrib, glPopClientAttrib
+
+= 第3章 视图 =
+- glMatrixMode
+- glLoadIdentity
+- glLoadMatrix*
+- glMultMatrix*
+- glLoadTransposeMatrix*
+- glMultTransposeMatrix*
+- glTranslate*
+- glRotate*
+- glScale*
+- gluLookAt
+- glFrustum
+- gluPerspective
+- glOrtho
+- gluOrtho2D
+- glViewport
+- glDepthRange
+- glClipPlane
+- gluUnProject
+- gluUnProject4
+- gluProject
+
+= 第4章 颜色 =
+- glColor*
+- glIndex* / glClearIndex
+- glShadeModel
+
+= 第5章 光照 =
+- glLight*
+-

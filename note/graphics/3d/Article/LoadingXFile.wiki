@@ -1,0 +1,111 @@
+* mesh的成分有顶点, 纹理坐标, 材质
+* .X文件可有文本和二进制格式
+* 文本格式, 一对括号定义一块, 有层次
+* 内部描述
+	* Block
+		* Frame
+			* FrameTransformMatrix
+			* Frame
+			* Mesh
+		* Mesh
+			* MeshNormal
+			* MeshTextureCoords
+			* MeshMaterialList
+			* SkinMeshHeader
+			* SkinWeights
+		* MeshMaterialList
+			* Material
+		* Material
+			* TextureFileName
+		* AnimationSet
+			* Animation
+		* Animation
+			* AnimationKey
+*  我们关注的是 Mesh block, X文件中可能有多个Mesh, mesh block控制的信息:
+	* MeshNormals: 法线向量列表
+	* MeshTextureCoords: 每个材质的纹理坐标
+	* MeshMaterialList: 用于该mesh的材质列表	
+* 需要完成的任务 
+	* 认识文件格式的类型(文本或二进制)
+	* 提取所有的mesh以及其关联的块
+	* 连接一模型上所有的mesh
+	* 创建 mesh subset 以便每个材质使用
+	* 计算该mesh的围绕盒
+	* 在 OpenGL 中显示该模型
+* 代码设计
+	* Model: Concat(), Subset()
+	* Mesh: Vertices(), TCoords(), Normals()
+	* Material: Colour, Bitmap
+	* Object3D: Init(Model*), Draw() --- 带动画, 且计算包围盒
+	* 文件有多个格式, 每个格式有不同的加载方式, 我们从 X File Loading 类派生一个类
+		* IO: virtual Load()
+		* IOModel_x: Load()
+* 实现
+	* Sample0.zip 可查看基本框架
+	* Scene 对象包装了所有屏幕操作, 字体管理, 纹理加载和注册
+	* Sample0 演示了如何显示加载的OpenGL logo 纹理
+	* 还有 timer 类用于计时, 根据 Win32 函数 GetTickCount
+	* 还有一些 tracing 宏定义与 ToolBox\MyTrace.h
+		* DECLARE_TRACE: 声明一个 tracing 对象
+		* START_TRACE: 初始化
+		* END_TRACE: 移除和删除tracing对象
+		* MYTRACE: 打印数据
+	* 文件 Sample1.zip
+		* 加载接口定义与 framework\Frm_IO.h
+		* X文件的加载类定义与 TOOLbOX\IOModel_x.h 和 cpp, 伪代码
+			* 打开文件
+			* 检查文件头
+			* 得到模型对象的关联
+			* 进入主处理循环
+				* 读块名称
+					* 如果认识快名称, 则进行处理
+		* 文件头的检查通过定义于 XfileStructs.h 的值进行比较来完成
+		* 两个主要函数
+			* ProcessBlock: 找到有效的块, 辨识块的类型(在 XOF_TEMPLATEID 结构列表中查找)
+			* AvoidTemplate: 用于查找一个开括号对应的闭括号位置
+		* 同样的情况还可用于 ProcessBone(void);
+		* ProcessMesh, 伪代码
+			* 创建一个空的 Mesh 对象, 并初始化
+			* 读取名称
+			* 如果没名称, 则分配一个名称
+			* 读取顶点数
+			* 加载顶点列表至Mesh对象
+			* 进入 Mesh 处理循环
+				* 查看块名是否认识, 认识就进行处理
+			* 处理之后, 将Mesh对象添加进Model的Mesh列表
+		* Material 伪代码
+			* 读取该mesh使用的材质数量
+			* 读取每个face的材质索引
+			* 进入材质列表处理循环
+				* 读取Block name, 如认识则处理
+		* 处理材质伪代码
+			* 读取face的颜色
+			* 读取emission power
+			* 读取镜面颜色
+			* 读取散色颜色
+			* 进入材质描述处理循环
+			* 将该材质添加进mesh的材质列表
+* 连接mesh, 创建 subset
+	* 见 framework\Frm_Mesh.h 和 cpp 文件
+		* 连接mesh 有利于简化mesh的维护(只有一个材质列表, 一个法线向量列表, 一个顶点和面的列表); 简化绘制, 用单个顶点数组实现
+	* 伪代码
+		* 在mesh list中从上个mesh中创建一个新的mesh以及返回其尺寸大小
+		* 检查新的mesh尺寸以及解决所有的不符之处
+		* 创建一个新的mesh数组
+		* 处理model list中的所有mesh
+			* 每个mesh 增加其关联索引
+			* 拷贝每个mesh数据至新的mesh中
+			* 将每个mesh材质移至新的mesh材质列表
+		* 删除model的mesh list
+		* 添加进 model mesh
+	* 注意mesh可分为有纹理着色的mesh和纯颜色着色的mesh
+	* 创建subset, 使得一个mesh有多个材质. 分割我们的faces数组为每个材质使用的faces列表. 目的是在绘制我们的mesh subset之前设置一个材质
+	* 伪代码
+		* 遍历材质列表中的每个材质
+			* 在 FaceMaterial 列表中计算出现该材质的数目
+			* 初始化subset
+			* 每个使用该材质的面的数据拷贝至subset
+		* 添加subset进subset列表
+* Displaying the result
+	* Object3D 类负责基于原始mesh的计算
+	* 见 Sample1.cpp, 分析 tiny_4anim.x 文件

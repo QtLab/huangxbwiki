@@ -1,0 +1,14 @@
+* 提供命令用于快速在源文件和头文件之间切换
+* A --- 切换
+* AS --- 分割切换
+* AV --- 垂直分割切换
+* AT --- 新的Tab切换
+* AN --- 
+* IH
+* IHS
+* IHV
+* IHT
+* IHN
+* <Leader>ih
+* <Leader>is
+* <Leader>ihn

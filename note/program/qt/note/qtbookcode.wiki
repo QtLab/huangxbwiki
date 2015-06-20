@@ -1,0 +1,35 @@
+= Chapter 01 =
+== age ==
+* QWidget, SQpinBox, QSlider 的使用
+* QSpinBox::setRange, QSlider::setRange
+* valueChanged single 对应 setValue slot
+* QHBoxLayout
+== hello ==
+* QLabel 的使用
+== quit ==
+* QPushButton 的使用
+* QApplication::quit()
+
+= Chapter 02 =
+== find ==
+* QPushButton::setDefault() --- 设置默认按钮
+* QWidget::setFixedHeight --- 设置固定高度
+* Qt::CaseSensitivity --- 大小写敏感枚举类型
+== gotocell1 ==
+* 创建一个ui文件啊
+* 生成的Ui类调用 setupUi() 函数
+{{{class="brush: c++"
+	Ui::GoToCellDialog ui;
+    QDialog *dialog = new QDialog;
+    ui.setupUi(dialog);
+}}} 
+== gotocell12 ==
+* QWidget::setupUi() 在Ui类的派生类中加载.
+* on_控件名_信号: 自动连接该槽至信号.
+* QLineEdit::setValidator 和 QLineEdit::hasAcceptableInput
+* QDialog::accept() 和 QDialog::reject() 两个slot函数
+== sort ==
+* QWidget::layout() 获取 layout
+* QLayout::setSizeConstraint --- 设置大小限制
+* QComboBox::clear() 清空组合框
+* QComboBox::addItem() 添加条目

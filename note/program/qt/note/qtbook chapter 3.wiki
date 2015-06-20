@@ -1,0 +1,103 @@
+= Chapter 3 Creating Main Windows =
+== 3.1 Subclassing QMainWindow(从QMainWindow 派生类) ==
+* closeEvent是QWidget的虚函数, 当关闭窗口时自动调用, 在派生类中可以重新实现该函数.
+* Qt 应用程序使用图像的方法:
+	* 保存图像至文件, 运行期间加载
+	* 在源代码中包含XPM文件(XPM文件也是有效的C++文件)
+	* 使用Qt资源机制
+* 如果需要使用资源系统, 我们必须创建资源文件, 并在.pro文件中添加一行标识资源文件: RESOURCES = spreadsheet.qrc
+* 资源文件仅仅是简单的XML格式
+{{{
+<RCC>
+<qresource>
+    <file>images/icon.png</file>
+    ...
+    <file>images/gotocell.png</file>
+</qresource>
+</RCC>
+}}}
+
+	* 需要使用前缀 :/, 如 :/images/icon.png
+    
+== 3.2 Creating Menus and Toolbars ==
+* 在Qt中创建菜单和工具条有以下三个步骤:
+	# 创建和设置Action
+	# 创建菜单和并给他们放置action
+	# 创建工具条并给他们放置action
+* QAbstractItemView:: selectAll()
+* QTableView::setShowGrid(bool)
+* QMainWindow::menuBar () --- 第一次调用则创建一个菜单条
+* widget增加右键菜单的方法:
+	* 首先addAction, 而后调用setContextMenuPolicy(Qt::ActionsContextMenu); 设置关联菜单
+	* 是重载QWidget::contextMenuEvent函数, 然后调用exec()实现
+* QMainWindow::addToolBar() --- 增加工具条
+
+== 3.3 Setting Up the Status Bar ==
+* QMainWindow::statusBar ()函数得到其指针, 而后可用 addWidget() 添加该状态栏
+* QStatusBar::addWidget() 第二个参数设置为1表示拉伸
+
+== 3.4 Implementing the File Menu ==
+* QMessageBox::warning() --- 警告对话框, 还有 information(), question(), critical()
+* QFileDialog::getOpenFileName() 打开文件对话框.  QFileDialog::getSaveFileName 保存文件对话框, QFileDialog::DontConfirmOverwrite()
+* 文件对话框的窗口会出现其父窗口的左上角, 并共享其父窗口的任务条(taskbar entry)
+* QWidget的close() slot会调用closeEvent()
+    * event->ignore(); // 忽略该事件
+    * event->accept(); // 表示接受该事件
+* 我们可以通过设置QApplication's quitOnLastWindowClosed 属性为假来禁止程序关闭, 直至调用QApplication::quit()
+* QFileInfo(fullFileName).fileName(); 得到文件名
+* Qt列表容器的prepend()函数用于列表, 列表类的方法之一, 作用是插入列表的开头
+* QVariant类型可以保存许多C++和Qt类型的数据, 可将该数据保存至 Action 的Data中
+* QObject::sender() 该函数可以在slot中得到sender object的指针, 对于多个signal连接至一个slot时很有用.
+
+== 3.5 Using Dialogs ==
+* 通过signal和slot 对查找对话框和主程序进行互动
+* QWidget可以通过方法 raise() 和 activateWindow() 来使得该窗口激活在屏幕的最前方
+* 非模式对话框使用show()来显示, 模式对话框则使用 exec()来显示
+* QTableWidgetSelectionRange --- 存储表格选择区域的左上和右下所在行列
+* About对话框 --- QMessageBox::about()
+* 比较少的做法: QMessageBox 或 QFileDialog可以像正常的widget那样创建, 而后调用exec执行.
+
+== 3.6 Storing Settings ==
+* QSettings在不同的平台中, 存储在不同的地方. Windows程序则存储在系统注册表里.
+	* 其构造函数参数含组织名称和应用程序名称, 方便其查找和写入
+    * QSettings 存储类 key-value对的设定, key类似文件系统路径, subkey则类似路径语法(如findDialog/matchCase)
+    * 可使用beginGroup()和endGroup()
+{{{c++
+settings.beginGroup("findDialog");
+settings.setValue("matchCase", caseCheckBox->isChecked());
+settings.setValue("searchBackward", backwardCheckBox->isChecked());
+settings.endGroup();        
+}}}
+
+    * QSetting的value则可以为int, bool, double, QString, QStringList, 或者任意QVariant支持的类型.
+        
+== 3.9 Multiple Documents ==
+* 修改程序为多文档程序
+    * File|New: 创建一个新的空文档窗口, 而不是重新使用已存的主窗口
+    * File|Close: 关闭当前主窗口
+    * File|Exit: 关闭所有窗口
+* 给widget设置属性Qt::WA_DeleteOnClose, 当关闭的时候删除该widget在内存中的资源, 节省内存. ---> setAttribute(Qt::WA_DeleteOnClose);
+* foreach (QWidget *win, QApplication::topLevelWidgets());  // 可以用来遍历应用程序的所有窗口
+    
+== 3.10 Splash Screens ==
+* QSplashScreen实现Splash Screen效果
+* QSplashScreen在主窗口显示之前显示一张图像, 并在图像上写信息用来告知用户应用程序的初始化过程.
+* splash代码一般位于main()函数中, 在调用QApplication::exec()之前
+{{{c++
+QSplashScreen *splash = new QSplashScreen;
+splash->setPixmap(QPixmap(":/images/splash.png"));
+splash->show();
+Qt::Alignment topRight = Qt::AlignRight | Qt::AlignTop;
+splash->showMessage(QObject::tr("Setting up the main window..."),
+    topRight, Qt::white);
+... ...
+splash->showMessage(QObject::tr("Loading modules..."),
+    topRight, Qt::white);
+... ...
+splash->showMessage(QObject::tr("Establishing connections..."),
+    topRight, Qt::white);
+... ...
+splash->finish(&mainWin);
+delete splash;
+return app.exec();
+}}}

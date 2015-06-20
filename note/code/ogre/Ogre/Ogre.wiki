@@ -1,0 +1,31 @@
+* SampleContext 的基类有Ogre::FrameListener, Ogre::WindowEventListener, OIS::KeyListener, OIS::MouseListener
+* OGRE_NEW_T 创建 Ogre::FileSystemLayer 对象, OGRE_DELETE_T 删除
+* Ogre::Profiler 测试你的性能.
+* SampleContext::runSample
+	- Sample::_shutdown() 关闭
+	- Ogre::RenderTarget::removeAllViewports()
+	- Ogre::Root::getInstalledPlugins()
+	- Sample::getRequiredPlugins()
+	- Sample::getRequiredRenderSystem()
+	- Ogre::Root::getRenderSystem()
+	- Ogre::RenderSystem::getName()
+	- Sample::testCapabilities()
+	- Ogre::RenderSystem::getCapabilities()
+	- Sample::_setup()
+	- 步骤:
+		# 关闭当前例子
+		# 移除视口
+		# 判断插件需求
+		# 渲染系统是否符合
+		# 测试渲染系统能力需求
+		# 安装新例子
+- SampleContext::initApp
+	- SampleContext::createRoot()
+	- SampleContext::oneTimeConfig()
+	- Ogre::Root::setRenderSystem()
+	- SampleContext::setup()
+	- SampleContext::recoverLastSample()
+- SampleContext::closeApp()
+	- Ogre::Root::saveConfig()
+	- SampleContext::shutdown()
+- Sample::paused()

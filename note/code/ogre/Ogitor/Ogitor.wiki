@@ -1,0 +1,62 @@
+= main 文件 =
+* main 函数
+	- 程序准备工作
+		# QDir::setCurrent() 设置工作目录
+		# QCoreApplication::applicationDirPath() 应用程序执行文件所在目录
+		# QFileInfo 获取文件信息
+		# QCoreApplication::setOrganizationName()
+		# QCoreApplication::setApplicationName()
+		# QSettings 设置
+		# QTranslator 翻译
+		# QLocale::system().name()
+		# QCoreApplication::installTranslator
+		# QPixmap 加载一个图像
+		# QSplashScreen 设置等待界面
+	- 设置Ogre
+		# setupOgre() 加载 Ogre
+	- 设置主窗口
+		# readRecentFiles() 读取最近的文件
+		# MainWindow() 主要窗口显示 -
+		# MainWindow::setApplicationObject 将应用程序传递给这个窗口
+	- 加载场景
+		# Ogitors::OgitorsRoot::LoadScene 加载场景 -
+		# MainWindow::repaint() 重绘
+	- 程序循环
+		# QCoreApplication::exec() 执行.
+	- 程序善后工作
+		# writeRecentFiles() 写入最近的文件 -
+		# 调用 OGRE_DELETE 删除Ogre对象
+
+* setupOgre
+	- 设置Ogre
+		# Ogre::Root 
+		# Ogre::LogManager::setLogDetail
+		# Ogre::ConfigFile::load
+		# Ogre::ResourceGroupManager::setLoadingListener
+			- 这里使用 Ogitors::ResourceLoadingListener 监听
+		# 配置读取
+		# 设置渲染系统
+			- Ogre::Root::getAvailableRenderers() 得到可用渲染器
+			- Ogre::RenderSystem::getName() 得到渲染系统名称
+			- Ogre::RenderSystem::setConfigOption() 设置配置选项
+			- Ogre::Root::setRenderSystem 设置渲染系统
+			- Ogre::Root::initialise()
+	- 设置快捷键
+		# Shortcuts 对象
+		# Shortcuts::load()
+		# Ogitors::CViewportEditor::SetKeyboard 设置键盘
+	- Ogitor对象
+		# 创建 QtOgitorSystem 对象
+		# 创建 Ogitors::OgitorsRoot
+* readRecentFiles
+	- Ogre;;UTFString --- 处理utf字符串
+	- QTextCodec::codecForName --- 文本解码器
+	- QTextCodec::fromUnicode
+	- Ogitors::OgitorsRoot::InitRecentFiles
+* writeRecentFiles
+	- Ogitors::OgitorsRoot::getRecentFiles 获取最近文件
+	- ConvertToQString 转换为utf
+
+= MainWindow文件 =
+* MainWindow::MainWindow
+	- 

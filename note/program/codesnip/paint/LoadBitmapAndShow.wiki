@@ -1,0 +1,12 @@
+{{{c++
+	CBitmap bitmap;
+	bitmap.LoadBitmap(bmpID);
+	BITMAP bmpInfo;
+	bitmap.GetBitmap(&bmpInfo);
+	CDC memDC;
+	memDC.CreateCompatibleDC(pDC);
+	CGdiObject* oldObject;
+	oldObject = memDC.SelectObject(&bitmap);
+	pDC->StretchBlt(0,0,24,rect.bottom,&memDC,0,0,bmpInfo.bmWidth,bmpInfo.bmHeight,SRCCOPY);
+	bitmap.DeleteObject();
+}}}

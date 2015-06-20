@@ -1,0 +1,65 @@
+* System
+	* TimeSpan 结构体
+		* TotalSeconds: 获取以整秒数和秒的小数部分
+
+* Microsoft.Xna.Framework
+	* GraphicsDeviceManager: 控制图形设备的配置与管理
+		* GraphicsDevice: 属性
+	* Vector2: 有两个组成部分的向量
+	* Content: 属性, 类型为 ContentManager, 主要用于得到当前的 ContentManager
+	* Game
+		* 方法
+			* Initialize --- 在 Game 和 GraphicsDevice 创建之后调用, 在 LoadContent 之前调用
+	* GameTime: 游戏时间状态在值方面的表达
+		* 属性
+			* ElapsedGameTime --- 自从上次更新之后流逝的时间, 为 TimeSpan 类型
+			* ElapsedRealTime --- 自上一帧流逝的实时时间
+	* MathHelper
+		* 方法
+			* ToRadians: 将角度转换弧度
+	* Matrix --- 表示一个矩阵
+		* 方法
+			* CreateRotation* 系列
+			* CreateTranslation
+			* CreateLookAt --- 创建一个视图矩阵
+			* CreatePerspectiveFieldOfView --- 创建一个投影矩阵
+
+* Microsoft.Xna.Framework.Content
+	* ContentManager: 处理加载的可管理对象
+		* 属性
+			* RootDirectory --- 设置资源的根目录
+			* Load --- 加载资源
+	
+* Microsoft,Xna.Framework.Graphics
+	* BasicEffect --- 着色模型1.1的Effect, 支持 顶点颜色, 纹理, 光照
+		* 属性
+			* World --- 设置和读取其世界矩阵
+			* View --- 设置和读取其视图矩阵
+			* Projection --- 设置和读取其投影矩阵
+			* AmbientLightColor, DiffuseColor, SpecularColor, SpecularPower 设置材质光照属性
+		* 方法
+			* EnableDefaultLighting --- 允许该 Effect 的光照缺省设置
+	* GraphicsDevice
+		* Viewport: 属性, 可得到 AspectRatio, Width, Height
+	* Model --- 由多个 ModelMesh 对象组成的 3D模型
+		* 属性
+			* Bones --- ModelBone 对象的集合, 类型为 ModelBoneCollection
+			* Meshes --- ModelMesh 对象的集合
+		* 方法
+			* CopyAbsoluteBoneTransformsTo --- 拷贝模型中的每个骨头的变换至给定的数组
+	* ModelBone
+		* 属性
+			* Index --- 表示骨头在集合中的索引
+	* ModelMesh --- 表示一个 mesh 
+		* 属性
+			* ParentBone --- 得到该 mesh 的父骨头
+		* 方法
+			* Draw --- 绘制该Mesh所有的 ModelMeshPart 对象
+	* SpriteBatch: 控制一组sprite使用相同的设置绘制
+		* 构造函数: 允许一组 sprite 以相同的设置绘制
+		* 方法
+			* Begin(), End() 开始绘制
+			* Draw --- 渲染一个 sprite, 注意 layerDepth 设为1.0 可以让该纹理为背景
+	* Texture2D: 表示一个2D格栅纹素
+		* 属性
+			* Width, Height

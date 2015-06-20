@@ -1,0 +1,249 @@
+= Chapter 6 Layout Management =
+* Qt提供的layout: QHBoxLayout, QVBoxLayout, QGridLayout, QStackedLayout.
+* 使用layout的一个理由是使得widget适应字体, 程序界面语言以及平台的变化.
+* 其他可以执行layout管理的类: QSplitter, QScrollArea, QMainWindow, QMdiArea
+	- QSplitter 会提供以一个splitter条让用户可以拖动或者重置widget的大小.
+	- QMdiArea则支持MDI(多文档接口)
+
+== 6.1 Laying Out Widgets on a Form ==
+* 这里管理子widget的layout有三种方式: 绝对位置, 手工layout, layout 管理器
+* 绝对位置方式, 通过各个子widget调用setGeometry来设定位置和大小, 主widget则调用setFixedSize设置固定大小
+	- 使用绝对位置的缺点:
+		# 用户不能重置其大小
+		# 一些文本可能由于字体的变化或者语言的变化而被截去部分内容
+		# 在某些style中, widget可能会有不适当的大小
+		# 必须手工计算大小和位置, 乏味且容易出错, 维护困难
+* 手工layout, 位置仍然绝对, 但是大小可以适应窗口的大小. 通过重写 resizeEvent() 方法, 在其中设置子widget的几何.
+* layout 管理器方法, 考虑每个widget的size hint(该size hint依赖于widget的字体, 内容), 同时也考虑最小和最大大小.
+	- 根据字体的变化, 内容的变化, 窗口大小的变化自动修正大小.
+	- 三个最重要的layout类是QHBoxLayout, QVBoxLayout, QGridLayout, 这三者都为QLayout的派生类
+	- 一个layout内的边缘和子widget之间的空格由当前widget的style决定. 也可以使用QLayout::setContentsMargins()和QLayout::setSpacing()来改变
+	- QGridLayout的语法: layout->addWidget(widget, row, column, rowSpan, columnSpan);
+	- addStretch() 用来告知layout 管理器填充该处的空白.
+	- layout 管理器的优点:
+		# 添加或者移除一个widget, layout会自动修正以适应新的情况, 对hide()和show()也有同样的效果.
+		# 当子widget的size hint发生改变时, layout 管理器会自动修改以适应新的size hint
+		# 根据子widget的size hint和最小值来设置layout的最小值
+	- 有时我们需要修改size policy和widget的size hint来实现我们想要的布局.
+	- QSizePolicy有垂直和水平的成分, size policy的值有:
+		# Fixed --- 固定的layout, 不能拉伸和收缩. 使用size hint的大小
+		# Minimum --- 表示该widget的最小值就是size hint. 不能够收缩至比该值更小的值. 但可填充可用的空间.
+		# Maximum --- 表示该widget的最大值就是size hint, 该widget可以收缩至其最小值 minimum size hint
+		# Preferred --- 该widget的size hint就是其优先值, 在必要的时候可以收缩和拉伸
+		# Expanding --- 表示该widget可以收缩和拉伸, 尤其是其愿意拉伸.
+	- Expanding 和 Preferred的区别: 当一个form包含两者的widget, 该form大小变化时, 额外的空白处则会给Expanding widget, 而Preferred widget保持为其size hint的大小
+	- MinimumExpanding 和 Ignored这两个Size Policy不再经常使用
+	- 为了补充水平和垂直部分的size policy, 我们还设定了拉伸因子(strectch factor), 可以设置widget在水平或垂直方向的拉伸比例, 比如让一个widget为另一个widget的两倍, 可以设置拉伸因子一个为2, 一个为1.
+	- 如果对一个widget不满意, 我们还可以派生该widget类, 重写其sizeHint()函数
+    
+== 6.2 Stacked Layouts ==
+* QStackedLayout 类对一系列子widget布局, 或者"分页". 且每次只显示一个页面, 隐藏其他页面的内容.
+	- Qt提供QStackedWidget, 其为内置QStackedLayout的QWidget.
+* 页数是从0开始, 设置当前页 setCurrentIndex, 得到一个子widget的页号则使用indexOf().
+* QListWidget可以和QStackedLayout配合使用.
+{{{c++
+    listWidget = new QListWidget;
+    listWidget->addItem(tr("Appearance"));
+    listWidget->addItem(tr("Web Browser"));
+    listWidget->addItem(tr("Mail & News"));
+    listWidget->addItem(tr("Advanced"));
+
+    stackedLayout = new QStackedLayout;
+    stackedLayout->addWidget(appearancePage);
+    stackedLayout->addWidget(webBrowserPage);
+    stackedLayout->addWidget(mailAndNewsPage);
+    stackedLayout->addWidget(advancedPage);
+    connect(listWidget, SIGNAL(currentRowChanged(int)),
+            stackedLayout, SLOT(setCurrentIndex(int)));
+    ...
+    listWidget->setCurrentRow(0);
+}}} 
+	- currentRowChanged(int)信号发送给setCurrentIndex(int) slot 实现页面切换
+	- setCurrentRow()  设置当前页面
+* 在Qt Designer中实现分页
+	- 用"dialog"模板或者"widget"模板创建新的form
+	- 添加QListWidget和QStackedWidget
+	- 填充每个页面的widget和layout
+	- 水平方向布局这两个widget
+	- signal和slot连接 currentRowChanged(int) --> setCurrentIndex(int)
+	- 设置list widget的currentRow属性为0
+    
+== 6.3 Splitters ==
+* QSplitter的子widget根据创建的顺序自动排列在一起. 相邻的widget之间有splitter bar. 下面是创建的代码
+{{{c++
+    int main(int argc, char *argv[])
+    {
+        QApplication app(argc, argv);
+
+        QTextEdit *editor1 = new QTextEdit;
+        QTextEdit *editor2 = new QTextEdit;
+        QTextEdit *editor3 = new QTextEdit;
+
+        QSplitter splitter(Qt::Horizontal);
+        splitter.addWidget(editor1);
+        splitter.addWidget(editor2);
+        splitter.addWidget(editor3);
+        ...
+        splitter.show();
+        return app.exec();
+    }
+}}}
+* QSplitter 派生自QWidget, 像其他的widget一样使用.
+* 复杂的布局可以嵌套使用水平或垂直QSplitter
+* MailClient的例子
+{{{c++
+    MailClient::MailClient()
+    {
+        ...
+        rightSplitter = new QSplitter(Qt::Vertical);
+        rightSplitter->addWidget(messagesTreeWidget);
+        rightSplitter->addWidget(textEdit);
+        rightSplitter->setStretchFactor(1, 1);
+
+        mainSplitter = new QSplitter(Qt::Horizontal);
+        mainSplitter->addWidget(foldersTreeWidget);
+        mainSplitter->addWidget(rightSplitter);
+        mainSplitter->setStretchFactor(1, 1);
+        setCentralWidget(mainSplitter);
+
+        setWindowTitle(tr("Mail Client"));
+        readSettings();
+    }
+}}}
+	- setStretchFactor 设置拉伸因子, 默认情况是随着大小变化, 各部分的比例不变, 第一个参数是以第一个widget为0的索引值, 第二个参数设置拉伸因子, 缺省为0
+* 我们可以通过调用 QSplitter::setSizes() 来移动splitter handles.
+* 保存设置
+{{{c++
+    QSettings settings("Software Inc.", "Mail Client");
+    settings.beginGroup("mainWindow");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("mainSplitter", mainSplitter->saveState());
+    settings.setValue("rightSplitter", rightSplitter->saveState());
+    settings.endGroup();
+    // 读取设置
+    QSettings settings("Software Inc.", "Mail Client");
+    settings.beginGroup("mainWindow");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    mainSplitter->restoreState(
+            settings.value("mainSplitter").toByteArray());
+    rightSplitter->restoreState(
+            settings.value("rightSplitter").toByteArray());
+    settings.endGroup();
+}}}
+* QWidget::saveGeometry(), QWidget::restoreGeometry, QSplitter::saveState(), QSplitter::restoreState() 实现注册表保存和恢复QWidget的几何和QSplitter的状态.
+* Qt Designer也完全支持QSplitter, 将widgets放入一个splitter中, 将子widget正确地放置进他们想要的位置, 还可以选择它们以及在splitter中设置水平和垂直的布局.
+
+== 6.4 Scrolling Areas ==
+* 如果需要使用滚动条, 最好使用QScrollArea而不是自己实现QScrollBar和滚动功能, 因为这样太复杂
+    - 使用QScrollArea的方法是调用setWidget使得该widget成为QScrolllArea viewport的子类. 可通过QScrollArea::viewport()访问viewport
+{{{c++
+        QScrollArea scrollArea;
+        scrollArea.setWidget(iconEditor);
+        scrollArea.viewport()->setBackgroundRole(QPalette::Dark);
+        scrollArea.viewport()->setAutoFillBackground(true);
+        scrollArea.setWindowTitle(QObject::tr("Icon Editor"));
+}}}
+* 通过调用setWidgetResizable(true)告知该QScrollArea可以自动的重置widget的大小. 这样使得其可以利用size hint之外的空间
+* 缺省情况是当viewport比widget更小的时候才显示滚动条, 如果想滚动条永远显示, 则使用以下代码:
+{{{c++
+    scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+}}}
+* QScrollArea派生自QAbstractScrollArea, QTextEdit和QAbstractItemView的基类为QAbstractScrollArea.
+
+== 6.5 Dock Windows and Toolbars ==
+* Dock Window表示那些可以在QMainWindow内停靠的窗口且可以独立浮动的窗口.
+	- QMainWindow 提供了四个浮动区域, 上,下, 左, 右.
+* 每个dock window都有其标题条, 可通过QDockWidget::setFeatures() 设置其属性
+* QMainWindow::setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea); // 设置左上角区域属于左边的dock widget区域
+* 如果我们想要一个浮动的工具条, 我可以简单地将其放置进一个QDockWidget中.
+* 如何在一个QDockWidget包装一已存widget, 且插入右边的dock区域
+{{{c++
+    QDockWidget *shapesDockWidget = new QDockWidget(tr("Shapes"));
+    shapesDockWidget->setObjectName("shapesDockWidget");
+    shapesDockWidget->setWidget(treeWidget);
+    shapesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea
+                                         | Qt::RightDockWidgetArea);
+    addDockWidget(Qt::RightDockWidgetArea, shapesDockWidget);
+}}}
+	- setAllowedAreas()限制可以接受该dock窗口可以dock的区域.
+	- 每个对象都有一个对象名, 在调试的时候有用
+	- Dock widget和Toolbar都需设置对象名, 这样可使用函数QMainWindow::saveState()和QMainWindow::restoreState() 保存和恢复几何和状态.
+* 工具条
+{{{c++
+    QToolBar *fontToolBar = new QToolBar(tr("Font"));
+    fontToolBar->setObjectName("fontToolBar");
+    fontToolBar->addWidget(familyComboBox);
+    fontToolBar->addWidget(sizeSpinBox);
+    fontToolBar->addAction(boldAction);
+    fontToolBar->addAction(italicAction);
+    fontToolBar->addAction(underlineAction);
+    fontToolBar->setAllowedAreas(Qt::TopToolBarArea
+                                 | Qt::BottomToolBarArea);
+    addToolBar(fontToolBar);
+}}}
+* 在QMainWindow派生类的构造函数中给工具条添加 ComboBox, SpinBox, 一些QToolButtons
+* 保存和恢复设置, 使用 QMainWindow::saveState()和QMainWindow::restoreState()保存和恢复工具条, dock窗口的位置.
+{{{c++
+    // 保存
+    QSettings settings("Software Inc.", "Icon Editor");
+    settings.beginGroup("mainWindow");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("state", saveState());
+    settings.endGroup();
+    // 恢复
+    QSettings settings("Software Inc.", "Icon Editor");
+    settings.beginGroup("mainWindow");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("state").toByteArray());
+    settings.endGroup();
+}}}
+* QMainWindow还给dock window和Toolbar提供了右键菜单, 用于关闭隐藏或显示一个工具条或者一个dock窗口.
+
+== 6.6 多文档接口 ==
+* 一个MDI应用程序通过使用QMdiArea类作为中心widget以及让每个文档窗口作为一个QMdiArea的子窗口
+    - 子窗口菜单-MDI应用程序提供了一个Window菜单管理窗口和窗口列表, 激活的文档窗口会有选中标志
+* 在构造函数中, 创建一个QMdiArea对象并设置为中心widget, 并将该QMdiArea的subWindowActivated()信号发送给一个slot, 实现菜单的更新
+* 在构造函数的结尾部分有一行代码: QTimer::singleShot(0, this, SLOT(loadFiles())); 
+	- 表示0秒的间隔之后调用loadFiles(). 在事件循环为空闲时, 计时器运行完时间, 事实上表示当构造函数完成之后, 主窗口显示之时, 调用loadFiles()函数
+	- 如果不这样做, 当有大量的文件之时, 直到文件加载完毕之后构造函数还未必完成时, 用户也许会在屏幕上看不到任何东西. 而认为程序失败.
+{{{c++
+void MainWindow::loadFiles()
+{
+    QStringList args = QApplication::arguments();
+    args.removeFirst();
+    if (!args.isEmpty()) { 
+		foreach (QString arg, args) 
+			openFile(arg); 
+		mdiArea->cascadeSubWindows(); 
+	} 
+	else { 
+		newFile(); 
+	} 
+	mdiArea->activateNextSubWindow();
+}
+}}}
+* QApplication构造函数自动移除类似 -style 和 -font 这样的Qt专用命令行选项.
+* 关联编辑器和复制剪贴菜单
+{{{c++
+    connect(editor, SIGNAL(copyAvailable(bool)),
+            cutAction, SLOT(setEnabled(bool)));
+    connect(editor, SIGNAL(copyAvailable(bool)),
+            copyAction, SLOT(setEnabled(bool)));
+}}}
+* QMdiArea的addSubWindow() 函数可以创建一个新的QMdiSubWindow: QMdiSubWindow *subWindow = mdiArea->addSubWindow(editor);    
+* QActionGroup 确保一组菜单只有一个菜单能被选中.
+* QMdiArea::activeSubWindow() --- 返回其活跃窗口
+* QMdiSubWindow::widget() 获取一个子窗口中的组件.
+* qobject_cast<Editor *> --- 用于强制转换.
+* 当一个子窗口被激活或者最后一个子窗口被关闭时, 发送信号 subWindowActivated()
+* 可以实现一些功能的QMdiArea的slots: closeActiveSubWindow(), closeAllSubwindows(), tileSubWindows(), cascadeSubWindows().
+* QMdiArea::subWindowList() --- 返回子窗口列表.
+* 如果要求一个代码编辑组件, 我们可以考虑使用 Scintilla, 见  http://www.riverbankcomputing.co.uk/qscintilla/
+* 任意 Qt Widget 都可以在一个 QMdiSubWindows中做作为一个 MDI 区域的子窗口.
+* QTextEdit::document() 返回一个 QTextDocument 对象指针.
+* WA_DeleteOnClose 属性可以防止用户关闭编辑器窗口的内存泄漏.
+* 无论用户何时修改编辑器中的文本, 其内的QTextDocument都会发送contentsChanged()信号.
+* QTextCursor::hasSelection ()  --- 返回当前文本光标是否选择了文本
+* QAction::setChecked() --- 设置选中该Action
+* QWidget::fontMetrics 可以返回 QFontMetrics 对象表示其上的字体信息. QFontMetrics::width(), QFontMetrics::lineSpacing()可以返回相关信息.

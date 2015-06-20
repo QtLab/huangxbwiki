@@ -1,0 +1,28 @@
+= 宏 =
+	* void Q_INIT_RESOURCE(name) --- 在一些平台用于存储在静态库中的资源加载, 可以确保qrc文件内的资源被加载
+
+= 重要类与函数 =
+	* QFontMetrics --- 提供字体尺度信息
+		* lineSpacing --- 一个字的底线到下一行字底线的距离
+		* width --- 字符串使用该字体的宽度
+	* QGLFormat --- 用于指定 OpenGL 渲染上下文的显示格式
+		* 缺省设置
+			* 允许(Double buffer, Depth buffer, RGBA, Stencil buffer, Direct rendering)
+			* 禁止(Alpha channel, Accumulator buffer, Stereo, Overlay, Multisample buffer)
+			* Plane: 0, OpenGL 还可实现 overlay/underlay 渲染平面
+		* hasOpenGL --- 是否支持 OpenGL
+	* QGLFramebufferObject --- 用于包装一个 OpenGL 真缓存对象的类
+		* hasOpenGLFramebufferObjects --- 是否支持 GL_EXT_framebuffer_objects 扩展
+		* hasOpenGLFramebufferBlit  --- GL_EXT_framebuffer_blit
+	* QGLFramebufferObjectFormat --- 制定 OpenGL 帧缓存对象的格式
+		* 构造函数 --- 缺省目标为 GL_TEXTURE_2D, F否则自定义格式
+		* 缺省为无挂接的非多重采样帧缓存对象, 纹理目标为 GL_TEXTURE_2D, 内部格式为 GL_RGBA8
+		* setAttachment --- 设置帧缓存对象挂接配置的挂接, 参数为 QGLFramebufferObject::Attachment 类型
+			* QGLFramebufferObject::Attachment --- 用于配置当创建一个帧缓存对象时挂接至该帧缓存对象的深度和模版缓存
+				* QGLFramebufferObject::NoAttachment --- 当帧缓存对象无深度和模版缓存挂接时, 不会进行深度和模版测试
+				* QGLFramebufferObject::CombinedDepthStencil --- 如有 GL_EXT_packed_depth_stencil, 挂接深度和模版缓存的组合. 否则只挂接深度缓存
+				* QGLFramebufferObject::Depth --- 挂接深度缓存
+	* QGLWidget
+		* makeCurrent --- 让本widget作为OpenGL 操作的当前widget
+	* QSvgRenderer --- 用于绘制 SVG 文件的内容 
+	* QTimeLine --- 用于控制动画的时间线

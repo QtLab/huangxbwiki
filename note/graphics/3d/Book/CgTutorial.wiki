@@ -1,0 +1,9 @@
+= Chapter 1. Introduction =
+* Cg 编译器支持动态编译.
+* Cg 不是一个单独的程序, 而是Cg 运行库的一部分. 3D 应用程序和游戏必须链接 Cg 运行库才能使用 Cg 程序. 
+* 如果你使用 OpenGL,  则使用 CgGL 库调用合适的 OpenGL routines 将翻译后的Cg流程传递给OpenGL驱动. 同样还有 CgD3D.
+* cgGL中的routines 以cgGL开头.
+= Chapter 2. The Simplest Programs =
+== 2.1 A Simple Vertex Program ==
+* 可以使用 /* ... */ 注释, 也可用 // 注释.
+=== The Naming Convention for Examples ===

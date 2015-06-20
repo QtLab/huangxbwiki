@@ -1,0 +1,35 @@
+* RacingGameManager.cs --- 修改
+{{{cnet
+	// 55行 增加
+	private static NPCController NPCcar1 = new NPCController(new Vector3(0, 0, 0));
+	// 73行 增加
+	public static int NPCcurrentCarNumber = 2;
+	// 146行
+	gameScreens.Peek().GetType() != typeof(NPCGameScreen);
+	// 159行
+	gameScreens.Peek().GetType() == typeof(NPCGameScreen));
+	// 增加函数
+        public static bool InNPCGameScreen
+        {
+            get
+            {
+                return gameScreens.Count > 0 &&
+                    gameScreens.Peek().GetType() == typeof(NPCGameScreen);
+            }
+        }
+	// 182 行
+	gameScreens.Peek().GetType() != typeof(NPCGameScreen);
+	// 216 行 增加函数
+        public static NPCController NPCCar1
+        {
+            get
+            {
+                return NPCcar1;
+            }
+        }
+	// 397 行 增加
+	NPCcar1.Update();
+
+	// 424 行
+	//gameScreens.Peek().GetType() == typeof(Options) &&
+}}}

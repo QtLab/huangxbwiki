@@ -1,0 +1,6 @@
+* 输入: 3D场景描述文件, 包含XML代码, LUA脚本语言, GLSL着色语言
+	* XML: 3D场景描述代码(纹理, 模型加载, 设置光照, 声音等)
+	* LUA: 场景实体的逻辑管理
+	* GLSL: 创建真实和不可置信的渲染
+* First Programe
+	* light节点, 子节点 diffuse, mesh节点, 子节点spin_value, 属性 polygon_mode

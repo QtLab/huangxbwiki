@@ -1,0 +1,20 @@
+== Chapter 17 Providing Online Help ==
+1. 帮助可是使用tooltip, status tip, What's this?, 还可使用QTextBrowser制作简单的在线帮助浏览器.
+
+17.1 Tooltips, Status Tips, and "What's This?" Help
+1. 给Widget增加Tooltips, QWidget::setToolTip(). 也可使用函数setToolTip() 给QAction一个tooltip, 默认使用action的文本作为tooltip
+    函数 setStatusTip() 用于设置状态栏提示.
+2. What's This?
+        dialog->setWhatsThis(tr("<img src=\":/images/icon.png\">"
+                                " The meaning of the Source field depends "
+                                "on the Type field:"
+                                "<ul>"
+                                "<li><b>Books</b> have a Publisher"
+                                "<li><b>Articles</b> have a Journal name with "
+                                "volume and issue number"
+                                "<li><b>Theses</b> have an Institution name "
+                                "and a Department name"
+                                "</ul>"));
+    Qt支持的HTML标记 http://doc.trolltech.com/4.3/richtext-html-subset.html
+    静态函数 QWhatsThis::createAction()  可创建 What's This?
+

@@ -1,0 +1,3 @@
+[[How to Create an Application that has Office Style Toolbars and Menus|How to Create an Application that has Office Style Toolbars and Menus]]<br />
+[[How to Add a Docking Pane to Your Application |How to Add a Docking Pane to Your Application ]]<br />
+

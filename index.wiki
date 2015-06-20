@@ -1,0 +1,37 @@
+%title 夏冰的Wiki
+
+= 夏冰的维基世界 =
+
+== 各项笔记 ==
+=== 图形设计 ===
+	* [[note/graphics/ogre/Ogre|Ogre]]
+	* [[note/graphics/opengl/opengl|Opengl]]
+	* [[note/graphics/directx/directx|DirectX]]
+	* [[note/graphics/3d/3d|3D图形]]
+	* [[note/graphics/photoshop/photoshop|Photoshop]]
+	* [[note/graphics/lib/lib|开发库]]
+
+=== 程序设计 ===
+	* [[note/program/function/function|APIs]]
+	* [[note/program/language/language|语言]]
+	* [[note/program/algorithm/algorithm|算法]]
+	* [[note/program/qt/qt|Qt]]
+	* [[note/program/mfc/mfc|MFC]]
+	* [[note/program/tool/tool|编程工具]]
+	* [[note/program/codesnip/codesnip|代码片段]]
+
+=== 代码分析 ===
+	* [[note/code/opengl/opengl|OpenGL]]
+	* [[note/code/ogre/ogre|ogre]]
+
+=== 电脑技术 ===
+	* [[note/computer/vim/vim|Vim]]
+	* [[note/computer/software/software|软件工具]]
+
+== 项目开发 ==
+	* [[note/program/Graphics/Graphics|图形]]
+
+== 个人文集 ==
+	* [[myarticle/program/program|程序]]
+	* [[myarticle/webnote/webnote|网络阅读笔记]]
+	* [[myarticle/note/note|笔记]]

@@ -1,0 +1,33 @@
+= 使用 CObject =
+== 从 CObject 派生 ==
+* 四种继承功能
+	- 基本功能
+	- DECLARE_DYNAMIC: 可使用 CObject::IsKindOf
+	- DECLARE_DYNCREATE: 可使用 CObject::IsKindOf, CRuntimeClass::CreateObject
+	- DECLARE_SERIAL: 可使用 CObject::IsKindOf, CRuntimeClass::CreateObject, CArchive::operator>>/CArchive::operator<<
+* 可以重写 CObject 的函数, 如 Dump, AssertValid
+
+== 设置派生类功能 ==
+=== 添加运行时类信息 ===
+* 头文件
+{{{class="brush: c++"
+class CPerson : public CObject 
+{
+   DECLARE_DYNAMIC( CPerson )
+
+   // other declarations
+};
+}}} 
+* 源文件
+{{{class="brush: c++"
+IMPLEMENT_DYNAMIC( CPerson, CObject )
+}}} 
+=== 添加动态创建支持 ===
+* 声明中使用 DECLARE_DYNCREATE
+* 定义一个无参数的构造函数
+* 源文件中使用  IMPLEMENT_DYNCREATE 宏
+=== 添加序列化支持 ===
+* 重载 Serialize 成员函数
+* 类声明中使用 DECLARE_SERIAL 宏
+* 定义无参数的构造函数
+* 源文件使用 IMPLEMENT_SERIAL 宏

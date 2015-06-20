@@ -1,0 +1,2 @@
+加载位图并显示 [[LoadBitmapAndShow|Link]]
+

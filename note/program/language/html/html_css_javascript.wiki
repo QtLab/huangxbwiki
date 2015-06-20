@@ -1,0 +1,875 @@
+= HTML 基本标记 =
+* head, title
+* 元信息标志 meta, 不需结束标记, 定义页面信息的说明, 关键字, 刷新等
+	- name 用于描述网页, 便于搜索引擎查找, 分类
+{{{class="brush: html"
+<meta name="keywords" content="输入具体的关键字">
+<meta name="description" content="设置页面说明">
+<meta name="generator" content="编辑软件的名">
+<meta name="author" content="作者的姓名">
+}}} 
+	- 设置网页的编码方式
+{{{class="brush: html"
+<meta http-equiv="content-type" content="text/html; charset=字符集类型" />
+}}} 
+	- 设置网页的定时跳转
+{{{class="brush: html"
+<meta http-equiv="refresh" content="跳转的时间;URL=跳转到的地址">
+}}} 
+* 主题标志 Body
+	- 背景颜色: <body bgcolor="背景颜色">
+	- 背景图片: <body background="图片的地址">
+	- 文字颜色: <body text="文字的颜色">
+	- 链接文字颜色: <body link="颜色" alink="正在访问的文字颜色" vlink="访问后的文字颜色">
+	- 页面与浏览器边框之间的距离(像素为单位): <body topmargin=上边值的距离 leftmargin=左边值的距离>
+	- 注释: <!--注释内容-->
+
+= 第3章 文字与段落标记 =
+* 标题字标记 h
+	- 大小:  h1 到 <h6>
+	- 对齐属性: align
+* 文本基本标记 font
+	- 字体属性 face 
+	- 字号属性 size: 绝对字号 1-7, 相对字号 -4到+4(相对于3号)
+	- 颜色属性 color
+* 文本格式化标记
+	- 粗体标记 b, strong
+	- 斜体标记 i, em, cite
+	- 上标标记 sup
+	- 下表标记 sub
+	- 大字号标记 big
+	- 小字号标记 small(和上面一样可以逐级放大或缩小)
+	- 下划线标记 u
+* 段落标记
+	- 段落标记 p
+	- 换行标记 br
+	- 不换行标记 nobr
+* 水平线
+	- 插入水平线 hr
+	- 水平线宽度 width, 高度 size, 去掉阴影 noshade, 颜色 color, 排列 align
+* 其他标记
+	- 空格: &nbsp;
+	- ""-&quot;  &-&amp;  <-&lt;  >-&gt;  x-&times;  &sect  &ccopy;  &reg;  &trade;
+
+= 第4章 使用图像 =
+* 插入图像
+	- 插入图像标记 img
+		- src 图像的源文件
+		- alt 提示文字
+		- width, height 高宽
+		- border 边框
+		- vspace, hspace 垂直, 水平间距
+		- align 排列
+		- dynsrc 设置 avi 文件的播放
+		- loop 设置 avi 文件循环播放次数
+		- loopdelay 设置 avi 文件循环播放延迟
+		- start 设置 avi 文件播放方式
+		- lowsrc 设定低分辨率图像
+		- usemap 映像地图
+* 图像的超链接: <a href="链接地址"><img src="图像文件的地址"></a>
+* 图像的热区链接
+	- 设置映像图像名: <img src="图像地址" usemap="映射图像名称">
+	- 定义热区图像
+{{{class="brush: html"
+<map name="映射图像名称">
+<area shape="热区形状" coords="热区坐标" href="链接地址">
+</map>
+}}} 
+
+= 第5章 使用列表 =
+* 有序列表
+	- 有序列表 ol
+	- 有序列表的序号类型 type: 小写字母, 数字,  大写字母, 小写罗马数字, 大写罗马数字
+	- 有序列表的起始数值 start
+* 无序列表
+	- 无序列表 ul: disc, circle, square
+	- 目录列表标记 <dir>
+	- 定义列表标记 <dl>
+		- <dt> 定义的名词
+		- <dd> 定义的解释
+	- 菜单标记 <menu>
+
+第6章 使用表格
+* 创建表格
+	- 基本构成: table, tr, td
+	- 标题: caption
+	- 表头: th
+* 表格的基本属性
+	- 宽度 width
+	- 高度 height
+	- 对齐 align
+* 表格的边框
+	- 宽度 border
+	- 颜色 bordercolor
+	- 内框宽度 cellspacing
+	- 表格内文字和边框间距 cellpadding
+* 表格背景
+	- 背景颜色 bgcolor
+	- 背景图像 background
+* 表格的行属性
+	- 高度 height: 行的高度 <tr height="行的高度">
+	- 边框颜色 bordercolor: <tr bordercolor="边框的颜色">
+	- 行背景 bgcolor, background
+	- 行文字对齐 align
+	- 行文字垂直对齐 valign
+* 单位各属性
+	- width, height
+	- 水平跨度 colspan
+	- 垂直跨度 rowspan
+	- 对齐方式 align, valign
+	- 单元格的背景色 bgcolor
+	- 边框颜色 bordercolor
+	- 亮边框 bordercolorlight
+	- 暗边框 bordercolordark
+	- 背景图像 background
+* 表格的结构
+	- 表格的表首标记 <thead>, 用于定义表格最上端表首的样式, 可以设置背景颜色, 文字对齐方式, 文字的垂直对齐方式等
+{{{class="brush: html"
+<thead bgcolor="背景颜色" align="对齐方式">
+...
+<\thead>
+}}} 
+	- 表格的表主体标记 <tbody>
+	- 表格的表尾标记(tfoot)
+
+== 第7章 建立超链 ==
+* 内部链接: 在同一个网站中的资源
+	- 目标窗口 target: self, blank, top, parent
+* 锚点链接
+	- 建立锚点: <a name ="锚点名称"></a>
+	- 链接至同一页面中的锚点: <a href="#锚点名称">...</a>
+	- 链接至其他页面中的锚点: <a href="链接的文件地址#锚点名称">...</a>
+* 外部链接
+	- 链接到外部网站: <a href="http://......">...</a>
+	- 链接到email: <a href="mailto:邮件地址">...</a>
+	- 链接到 ftp: <a href="ftp://......">...</a>
+	- 链接到 Telnet: <a href="telnet://地址">...</a>
+	- 下载文件: <a href="文件地址">...</a>
+
+= 第8章 添加多媒体 =
+* 设置滚动效果
+	- 滚动标记 marquee: 移动文字, 图片, 表格等
+{{{class="brush: html"
+<marquee>......</marquee>
+}}} 
+	- 滚动方向 direction: up, down, left, right
+	- 滚动方式 behavior: scroll(循环), slide(滚动一次), alternate(来回)
+	- 滚动速度 scrollamount
+	- 滚动延迟 scrolldelay
+	- 滚动循环 loop
+	- 滚动范围 width, height
+	- 滚动背景颜色 bgcolor
+	- 空白空间 hspace, vspace
+* 插入多媒体文件
+	- 插入 Flash 动画
+		- <embed src="多媒体文件地址" width="多媒体的宽度" height="多媒体的高度"></embed>
+	- 插入音频和视频文件
+		- <embed src="多媒体文件地址" width="播放界面的宽度" height="播放界面的高度"></embed>
+* 设置背景音乐
+	- 背景音乐 bgsound
+		- <bgsound src="背景音乐的地址">
+	- 循环次数 loop, 如果希望无限循环, 设为 true
+* 插入 JavaApplet
+{{{class="brush: html"
+<applet code="Lake.class" width="宽度" height="高度">
+<param name="文件夹的名称" value="图片名称">
+</applet>
+}}} 
+
+== 第9章 使用框架结构 ==
+* 框架是浏览器窗口中的一个区域, 它可以显示与浏览器窗口的其余部分中所显示的内容无关的HTML文档
+* 框架集是HTML文件, 它定义一组框架的布局和属性, 包括框架的数目, 大小和位置, 以及在每个框架中初始显示页面的URL
+* 设置框架集的属性 frameset
+	- 水平分割窗口 rows
+{{{class="brush: html"
+<frameset rows="框架窗口的高度, 框架窗口的高度, ...">
+<frame>
+<frame>
+...
+<frameset>
+}}} 
+	- 垂直分割窗口
+	- 嵌套分割窗口
+	- 框架的边框 frameborder: <frameset frameborder="是否显示">
+	- 框架的边框宽度: framespacing
+	- 框架的边框颜色: bordercolor
+* 设置窗口属性 frame
+	- 页面源文件 src
+	- 页面名称 name
+	- 禁止调整窗口的尺寸 noresize
+	- 边框与页面内容的水平边距 marginwidth
+	- 边框与页面内容的垂直编剧 marginheight
+	- 框架滚动条显示 scrolling
+	- 不支持框架标记 noframes: <noframes>替换显示内容</noframes>
+* 浮动框架 iframe
+	- 页面源文件 src
+	- 高宽 width, height
+	- 对齐 align
+	- 滚动 scrolling
+* 创建框架链接
+	- 一般一个页面中会有一个框架窗口作为导航页面, 其中添加了对另一个框架内容的链接设置, 这些链接则是通过 target 来实现
+	- 浮动框架的链接
+
+第10章 使用表单
+* <form>和</form>之间创建一个表单
+	- 提交表单 action: <form action="表单的处理程序">
+	- 表单名称 name
+	- 传送方法 method: get, post
+	- 编码方式 enctype: application/x-www-form-urlencoded 默认, multipart/from-data MIME编码
+	- 目标显示方式 target: _blank, _parent(父框架或父窗口), _self, _top
+* 插入表单对象
+	- 文字字段 text: <input name="控件名称" type="text" value="文字字段的默认取值" size="控件的长度" maxlength="最长字符数" />
+	- 密码域 password
+	- 单选按钮 radio
+	- 复选框按钮 checkbox
+	- 普通按钮 button
+	- 提交按钮 submit
+	- 重置按钮 reset
+	- 图像域 image
+	- 隐藏域 hidden
+	- 文件域 file
+* 菜单和列表
+	- 下拉菜单
+{{{class="brush: html"
+<select name="下拉菜单名称">
+<option value="选项值" selected="是否选择">选项显示内容</option>
+.....
+</select>
+}}} 
+	- 列表项
+{{{class="brush: html"
+<select name="列表项名称" size="显示的列表项项目" multiple>
+<option value="选项值" selected="是否选择">选项显示内容</option>
+.....
+</select>
+}}} 
+* 文本域标记 textarea: <textarea name="文本域名称" color="列数" rows="行数"></textarea>
+* id 标记, 标记唯一的元素
+	- <id=元素的标识名>
+
+= 第11章 使用 XHTML =
+* 最简单的XHTML页面
+{{{class="brush: html"
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http:://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>标题</title>
+</head>
+<body>
+正文...
+</body>
+}}} 
+	- <!DOCTYPE> 文档生命文件
+	- html 元素和名字空间
+	- 头部元素, 定义页面头部信息, 含标题元素, <meta>元素
+* XHTML 语法规范
+	- XHTML 元素必须是完全嵌套的, 如 <b><i>这就是粗体和斜体</i></b>
+	- XHTML 文档格式必须规范
+	- 标签名必须小写
+	- 所有XHTML元素必须有始有终
+	- 用 id 属性代替 name 属性: 在XHTML里除了表单(form)外,  name属性不能使用, 需要用 id 来替换
+	- DOCTYPE 声明是不可缺少的
+	- 属性必须加上英文双引号
+	- 明确所有属性的值, 没有值的属性也要用自己的名称作为值
+
+= 第12章 使用 CSS 样式表 =
+* 使用 CSS
+	- CSS的基本语法: 选择符{样式属性: 取值; 样式属性: 取值; 样式属性: 取值; ......}
+		- 选择符指这组样式编码所要针对的对象, 可以是一组 XHTML 标签, 如 body, h1, 也可以是定义了特定id或class的标签
+		- 值的形式有两种, 一种指定范围的值, 一种为数值
+	- 4种添加CSS的方法
+		- 链接外部样式表: <head> 中使用 <link> 标记
+{{{class="brush: html"
+<head>
+...
+<link rel=stylesheet type=text/css href=s1style.css>
+...
+</head>
+}}} 
+		- 内部样式表, 位于 <head> 内 <style> 标签
+{{{class="brush: html"
+<head>
+<style tpye="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.style1 {
+	color: #fbe33e;
+	font-size: 13px;
+}
+-->
+</style>
+</head>
+}}} 
+		- 导入外部样式表: 在内部样式表的 <style> 内导入一个样式表, @import
+{{{class="brush: html"
+<head>
+<style tpye="text/css">
+<!--
+@import style.css
+其他样式表的声明
+-->
+</style>
+</head>
+}}} 
+		- 内嵌样式, 在 HTML 标记内添加 style 参数
+{{{class="brush: html"
+<table style=color:red; margin-right: 220px>
+这是个表格
+</p>
+}}} 
+* 字体属性
+	- 字体 font-family
+		- 语法: font-family: "字体1", "字体2", ...
+	- 字号 font-size
+		- 语法: font-size: 大小的取值
+		- xx-small, x-small, small, medium, large, x-large, xx-large, larger, smaller, length(可采用百分比或长度值, 百分比则是基于父对象的字体)
+	- 字体风格 font-style
+		- 语法: font-style: 样式的取值
+		- normal, italic, oblique(中间)
+	- 加粗字体: font-weight
+		- 语法: font-weight:字体粗细值
+		- normal, bold, bolder, lighter, number(100-900之间的数值)
+	- 小写字母转大写: font-variant
+		- 语法: font-variant: 取值
+		- normal, samll-caps(将小写的英文字母转换成大写, 且字体较小)
+	- 字体复合属性
+		- 语法: font:字体取值
+* 颜色和背景属性
+	- 颜色属性 color
+		- 语法: color: 颜色取值
+	- 背景颜色 background-color
+	- 背景图像 background-image
+		- 语法: background-image:url(图像地址)
+	- 背景重复 background-repeat 
+		- background-repeat: 取值
+		- norepeat, repeat-x, repeat-y
+	- 背景附件 background-attachment: 背景图像随对象滚动还是固定不动
+		- background-attachment: scroll/fixed
+	- 背景位置 background-position: 设置背景图像的位置, 只能应用于块级元素和替换元素. 替换元素包括 img, input, textarea, select, object
+		- 语法 background-position: 位置取值
+		- 长度设置值
+			- X, Y
+		- 百分比设置值
+		- 关键字设置值
+	- 背景复合属性 background
+		- 语法 background:  取值
+* 段落: 主要包括单词间隔, 字符间隔, 文字修饰, 纵向排列, 文本替换
+	- 单词间隔 word-spacing
+		- 语法 word-spacing: 取值
+		- normal, 长度值(可以负值)
+	- 字符间隔 letter-spacing
+		- 语法 letter-spacing: 取值
+		- none, underline, overline, linethrough, blink(闪烁)
+	- 垂直对齐方式 vertical-align
+		- 语法 vertical-align: 排列取值
+		- baseline, sub, super, top, text-top, middle, text-bottom
+	- 文本转换 text-transform
+		- 语法 text-transform: 转换值
+		- none, capitalize, uppercase, lowercase
+	- 水平对齐方式 text-align
+		- 语法: text-align: 排列值
+		- left, right, center, justify
+	- 文本缩进 text-indent
+		- 语法: text-indent: 缩进值
+		- 长度值和百分比
+	- 文本行高 line-height
+		- line-height: 行高值
+		- 长度, 倍数, 百分比
+	- 处理空白 white-space
+		- white-space: 值
+		- normal-连续多个空格合并, pre-源代码中空格和换行符被保留(仅限IE6), nowrap-同一行显示文本, 直至文本结束或<br>对象
+	- 文本反排 unicode-bidi, direction
+		- unicode-bidi 属性
+			- unicode-bidi:bidi-override | normal | embed
+				- bidi-overrid: 严格按照 direction 属性的值重排序
+				- normal: 默认
+				- embed: 对象打开附加的嵌入层, direction 属性的值指定嵌入层, 在对象内部进行隐式重排序
+		- direction 属性
+			- direction:ltr | rtl | inherit 
+* 外边距和内边距属性
+	- 外边距有五种: margin-top, margin-bottom, margin-left, margin-right, margin.
+	- 取值有长度, 百分比, auto. 百分比允许负数
+	- margin 的顺序为 上下左右
+	- 内边距: padding-top, padding-bottom, padding-left, padding-right, padding
+	- 取值有长度和百分比, 百分比不能用负数
+* 边框属性
+	- 边框样式 border-style 
+		- boder-style: 样式值
+		- boder-top-style: 样式值
+		- boder-right-style: 样式值
+		- boder-bottom-style: 样式值
+		- boder-left-style: 样式值
+		- 取值: none, dotted, dashed, solid, double, groove, ridge, inset, outset
+	- 边框宽度 border-width
+		- border-width: 宽度值
+		- border-top-width: 宽度值
+		- border-right-width: 宽度值
+		- border-bottom-width: 宽度值
+		- border-left-width: 宽度值
+		- 取值: medium, thin, thick, 长度
+	- 边框颜色 border-color
+		- border-color: 颜色值
+		- border-top-color: 颜色值
+		- border-right-color: 颜色值
+		- border-bottom-color: 颜色值
+		- border-left-color: 颜色值
+		- 取值: 关键字或RGB值
+	- 边框属性 border
+		- border: 边框宽度边框样式颜色值
+		- border-top: 上边框宽度上边框样式颜色值
+		- border-right: 右边框宽度右边框样式颜色值
+		- border-bottom: 下边框宽度下边框样式颜色值
+		- border-left: 左边框宽度左边框样式颜色值
+* 定位属性
+	- 使用定位属性可以控制元素的位置, 包括相对定位和绝对定位两种方式
+	- 定位方式 position: 控制浏览器如何定位 HTML 元素
+		- 语法 position:static | absolute | fixed | relative
+			- static 默认值
+			- absolute 绝对定位, 需同时使用 left, right, top, bottom 等属性进行绝对定位
+			- fixed 页面滚动时, 元素不随着滚动
+			- relative 相对定位, 对象不可层叠
+	- 元素位置 top, right, bottom, left
+		- 元素位置属性和定位方式共同设置元素的具体位置
+		- 语法: 
+			- top: auto | 长度值 | 百分比
+			- left: auto | 长度值 | 百分比
+			- bottom: auto | 长度值 | 百分比
+			- right: auto | 长度值 | 百分比
+			- auto 表示默认值
+	- 浮动属性 float: 设置元素在某个元素周围
+		- 语法: float: none | left | right
+	- 清除属性 clear: 用于指定一个元素是否允许有其他元素漂浮在它的前面
+		- 语法 clear: none | left | right | both
+		- none: 表示允许两边都可以有浮动对象
+		- left: 表示不允许左边有浮动对象
+		- right: 表示不允许右边有浮动对象
+		- both: 表示不允许有浮动对象
+	- 可视区域 clip: 限制只显示裁切出的区域, 裁切出的区域为矩形, 只要设置两个点就可以了
+		- 语法: clip: auto | rect (数字)
+			- auto 表示对象不裁切
+			- rect (数字) 表示它依据上, 右, 下, 左的顺序提供自对象左上角(0, 0) 坐标计算的四个偏移数值, 其中任一数值都可用 auto 替换, 即此边不裁切
+	- 层的宽度和高度 width, height
+		- 语法: 
+			- width: auto | 长度值
+			- height: auto | 长度值
+	- 超出范围 overflow: 可以设置当层内的内容超出层所能容纳的范围时的显示方式
+		- 语法: overflow: visible | auto | hidden | scroll
+		- visible 层的大小和内容都会自动显示出来
+		- auto 只会在内容超出层的内容时才显示滚动条
+		- hidden 隐藏超出内容
+		- scroll 总是显示滚动条
+	- 可见属性 visibility: 针对嵌套层的设置
+		- visibility: inherit | visible | hidden
+		- inherit 继承父对象的可见性
+		- visible 无论父层对象是否可见, 子层都是可见的
+		- hidden 表示无论浮层对象是否可见, 子层都隐藏
+* 列表属性
+	- 列表符号 list-style-type
+		- 语法: list-style-type: 值
+		- disc(默认值) 实心圆
+		- circle 空心圆
+		- square 实心方块
+		- decimal 阿拉伯数字
+		- lower-roman 小写罗马数字
+		- upper-roman 大写罗马数字
+		- lower-alpha 小写英文字母
+		- upper-alpha 大写英文字母
+		- none 不使用任何项目符号或编号
+	- 图像符号 list-style-image
+		- 语法: list-style-image: none | url(图像地址)
+		- none 不指定图像
+	- 列表缩进 list-style-position
+		- 语法 list-style-position: outside | inside
+		- outside 列表项目标记放置在文本之外, 且环绕文本不根据标记对齐
+		- inside 列表项目标记放置在文本以内, 且环绕文本根据标记对齐
+	- 列表复合属性 list-style
+		语法 list-style: list-stype-image | list-style-position | list-style-type
+* 光标属性 cursor: 设置在对象上移动时鼠标指针采用的光标形状
+	- 语法 cursor: auto | 形状取值 | url(图像地址)
+	- default: 默认光标
+	- hand 手形光标
+	- crosshair
+	- text 大写字幕I的形状
+	- help 问号标记箭头
+	- wait
+	- e-resize 向东的箭头
+	- ne-resize 东北的箭头
+	- n-resize
+	- nw-resize
+	- w-resize
+	- sw-resize
+	- s-resize
+	- se-resize
+	- auto 默认值. 浏览器根据当前情况自动确定光标类型
+* 滤镜属性: 用很简单的方法对网页中的对象进行特效处理
+	- 不透明度 alpha
+		- 语法 filter: alpha(参数1=参数值, 参数2=参数值,...)
+		- 参数
+			- opacity 开始时的透明度, 范围0-100, 默认0, 即完全透明, 100为完全不透明
+			- finishopacity 结束时的透明度
+			- style 渐变的样式, 0 无渐变, 1 直线渐变, 2 圆形渐变, 3 矩形渐变
+			- startx 透明渐变开始点的水平坐标
+			- starty 透明渐变开始点的垂直坐标
+			- finishx 透明渐变结束点的水平坐标
+			- finishy 透明渐变结束点的垂直坐标
+	- 动感模糊 blur: 设置对象的动态模糊效果
+		- 语法: filter: blur(add=参数值, direction=参数值, strength=参数值)
+			- add 是否显示原始图像
+			- direction 动态模糊的方向, 按顺时针方向以45度为单位进行累积
+			- strength 动态模糊的强度, 只能使用整数, 默认5个
+	- 对颜色进行透明处理 chroma: 将图片中的某种颜色转换为透明色, 产生透明效果
+		- 语法: filter:chroma(color=颜色代码或颜色关键字)
+	- 阴影效果 dropShadow: 设置在指定的方向和位置上产生阴影效果
+		- 语法 dropShadow(color=阴影颜色, offX=参数值, offY=参数值, positive=参数值)
+			- color 控制阴影的颜色
+			- offX, offY 阴影相对于原始图像移动的水平距离和垂直距离
+			- positive 阴影是否透明
+	- 对象翻转 flipH, flipV 设置沿水平方向/垂直方向翻转
+		- 语法: 
+			- filter:flipH
+			- filter:flipV
+	- 发光效果 glow: 对象周围产生发光的效果
+		- 语法: filter:glow(color=颜色代码, strength=强度值)
+			- strength 发光强度, 范围 1-255, 默认5
+	- 灰度处理 gray: 彩色图片中的色彩去掉
+		- 语法: filter: gray
+	- 反相 invert: 图片的颜色, 饱和度以及亮度完全反转过来
+		- 语法: filter: invert
+	- X光片效果 xray: 制作出类似 X 光片的效果
+		- 语法: filter: xray
+	- 遮罩效果 mask: 可以做出印章一样的效果
+		- filter: Mask(Color=颜色代码)
+	- 波形滤镜 wave: 创建波纹扭曲效果 
+		- filter: wave(add=参数值, freq=参数值, lightstrength=参数值, phase=参数值, strength=参数值)
+			- add 是否要把对象按照波形样式打乱
+			- freq 设置图片上的波浪数目
+			- lightstrength 设置波浪的光照强度, 范围为 0~100
+			- phase 设置波浪的起始位置
+			- strength 设置波浪的强度大小
+
+= 第13章 Web 标准与CSS网页布局实例 =
+* DIV+CSS布局网页基础
+	- 认识 DIV
+		- DIV 是 XHTML 的一个标记, 以 <div></div>的形式出现, 本身是容器性质的, 不但可以内嵌table, 还可以内嵌文本和其他的HTML代码
+		- DIV 用来为 HTML 文档内大块的内容提供结构和背景
+		- 其内所含元素的特性由DIV标记的属性来控制, 或者通过样式表格式化这个块来进行控制
+	- 一列固定宽度
+		- 一列式布局是所有布局的基础.
+		- 一列固定宽度中, 宽度的属性值是固定的像素.
+		- 具体步骤:
+			# 在 HTML 文档的 <head> 与 </head> 之间的相应位置输入定义的CSS样式代码
+{{{class="brush: html"
+<style>
+#layer{
+	background-color:#ffcc33;
+	border:3px solid #ff3399;
+	width:300px;
+	height:350px;
+}
+</style>
+}}} 
+			# 在 HTML 文档的 <body></body> 之间的正文中输入以下代码, 对 div 使用 layer 作为 id 名称
+{{{class="brush: html"
+<div id="Layer">1列固定宽度</div>
+}}} 
+	- 一列自适应
+		- 根据浏览器窗口的大小, 自动改变宽度或高度值
+{{{class="brush: html"
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=gb2312"/>
+<title>1列自适应</title>
+<style>
+#Layer{
+	background-color:#ffcc33;
+	border:3px solid #ff3399;
+	width:80%;
+	height:80%;
+}
+</style>
+</head>
+<body>
+<div id="Layer">1列自适应</div>
+</body>
+}}} 
+	- 两列固定宽度
+		- <head>中代码
+{{{class="brush: html"
+<style>
+#left{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	width:250px;
+	height:250px;
+	float:left;
+}
+#right{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	width:250px;
+	height:250px;
+	float:left;
+}
+</style>
+}}} 
+		- float 属性控制对象的浮动布局方式.
+		- <body> 中的代码
+{{{class="brush: html"
+<div id="left">左列</div>
+<div id="right">右列</div>
+}}}
+	- 两列宽度自适应
+{{{class="brush: html"
+<style>
+#left{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	width:65%;
+	height:250px;
+	float:left;
+}
+#right{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	width:25%;
+	height:250px;
+	float:left;
+}
+</style>
+}}}
+	- 两列右列宽度自适应
+{{{class="brush: html"
+<style>
+#left{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	width:200px;
+	height:250px;
+	float:left;
+}
+#right{
+	background-color:#ffcc33;
+	border:1px solid #ff3399;
+	height:250px;
+	float:left;
+}
+}}} 
+* 使用 CSS 设计网站导航栏
+	- 实现背景变换的导航菜单
+		- 导航也是一种列表, 每个列表数据就是导航栏中的一个导航频道, 使用 ul 元素以及 li 元素以及 CSS 样式可以实现背景变换的导航菜单, 具体操作步骤如下:
+			- <head> 内部
+{{{class="brush: html"
+<style>
+#button {
+	width: 150px;
+	border-right: 1px solid #000;
+	padding: 0 0 1em 0;
+	margin-bottom: 1em;
+	font-family: "宋体";
+	font-size: 13px;
+	background-color: #ff9933;
+	color: #0000;
+}
+#button ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+#button li {
+	margin: 0;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #ffff00;
+}
+#button li a {
+	display: block;
+	padding: 5px 5px 5px 0.5em;
+	background-color: #ff9933;
+	color: #fff;
+	text-decoration: none;
+	width: 100%;
+	border-right-width: 10px;
+	border-left-width: 10px;
+	border-right-style: solid;
+	border-left-style: solid;
+	border-right-color: #ffcc00;
+	border-left-color: #ffcc00;
+}
+html>body #button li a {
+	width: auto
+}
+#button li a:hover {
+	background-color: #ffcc00;
+	color: #fff;
+	border-right-width: 10px;
+	border-left-width: 10px;
+	border-right-style: solid;
+	border-left-style: solid;
+	border-right-color: #ff00ff;
+	border-left-color: #ff00ff;
+}
+</style>
+}}} 
+			- <body> 中代码
+{{{class="brush: html"
+<div id = "button">
+<ul>
+<li><a href="#">首页</a></li>
+<li><a href="#">公司频道</a></li>
+<li><a href="#">最新动态</a></li>
+<li><a href="#">客房介绍</a></li>
+<li><a href="#">酒店服务</a></li>
+<li><a href="#">休闲娱乐</a></li>
+<li><a href="#">旅行社</a></li>
+</ul>
+</div>
+}}} 
+	- 利用 CSS 制作横向导航
+		- <head>中代码
+{{{class="brush: html"
+<style>
+#n li {
+	float:left;
+}
+#n li a {
+	color: #ffffff;
+	text-decoration: none;
+	padding-top: 4px;
+	display: block;
+	width: 65px;
+	height: 20px;
+	text-align: center;
+	background-color: #6600cc;
+	margin-left: 2px;
+}
+
+#n li a:hover {
+	background-color: #9999ff;
+	color: #ffffff;
+}
+</style>
+}}} 
+		- <body> 中代码
+{{{class="brush: html"
+<div id="n">
+<ul>
+<li><a href="#">酒店情况</a></li>
+<li><a href="#">客房</a></li>
+<li><a href="#">餐饮</a></li>
+<li><a href="#">商务会议</a></li>
+<li><a href="#">酒店服务</a></li>
+<li><a href="#">订房表</a></li>
+<li><a href="#">友情链接</a></li>
+</ul>
+</div>
+}}} 
+* 使用 CSS 设计表单样式
+	- 改变按钮的背景颜色和文字颜色
+		- head 中代码
+{{{class="brush: html"
+<style type="text/css">
+input.ann {
+	border: 1 solid #99cc00;
+	color: #6600ff;
+	font-size: 9pt;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	height: 18px;
+	line-height: normal;
+	background-color: #999999;
+}
+</style>
+}}} 
+		- body 中代码
+{{{class="brush: html"
+<input type="submit" value="登录" name="Submit" class="ann" />
+<input type="reset" value="取消" name="Close" class="ann" />
+}}} 
+	- 设计文本框的样式
+{{{class="brush: html"
+<input type="password" size=10 name="pwd"
+style="border:2px solid red red;background:yellow;"/>
+}}} 
+	- 设计文本框的文字样式
+		- 内嵌样式: style=font-family:"宋书";font-size:12px
+* 字体及段落样式设计
+	- 利用 CSS 控制字体大小和行距
+		- head
+{{{class="brush: html"
+<style type="text/css">
+<!--
+.dx {
+font-family: "宋体";
+font-size: 12px;
+line-height: 20px;
+}
+-->
+</style>
+}}} 
+	- 制作光晕文字效果
+{{{class="brush: html"
+<style type="text/css">
+<!--
+.qy {
+filter: Glow(Color=#87ca27, Strength=10);
+}
+-->
+</style>
+}}} 
+}}} 
+* 使用 CSS 设计图片样式
+	- 鼠标指针移上时图片渐变的效果, 利用 alpha 滤镜设置图像的透明度
+{{{class="brush: html"
+<style>
+.highlightit img{
+filter:progid:DxImageTransform.Microsoft.Alpha(opacity=60);
+-moz-opacity: 0.5;
+}
+.highlightit:hover img{
+filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);
+}
+</style>
+}}} 
+	- 设计不会重复出现的背景
+		- 利用 background-repeat  可以设置背景图像是否平铺, 还可以设计不重复出现的背景
+		- head
+{{{class="brush: html"
+.style2 {font-size: 12px; color: #ffff00; }
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	background-image: url(images/175.jpg);
+	background-color: #ffffff;
+	background-repeat: no-repeat;
+	background-position: right;
+}
+}}} 
+* 使用 CSS 控制链接样式
+	- 使用 CSS 实现鼠标指针形状改变
+{{{class="brush: html"
+<style type=text/css>
+.shb{
+cursor: e-resize;
+}
+</style>
+}}} 
+	- 鼠标指针移到链接文字上时改变文字大小或颜色
+{{{class="brush: html"
+<style type="text/css">
+a:link {font-size: 12px; text-decoration: none; color: #000000;}
+a:visited {font-size: 12px; text-decoration: none; color: #000000;}
+a:hover {font-size: 15px; text-decoration: none; color: #0000ff;}
+a:active {font-size: 13px; text-decoration: none; color: #cc99ff;}
+</style>
+}}} 

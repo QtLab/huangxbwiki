@@ -1,0 +1,14 @@
+* 序列容器: QList, QLinkedList, QVector, QStack, QQueue
+* 关联容器: QMap, QMultiMap, QHash, QMultiHash, QSet
+* foreach 预处理宏 
+* Java风格迭代器指向元素之间, 而STL风格迭代器指向元素.
+
+* 三个基本模型视图类: QAbstractItemModel, QAbstractItemView, QAbstractItemDelegate.
+* 预实现的类: QTabelView, QTreeView, QListView. 以及模型类:
+	- QStandardItemModel: 开发者用于管理数据项.
+	- QFileSystemModel: 用于给QListView和QTreeView提供目录信息.
+	- QStringListModel: 通过字符串用于QListView和QComboBox的视图.
+* 两个可以派生和扩充的专用抽象模型:
+	- QAbstractTableModel
+	- QAbstractListModel
+* QSortFilterProxyModel 允许源模型的数据项在提供给视图之前被排序和过滤.

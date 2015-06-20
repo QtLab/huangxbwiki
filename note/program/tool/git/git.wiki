@@ -1,0 +1,135 @@
+= 第一章 Getting Started =
+{{{
+$ git config --global user.name "John Doe"
+$ git config --global user.email johndoe@example.com
+$ git config --global core.editor emacs
+$ git config --global merge.tool vimdiff
+$ git config --list
+}}}
+* 查看特定项
+{{{
+$ git config user.name
+}}} 
+* 帮助
+{{{
+$ git help <verb>
+$ git <verb> --help
+$ man git-<verb>
+}}} 
+
+= 第二章 Git Basics =
+* 初始化: git init
+* 提交
+{{{
+$ git add *.c
+$ git add README
+$ git commit m 'initial project version'
+}}} 
+* 复制已有的repository: git clone
+* 记录Repository的变化.
+	- 工作目录中的每个文件有两个状态: tracked或untracked.
+	- tracked文件为上次快照中的文件, 可以是unmodified, modified, staged. 
+	- untraced为其他文件, 不在你上次的快照中, 也不在你的staging区域内.
+	- 编辑文件, 则成为modified, stage这些modified文件, 而后提交你的所有staged变化. 
+* 检查你文件的状态
+	- git status
+* Tracking新的文件
+	- git add
+	- add添加一个目录, 会递归添加该目录内的所有文件.
+* Staging Modified文件
+	- 修改一个已经tracked的文件. 得到一个 modified 文件
+	- 提交的文件版本是你上次git add时候的版本, 而非git commit时候的版本.
+* 忽视文件
+	- 在 .gitignore 创建一个文件列表模式.
+{{{
+$ cat .gitignore
+*.[oa]
+*~
+}}} 
+	- 第一行告知Git忽略任意以 .o 或 .a结尾的文件.
+	- 规则
+		- 空白行或者以#开头的行被忽略
+		- 标准glob模式
+		- 你可以在模式后加一个'/'表示为一个目录
+		- 你可以否定一个模式, 在其前加一个感叹号即可(!)
+	- glob模式像是简化的正则表达式. (*)表示0个或多个字符, [abc]匹配中括号内的任意字符. 问好匹配单个字符, [0-9] 匹配0到9之间的任意字符.
+* git diff 命令可以查看更详细的变化.
+	- 比较工作目录和staging区域的差异.
+	- 查看哪些已经staged git diff --cached/git diff --staged
+* 提交你的变化
+	- git commit --- 会出现编辑器, 更详细的消息, 可使用 -v 参数, -m 参数添加自己的消息.
+* 略过 Staging 区域
+	- git commit 使用 -a 参数. 则自动stage已经traced的文件, 这样可以略过 git add 部分.
+* 移除文件
+	- git rm 从你的工作目录移除文件.
+	- git rm --cached readMe.txt  移除staging区域的文件, 并放到 .gitignore 文件里.
+* 移动文件
+	- git mv file_from file_to 重命名
+* 查看提交历史
+	- git log
+	- 参数 -p 显示每次提交的不同 -2 表示最近两次提交
+	- --stat 查看简短状态
+	- --pretty 改变log输出格式, 有oneline
+	- short, full, fuller 选项
+	- 页面 37 输出格式
+	- --graph 添加 ASCII图
+	- --since --until 时间限制输出结果
+	- --author 限制作者, --grep 限制提交消息的关键词, --all--match 多个条件
+	- 特定目录或文件的提交变化 --加上路径.
+* 使用GUI
+* 撤销事情
+	- git commit --amend  可以修改之前的提交消息
+	- 添加忘记的文件
+{{{
+git commit -m 'initial commit'
+git add forgotten_file
+git commit --amend
+}}} 
+* Unstaging 一个 staged 的文件
+	- git reset
+* Unmodifying 一个修改的文件
+	- git checkout   这是一个危险的命令.
+* 远程工作.
+	- 显示你的远程 : git remote 
+		- 克隆来源的服务器默认git名称为origin
+		- -v 显示 URL
+	- 添加远程 Repositories
+		- git remote add [shortname] [url]
+	- 从你的远程中获取或者pulling
+		- git fetch [remote-name]   不合并
+		- git pull   合并
+		- clone的服务器默认为 origin
+	- pushing至你的远程服务器
+		- git push [remote-name] [branch-name]
+	- Inspecting 一个远程
+		- git remote show [remote-name]
+	- 移动和重命名远程
+		- git remote rename
+		- git remote rm
+* Tagging
+	- 列出你的tags
+		- git tag
+		- 可以使用模式: git tag -l 'v1.4.2.*' 
+	* 创建一个tag
+		- 两种类型的tags: lightweight 和 annotated(有注释的)
+		- 创建 annotated tag: git tag -a v1.4 -m 'my version 1.4'
+		- signed tags: git tag -s v1.5 -m 'my signed 1.5 tag'
+		- lightweight tags: git tag v1.4-lw
+		- 验证tags: git tag -v [tag-name]  使用GPG验证signature. 你需要你的钥匙圈中 signer 的公共钥匙使得它正确地工作.
+		- 稍后tagging: 根据部分校验码指定具体commit的tag --- git tag -a v1.2 9fceb02
+		- 共享tag: git push origin [tagname], 多个tags则使用 --tags选项给git push命令.
+* 技巧
+	- 自动补充: 源码 contrib/completion/git-completion.bash 文件拷贝至你的home目录, 将添加语句: source ~/.git-completion.bash
+	- Windows 系统预配置了自动补充.
+	- git命令别名, 使用 git config 修改
+{{{
+$ git config --global alias.co checkout
+$ git config --global alias.br branch
+$ git config --global alias.ci commit
+$ git config --global alias.st status
+$ git config --global alias.unstage ’reset HEAD --’
+$ git config --global alias.last ’log -1 HEAD’
+$ git config --global alias.visual "!gitk"
+}}} 
+
+= 第三章 Git Branching =

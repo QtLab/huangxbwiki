@@ -1,0 +1,42 @@
+* QtNetwork 模块. 
+	- QFtp 特定程序级协议. QTcpSocket, QTcpServer, QUdpSocket 底层类. QNetworkRequest, QNetworkReply, QNetworkAccessManager 高层类. QNetworkConfiguration, QNetworkConfigurationManager, QNetworkSession 提供 bearer 管理.
+	- QNetworkRequest 类表示网络请求. QNetworkAccessManager 协调网络操作. 其还使用存储在客户端的cookie数据, authentication请求, 以及代理的使用.
+	- QNetworkReply 类表示回应网络请求. 由QNetworkAccessManager创建. 由QNetworkReply提供的信号可以单独监视每个回应, 或者使用管理器的信号替代以及抛弃相关请求. QNetworkReply为QIODevice派生类, 其可同步或异步处理.
+	- 每个应用或库可以创建一个或多个 QNetworkAccessManager 的实例来处理网络连接.
+* QFtp --- 处理 FTP.
+	- 无阻塞行为
+	- 命令ID --- 发送 commandStart(), commandFinished() 信号
+	- 数据处理指示器 --- QFtp::dataTransferProgress(), QNetworkReply::downloadProgress(), QNetworkReply::uploadProgress() 信号发送到 QProgressBar::setProgress(), QProgressDialog::setProgress()
+	- QIODevice支持
+	- 两种方法使用QFtp
+		- 跟踪命令ID, 通过连接适当的信号查看每个命令的执行.
+		- 安排所有的命令一次性连接至done()信号.
+* QTcpSocket 和 QTcpServer
+	- QTcpSocket 类提供了用于TCP的一个接口, 你可以使用 QTcpSocket 实现标准的网络协议(POP3, SMTP, NNTP), 以及自定义协议.
+	- 通过远程host和端口建立TCP连接, 建立之后可通过 QTcpSocket::peerAddress() 和 QTcpSocket::peerPort()利用该peer的IP地址和端口.
+	- QTcpSocket 异步工作和发送信号报告状态变化和错误. 使用 QTcpSocket::write() 和 QTcpSocket::read() 写数据.
+	- 可以和 QTextStream 和 QDataStream 一起工作, 从 QTcpSocket 读取之前, 调用 QTcpSocket::bytesAvailable() 确保有足够的数据可用.
+	- 如果要处理进来的TCP连接, 则使用 QTCPSever 类. QTCPServer::listen 设置服务器, 其连接至 QTcpServer::newConnection() 信号. QTcpServer::nextPendingConnection() 接受连接并用返回的QTcpSocket和客户端通讯.
+	- 同步使用QTcpSocket, QTcpSocket::waitFor() 函数.  例如在调用 QTcpSocket::connectToHost() 函数之后, 调用 QTcpSocket::waitForConnected() 阻塞线程直至发送了一个connected()信号.
+	- 最好在非GUI程序中使用同步socket.
+	- Fortune Client/Fortune Server 例子, Blocking Fortun Client 例子, Threaded Fortune Server 例子.
+* 使用 UDP 和 QUdpSocket
+	- UDP 发送数据包, 一般大小小于512个字节, 包括发送者和接收者的IP地址和端口
+	- 发送 IPv4 广播. 将数据包发送给特定地址 QHostAddress::Broadcast(255.255.255.255), 或者你本地网络的广播地址.
+	- QUdpSocket::bind() 准备接受进来的数据包. 当数据包进来后, 发送 readyRead() 信号, 调用 QUdpSocket::readDatagram() 读取数据包.
+	- Broadcast Sender 和 Broadcast Receiver 例子.
+	- Multicast Sender 和 Multicast Receiver 例子.
+* 使用 QHostInfo 解析 Host 名称
+	- 使用DNS协议转换host名称为IP地址.
+	- 用一个 host 名称, QObject 指针 和一个 slog signature调用 QHostInfo::lookupHost(). 其执行名字查找, 当结果准备好的时候激活该slot.(另外一个线程进行查找)
+	- QHostInfo::fromName() 根据Host名称得到结果. (同一线程) 
+* 网络代理的支持
+	- 使用 QNetworkProxy 类支持不同层次的网络配置. SOCK5 支持底层, HTTP和FTP代理在协议层. 具体见 QNetworkProxy::ProxyType.
+	- 代理可用于每个基于socket的连接或者应用程序的所有网络连接. 在一个新的开放的socket连接之前调用 QAbstractSocket::setProxy() 函数. QNetworkProxy::setApplication() 设置则应用于程序所有的连接.
+	- QNetworkProxyFactory 提供基于query具体代理类型的代理. 可以用 QNetworkProxyQuery编码该queries, 使得其可以根据关键规范选择代理.
+	- QNetworkProxyFactory::proxyForQuery 用于直接query该工厂. 传递一个工厂给 QNetworkProxyFactory::setApplicationProxyFactory 实现应用程序级的代理策略.  其QNetworkProxyFactory派生的类可以自定义代理策略.
+* Bearer管理支持.
+	- 控制设备的连接状态. 使得应用可以开始和停止连接接口和在连接点之间漫游.
+	- QNetworkConfigurationManager 类管理设备已知的网络配置列表. 网络配置通过QNetworkConfiguration类表示, 描述了可用于开始一个网络接口的参数集.
+	- 基于一个给定的网络配置打开一个QNetworkSession来开启一个网络接口. 大多数情况, 基于平台具体的默认网络配置创建一个网络session. 可以通过 QNetworkConfigurationManager::defaultConfiguration()函数返回默认的配置.
+	- 有些平台要求在任何网络操作之前打开一个网络session. 这个需求可通过 QNetworkConfigurationManager::capabilities() 返回的值与 QNetworkConfigurationManager::NetworkSessionRequired 测试得到.

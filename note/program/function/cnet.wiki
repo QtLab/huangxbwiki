@@ -1,0 +1,89 @@
+= 控件 =
+* 控件的共同属性: Name, Enabled, Font, BackColor, ForeColor, Image, Location, Size, Visible
+* Button
+	* 事件: Click
+* CheckedBox
+	* 属性: Items, MultiColumn, ColumnWidth, CheckOnClick, Sorted, CheckedItems, Text, CheckedIndices, Sorted, CheckedItems
+* ContextMenu
+	* 属性: MenuItem
+	* 方法: 
+	* MenuItem
+		* 方法: MergetMenu, CloneMenu(可复制主菜单), Add
+* ErrorProvider
+	* 属性: BlinkRate, Icon, BlinkStyle
+	* 方法: SetError(), SetIconAlignment(), SetIconPadding()
+* Form
+	* 方法: Close, Visible
+	* 事件: Load
+* GroupBox
+	* 属性: Text
+* ImageList
+	* 属性: Images 
+* Label
+	* 属性: Text
+* ListView
+	* 属性: MultiSelect, HideSelection, HoverSelection, LabelEdit, LabelWrap, RightToLeft, Scrollable, FullRowSelect, GridLines, LargeImageList, SmallImageList. Columns, Items, SelectedItems
+	* ListViewItem
+		* 属性: SubItems
+	* Items
+		* 属性: Count
+		* 方法: Insert, Remove
+* MainMenu
+	* 属性: ShortCut, Checked, RadioChecked(组菜单)
+	* 事件: Click
+* NotifyIcon
+	* 属性: ContextMenu(菜单), Icon, Text(提示), Visible
+* OpenFileDialog
+	* 属性: Filter, FileName
+	* 方法: ShowDialog
+* PictureBox
+	* 属性: Image, SizeMode
+* ProgressBar
+	* 属性: Minimum, Maximum, Value, Step
+* RichTextBox
+	* 属性: Text, Dock, Cursor
+	* 方法: SaveFile, LoadFile, Cut, Copy, Paste
+	* 事件: MouseMove, KeyUp
+	* RichTextBoxStreamType
+		* PlainText
+* SaveFileDialog
+	* 属性: Filter, FileName
+	* 方法: ShowDialog
+* StatusBar
+	* 属性: Dock(位置), Panels(设置面板), ShowPanels, SizingGrip
+	* StatusBarPanel
+		* 属性: Stype(可设置为文本), Text, Width, 
+* TabControl
+	* 属性: DrawMode, ImageList, ItemSize, Multiline, RowCount, SelectIndex, SelectedTab, ShowToolTips, SizeMode, TabPages(设置页)
+	* 方法: Add, Remove
+* TextBox
+	* 属性: PasswordChar
+* ToolBar
+	* 属性: Appearance(外观), AutoSize, BorderStyle, Bottom, BottonSize, ContextMenu, Cursor, Divider, DropDownArrow, ImageList, ImageSize, ShowToolTips, TextAlign, Wrappable, Dock, Buttons(可设置按钮)
+	* 事件: ButtonClick(可用于判断是哪个按钮处理)
+* ToolBarButton
+	* 属性: DropDownMenu, Enabled, ImageIndex(可在Form Load 中设置), Parent, PartialPush, Pushed, Style, Text, TooltipText, Visible
+* ToolTip
+	* 属性: Active, AutomaticDelay, AutoPopDelay, ReshowDelay, ShowAlays
+	* 方法: SetToolTip
+* TreeView
+	* 属性: BorderStyle, CheckBox, ImageIndex, ImageList, Indent(缩进), ItemHeight, LabelEdit, Nodes, PathSeparator, Scrollable, SelectedImageIndex, SelectedNode, ShowLines, ShowPlusMinus, ShowRootLines, Sorted, TopNode, VisibleCount, SelectedNode
+	* 方法: CollapseAll, ExpandAll, GetNodeAt, GetNodeCount, Select
+	* 事件: AfterExpand, AfterCollapse
+	* TreeNode
+		* 属性: BackColor, Bounds, Checked, FirstNode, ForeColor, FullPath, Handle, ImageIndex, Index, IsEditing, IsExpanded, IsSelected, IsVisible, LastNode, NextNode, NextVisibleNode, NodeFont, Nodes, Parent, PrevNode, PreVisibleNode, SelectedImageIndex, Tag, Text, TreeView
+		* 方法: Clone, Collapse, Expand, ExpandAll, GetNodeCount, Remove, Toggle
+
+= 类 =
+* Application
+	* 方法: Exit
+* Cursor
+	* 属性: Position
+* DialogResult
+	* 常量: Retry, CanceG
+* Int32
+	* 方法: ToString, Parse
+* MessageBox
+	* 方法: Show
+* string
+	* 方法: Length, Trim, SubString

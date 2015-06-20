@@ -1,0 +1,86 @@
+=== 01_Block ===
+	这里使用阴影压平矩阵来实现阴影, 见函数 m3dGetPlaneEquation, m3dMakePlanarShadowMatrix
+=== 02_bounce ===
+	glRect 的使用
+=== 02_glrect ===
+	同上
+=== 03_lines ===
+	线的绘制
+=== 03_linesw ===
+	glGetFloatv(GL_LINE_WIDTH_RANGE, fSizes);
+=== 03_lstipple ===
+	glLineStipple(factor, pattern); 第一个字节表示pattern内每个位重复的次数
+=== 03_lstrips ===
+	螺旋线
+=== 03_points ===
+	螺旋点
+=== 03_pointz ===
+	glPointSize 函数 设置点的大小
+=== 03_pstipple ===
+	多边形点画, glPolygonStipple
+=== 03_scissor ===
+	glScissor 设置裁剪区域
+=== 03_single ===
+	计时器函数的使用 glutTimerFunc
+=== 03_star ===
+	glEdgeFlag	设置边缘标记
+=== 03_stencil ===
+	设置stencil函数和操作
+=== 03_triangle ===
+	glBegin(GL_TRIANGLE_FAN);
+=== 04_atom ===
+	模拟星球
+=== 04_atom2 ===
+	模拟星球, 透视投影
+=== 04_ortho ===
+	glFrontFace(GL_CW); 的使用
+=== 04_perspct ===
+	透视投影
+=== 04_solar ===
+	带光照模拟星球
+=== 04_SphereWorld ===
+	GLFrame 模拟相机和物体
+=== 04_transform ===
+	m3dRotationMatrix44 自定函数
+=== 05_ambient ===
+	顶点数组和颜色数组的使用
+=== 05_jet ===
+	不带光照
+=== 05_litjet ===
+	带光照
+=== 05_shadow ===
+	阴影压平矩阵
+=== 05_shinyJet ===
+	带镜面光的飞机
+=== 05_sphereworld ===
+	带阴影的球面世界
+=== 05_spot ===
+	可见聚焦光的实现
+=== 05_triangle ===
+	三角形, 着色平滑模式
+=== 06_fogged ===
+	带雾的球体世界
+=== 06_motionblur ===
+	累积缓存
+=== 06_multisample ===
+	多重采样
+=== 06_reflection ===
+	实现镜面反射要点
+		1. 混合
+		2. 镜面的物体正面方向改为 GL_CW
+		3. 镜面物体更改光的位置
+		4. 注意不透明物体和可以反射的物体的绘制顺序
+=== 06_smoother ===
+	点和线的反锯齿
+=== 06_sphereworld ===
+	模板测试用于阴影, 以免重复在阴影处绘制
+=== 07_bitmaps ===
+	glBitmap
+=== 07_imageload ===
+	glDrawPixels
+=== 07_imaging ===
+	图像操作, 卷积, 缩放, 颜色表, Histongram 等等
+=== 07_Operations ===
+	各种像素操作
+=== 08_pyramid ===
+	纹理操作

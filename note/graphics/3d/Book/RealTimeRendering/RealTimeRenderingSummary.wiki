@@ -1,0 +1,811 @@
+Chapter 5 Visual Appearance
+* radiometry - 垂直通过表面单元面积的数量, 即 irradiance
+* Mdiff, Mspec, Ldiff, Lspec
+* Blinn-Phong 公式
+* 着色公式的实现: 逐模型, 逐图元, 逐像素
+* Gouraud shading
+* Phong shading
+* Nyquist limit --- 采样频率应当是被采样信号中最大频率的两倍以上
+* box filter, tent filter, sine filter
+* Screen-Base Antiliasing
+	- supersampling
+	- fll-scen antialiasing --- FSAA
+	- accumulation buffer
+	- rotated grid supersampling --- RGSS
+	- multisample antialiasing --- MSAA
+	- coverage sampling antialiasing --- CSAA
+	- A-buffer
+	- stochastic sampling
+		- jittering
+		- N-rooks sampling
+	- Quincunx 方法
+* Tansparent
+	- view-based effect, light-base effect
+	- screen-door transparency
+	- alpha blending
+	- over operator
+	- under operator
+	- depth peeling
+	- premultiplied alphas
+* Gamma Correction
+
+Chapter 6 Texturing
+* Projector Function
+* Coresponder Function
+* Texture Values
+* Magnification
+	- detail texture --- 和LOD不同, 仅用于细节
+	- cutout texture
+* Minification
+	- mipmap chain
+	- trilinear interpolation --- 金字塔插值
+	- overblurring --- 两个方向(u, v)不一致
+	- 变种 ripmap
+	- summed-area table
+	- unconstrained anisotropic filtering --- 较长和较短边确定采样频率
+* volume texture
+* Cube map
+* Texture Caching
+	- LRU
+	- MRU
+	- prefetching
+	- clipmap --- 用于巨量图像数据
+* Texture Compression
+	- 五种类型压缩
+	- OpenGL ES的压缩
+	- 法线的压缩
+	- high dynamic range
+* Procedural Texturing
+	- cellular texture
+* Texture Animation
+* Material Mapping
+	- diffuse color map
+	- specular color map
+	- gloss map
+* Alpha mapping
+	- decaling
+	- alpha test
+	- alpha to coverage
+* Bump mapping
+	- 三种尺寸: macro, meso, micro
+	- 改变法线
+	- Blinn's Method: 纹理中存储的值改变法线方向. 或使用heightfield改变法线.
+	- Normal Mapping
+	- Parallax Mapping
+		- heightfield纹理---返回不同位置的纹理
+	- Relief map - 查找光线与表面的第一个交叉点
+		- 采样法
+	- Heightfield texturing
+		- displacement: 根据纹理修改顶点高度坐标
+
+Chapter 7 Advanced Shading
+* Radiometry
+	- radiance, irradiance, radiant intensity之间的关系
+* Photometry
+	- luminance 亮度
+* Colorimetry
+	- 色度
+	- X, Y, Z到R, G, B的转换
+* Light Source Type
+	- direction light, point light
+	- Omni Lights
+	- OpenGL和DX的光下降公式
+	- Spotlights, 两种公式
+	- Textured Lights: visual richness, 强度分布, 聚光灯函数, 模式
+* 其他光源
+* BRDF理论
+	- f(l, v)
+	- BSSRDF(bidirectional surface scattering reflectance distribution function) --- 表面下的散射
+	- SVBRDF(spacially varying BRDF)
+	- 特点
+		- 两个限制
+		- 能量损失 R(l)
+		- Lambertian BRDF
+	- suface and body refelction
+		- 镜面BRDF和散射BRDF
+	- Fresnel Reflection
+		- Rf --- Fresnel reflectance
+		- 入射到折射radiance的计算
+		- External Reflection
+		- Schlick 近似法
+		- Typical Fresnel Reflectance Value
+		- Internal Reflection
+			- critical angle
+	- Local Subsurface scattering
+		- 均匀和非均匀绝缘体
+		- local subsurface scattering
+		- scattering albedo
+		- 镜面和散射反射的折中
+		- 公式 7.38, 7.39 近似法代入求解散射反射
+	- Microgeometry
+	- Microfact Theory
+		- NDF --- normal distribution function
+		- G(l, v)
+		- Ashikhmin 公式7.41
+	- Half Vector versus Reflection Vector
+* BRDF Model
+	- phong 光照模型
+	- 公式的简化和变种
+	- normalized BRDF
+	- Blinn-Phong BRDF (使用半角)
+	- NDF
+	- kajiya-kay BRDF 
+	- 余弦指数的microfacet BRDF版本
+	- visibility term
+* BRDF Acquisition and Presentation
+	- 获取BRDF
+	- lafortune BRDF
+	- distributed-based BRDF
+	- 标准正交基 --- spherical harmonics spherical wavelets
+	- 四维函数和因式分解
+* Implementing BRDFs
+	- mipmapping BRDF and Normal Maps
+	- NDF非线性
+* Combining Lights and Material
+	- 光的计算有两个阶段
+	- 每个光和材质类型可能的组合
+	- Multipass Lighting
+	- Defferred Shading
+
+Chapter 8 Area and Environmental Lighting
+* Li 和 E的关系
+* Lo 和 BRDF及E的关系
+* Area Light Source
+	- 公式 8.8的近似表示
+	- vector radiance --- 将区域光源转换为点光源. 公式 8.11
+		- 两个限制
+	- wrap lighting
+	- 区域光的高亮
+* Ambient Light
+	- 常量 LA
+* Environment Mapping
+	- 反射光线方向的计算
+	- reflection mapping --- 表面材质属性修改已有环境映射
+* Blinn and Newell 方法 --- 地球仪式, 计算经度纬度
+* Sphere Mapping
+	- 纹理图像正交观察到 reflective sphere
+	- 用矩阵和n, v计算出纹素.
+* Cubic Environment Mapping
+	- reflected view vector 作为三维纹理坐标.
+* Parabolic Mapping
+	- 两个环境纹理实现.
+* Glossy Reflections from Environment Maps
+	- 模糊 EM纹理, 得到更粗糙的镜面反射.
+	- 使用 BRDF lobe 余弦值书或高斯lob来过滤环境映射
+	- 在alpha中存储mipmap index可以方便选择map index
+	- View-Dependent Reflection Maps
+		- sphere map
+* Irradiance Environment Mapping
+
+Chapter 9 Global illumination
+* reflectance equation计算的radiance 公式9.1
+* 公式9.2改造公式9.1, 将入射光改为来自其他地方的出射光.
+* Shadow
+	- 使用矩阵投影阴影
+	- 投影阴影多边形渲染至纹理中
+	- 软阴影
+		- 累积缓存法
+		- 平截头体法, 光源采样生成多个阴影图像.
+		- 上下移动接收平面
+		- 区域光源的形状来过滤(卷积).
+		- gradient法
+	- 曲面物体的阴影
+		- 阴影纹理
+	- shadow volumes
+		- stencil buffer 实现
+		- 观察者在阴影锥内的处理
+		- z-fail shadow volumes
+		- 硬件解决方案 depth clamping
+		- 软件方法使用 齐次坐标
+		- 根据轮廓边缘生成阴影锥
+	- shadow map
+		- z-buffer 比较距离光源最近的物体和眼睛观察的深度
+		- 自我阴影问题
+		- ID代替深度值
+		- viewer移动时的不连贯性.
+		- Resolution Enhancement
+			- perspective aliasing, projective aliasing
+			- 修改光的view plane匹配眼睛的view plane
+			- matrix warping, dueling frustra
+			- shadow silhouette map
+			- adaptive shadow maps
+		- Percentage-Closer Filter(PCF)
+			- 如何采样
+			- 采样区域宽度, 采样模式
+		- Variance shadow Maps --- 过滤生成 shadow map, Pmax值光照中样本的最大值
+		- Related Algorithm
+			- deep shadow maps, opacity shadow map
+	- shadow Optimization
+* Ambient Occlusion
+	- ambient occlusion value k(A)的求解, 见图9.37
+	- n(bent) 公式9.17
+	- visibility and obscurance
+	- accounting for interreflections: 计算k(A)比full global illumination廉价
+	- dynamic computation of ambient occlusion
+		- object-space methods
+			- mesh 顶点 disk-shaped elements集合建模
+			- 层次计算 occlusion
+			- spherical harmonics
+			- 填充法
+			- distance field
+		- Screen-Space Methods
+			- 测试点集合(样本)和z-buffer关系
+			- unsharp mask filter
+			- 合并法(细致的和粗糙的合并)
+* Reflections
+	- 平面反射, 将反射的物体用矩阵绘制进反射平面对面
+	- 不要再没有reflector的地方反射
+	- 雾化和比较z-buffer增加真实度.
+	- 曲面反射
+		- 凹凸面的反射
+		- 环境映射实现
+* Transmittance(透视比)
+	- Beer-Lambert Law
+* Refractions--折射
+	- 折射向量计算
+	- 环境映射渲染折射物体
+	- relief mapping
+* Caustics(焦散线)---反射面或折射面聚焦的光
+	- image space, object space
+	- three-pass法得到caustic map
+	- caustics体
+* Global subsurface scattering
+	- scattering 小于一个像素用BRDF
+	- subsurface scattering theory
+		- 可能性, 波长, 路径
+	- wrap lighting --- 曲面建模
+	- nurmal blurring 
+		- annalytical BSSRDF
+		- 影响 diffuse reflectance
+	- texture space diffuse
+		- 图7.55
+	- depth-map technique --- 用于 large-scale scattering
+		- 通过 light space 的depth map计算光在物体内经过时的吸收量
+		- translucent shadow map 和 light space texture
+* Full-global illuminatioin
+	- radiosity --- 用于场景中多个部分光照的相互影响
+	- form factor --- 多少光从一个patch直接经过另一个patch的比例.
+	- differential form factor, 公式.35
+	- progressive refinement
+	- Ray tracing
+	- Mooute Carlo ray trace --- 根据BRDF模拟表面之间的相互反射折射
+		- Path tracing, Distribution ray tracing.
+	- irradiance caching/photon mapping
+	- instant radiosity
+* Precomputed Lighting
+	- 预计算 irradiance 存储在纹理中或顶点中
+	- 在顶点或纹理中存储方向信息用于环境映射
+	- radio normal mapping/dot3 lightmap
+	- vector irradiance
+	- preligght representation
+	- volume prelighting
+		- irradiance function
+	- precomputed occusion
+		- ambient occlusion和bent normal
+		- horizon angle
+	- precomputed radiance transfer
+		- real spherical harmonics
+
+Chapter 10 Image-Based Effect
+* Image-based rendering(IBR)
+	- rendering spectrum (一系列渲染技术)
+* fixed-view effects: 大部分场景一次性渲染.
+	- G-buffers 中的额外信息, 转换用户的相互操作为纹理自身的变化
+	- adaptive refinement
+* Skyboxes
+	- 分辨率要求
+* light field rendering
+	- 插值已有的view
+* spirites and layers
+* billboard
+	- screen-aligned billboard
+	- world-oriented billboard
+		- viewpoint-oriented billboard
+		- animating billboard 存储在相同纹理中解决动画. 如volume texture`
+		- 云的模拟
+		- 半透明billboard的处理
+		- 通过公告板的fade out和fade in的过程的处理, spherical billboards
+	- axial billboard --- 旋转矩阵的生成
+		- 与 screen-aligned billboar的区别
+* particle systems
+	- 着色器的使用
+	- imposter
+		- 复杂物体渲染至纹理, 然后在billboard贴图实现一个复杂的渲染
+		- Forsyth的一些建议, 如启发式更新纹理坐标.
+		- polypostor
+		- hierarchial image caching
+		- hierarchy of bidirectional texture function[BTF]
+		- billboard clouds --- overlapping cutout billboard集合
+* displacement technique
+	- impostor纹理带depth成分表示偏差
+	- layered depth image
+	- relief texture mapping
+	- multi-meshes impostor(MMI)
+	- textured depth mesh(TDM)
+	- geometry image
+* image processing
+	- sinc filter, gaussian filter
+	- 使用纹理的过滤技术来减少纹理的访问
+	- Downsampling
+* color correction
+	- look-up table(LUT)
+* tone mapping
+	- 即时执行或全屏幕pass中执行
+	- 简单的裁剪
+	- adaptive tone mapping
+	- global和local算法
+	- 柱状图
+	- GPU occlusion queries
+	- Reinhard[1058] --- 累计像素值, 而后取亮度对数和平均值, 而后再转换回来.
+		- high-key, low-key
+		- 公式的系列改进
+	- High dynamic range imaging and lighting
+		- 描述光的精度问题
+		- HDRI
+		- 存储格式: RGBE, R9G9B9E5, R11G11B10
+* Lens Flare and Bloom
+	- 图 10.26的演示
+	- streak effect
+	- bloom effect的实现
+* depth of field
+	- 物体焦点
+	- accumulation buffer, 分成三个区域渲染.
+	- scattering
+	- gather operation(使用纹理的过滤技术)
+* motion blur
+	- 添加多边形模拟
+	- accumulation buffer
+	- velocity buffer, line integral convolution(LIC)
+	- 拉伸物体
+	- 静态物体的blur(由于相机移动产生)
+* fog
+	- 公式: 线性, 指数, 一维纹理(表格)
+	- 一些假设和文章
+* Volume Rendergin
+	- voxel
+	- implicit surface
+	- volumetric texture
+	- 渲染毛发
+
+Chapter 11 Non-photorealistic rendering
+* Toon shading
+	- quantize纹理. 两个常用方法: solid color填充和two-tone approach
+	- 点乘作为纹理坐标
+* silhouette edge rendering
+	- 划分: 基于表面角度, procedural geometry, 图像处理, 向量边检测
+	- surface angle silhouetting
+		- view方向和法线点乘决定轮廓边缘
+	- procedural geometry silhouetting
+		- 渲染正面, 而后渲染背面显示轮廓
+		- z-偏移
+		- 实现相同宽度边缘
+			- 扩展背面三角形
+			- shell mapping
+		- 脊线的绘制技术
+	- silhouetting by image processing
+		- G-buffer 检测边缘: z-buffer, 发现, 环境光颜色
+		- 写入一个纹理
+	- silhouette edge detection
+		- 公式 11.1
+		- silhouette loop
+		- 绘制线条
+		- 纹理笔划(stroke)
+		- 顶点着色器检测边缘
+		- 几何着色器
+	- hybrid silhouetting
+		- id buffer 检测轮廓边, 而后stylized
+		- temporal coherence
+* other style
+	- toon rendering, diffuse shading term 选择纹理, 应用屏幕空间坐标, 产生手绘外观
+	- surface使用纹理坐标, 维持stroke的粗度密度. stroke-textured mipmaps, tonal art maps[TAMs]
+	- 像素着色器对于该技术的实现
+	- stroke的操作
+	- 曲面的principal curve direction line
+	- NTR effect和其他效果
+* lines
+	- edge highlighting
+		- 不同颜色绘制其边
+	- polygon edge rendering
+		- 偏移绘制线条
+		- 根据坡度设置偏移
+		- stencil buffer
+		- 像素着色器
+	- hidden-line rendering --- 绘制隐藏线
+		- 填充z-buffer不填充color-buffer法
+		- 部分模糊代替完全隐藏的绘制
+		- 另一种绘制模糊隐藏线的方法
+	- haloing
+		- 两条线相交如何显示次序问题
+
+Chapter 12 Polygonal technique
+* tessellation, consolidation, optimization, simplification
+* source of three-demensional data
+* 两种modeler: solid-based和surface-based
+	- implicit surface creation system
+* tessellation and triangulation
+	- tessellator的第一步确定最好的投影
+		- self-interaction问题
+	- triangulation算法
+		- ear clipping
+	- convex region
+	- join edge
+	- stencil buffer解决凹处
+	- shading problem
+		- 分割四边形
+		- warped四边形划分三角形后的纹理扭曲问题
+		- 旋转不变性(rotation-invariant)
+	- edge cracking and T-Vertices
+		- edge cracking --- 两个样条相交产生的问题
+		- T-vertices --- flat平面连接的时候所出现问题
+* consolidation
+	- merging
+		- 顶点列表和索引
+		- hasing合并多边形
+		- welding
+	- orientation
+		- orientation方法: 查找相邻边, 找到相邻三角形, 得到连续组, 翻转三角形, 是否整体翻转
+		- signed volume
+	- solidity
+		- solidity 测试: 每个多边形边是否恰好被两个多边形共享
+	- normal smoothing and crease edges
+		- 两个信息: smoothing groups和crease angle
+		- 权重平滑法线
+* triangle fans, strips, meshes
+	- fans
+	- strips
+		- generalized triangle strips
+		- swap operation
+		- 退化三角形连接strips
+	- creating strips
+		- 贪婪法, 相邻图, 对偶图
+		- SGI算法
+	- triangle meshes
+		- 边和面的关系
+		- cache
+		- the average cache miss ratio
+		- cache oblivious mesh layouts
+			- space-filling curve
+	- vertex and index buffers/arrayso
+		- vertex buffer 的数据类型
+		- 三角形集的cache-efficient次序
+* simplicification
+	- 三种类型: static, dynamic, view-dependent
+	- static: 单独的LOD模型
+	- dynamic simplification
+		- edge collapse
+			- view-independent progressive meshing(VIPM)
+		- 两个顶点缩至一个新顶点
+		- 移除顶点的cost function
+		- image-driven collapse functioin
+		- 纹理扭曲问题
+		- 产生LOD模型
+	- view-dependent simplification
+		- 通过颜色或bump map texture捕捉小的surface细节作为结果的静态mesh, triangulated irregular network[TIN]
+		- 基于view的cost function.
+		- ROAM算法
+		- 层次结构
+			- error bound
+
+Chapter13 curves and curved surfaces
+* parametric curves
+	- bezier curves
+		- bezier curves using bernstein polynomials
+		- bounded bezier curve on the gpu
+	- continuity and piecewise bezier curves
+		- 两个贝塞尔曲线的连接, piecewise bezier curve
+		- Cn, Gn
+	- cubic hermite interpolation
+	- kochanek-bartels curves
+* parametric curved surfaces
+	- bezier patches
+	- bezier triangle
+	- N-patches
+	- continuity
+* implicit surface
+* subdivision curves
+	- chaikin's scheme
+	- approximating, interpolating chalkin
+* subdivision surfaces
+	- refinement phase, smoothing phase
+	- loop subdivision
+		- 一个三角形划分成四个新的三角形
+		- valence 6
+		- limit position, limit tangent
+	- modified butterfly subdivision
+		- 四种情况生成新顶点: regular setting, semiregular setting, irregular setting, boundaries
+	- 根号3-subdivision
+		- 每个三角形划分成三个三角形
+	- catmull-clark subdivision
+		- 思路见13.47, 第一步之后只有valence 4的顶点
+	- piecewise smooth subdivision
+		- 改进surface细节
+		- 在想要sharp的边上打上标签以进行不同的subdivide
+	- displaced subdivision
+		- 沿着法线偏移点
+		- displacement map的subdivide
+	- normal, texture, and color interpolation
+		- control mesh顶点的limit normal以及subdivision scheme
+* efficient tessellation
+	- hardware tessellation pipeline
+	- fractional tessellation
+		- fractional tessellation factors
+	- vertex + evaluation shader
+	- adaptive tessellation
+		- a three-pass technique for adaptive tessellation
+		- terminating adaptive tessellation
+			- 何时终止tessellation
+			- 曲线的flat估计
+			- 其他考虑为factor的因素: view frustum 内部, frontfacing, 屏幕所占区域, 物体边缘, 镜面光照
+		- quad basis
+	- camull-clark surface with hardware tessellation
+		- bicubic bezier patch
+
+chapter 14 accelleration algorithm
+* spatial data structure
+	- bouding volume hierarchies(BVHs)
+	- binary space partitioning(BSP) tree, quadtree, octree.
+	- scene graph
+	- BVHs
+		- 球形AABBs, OBBs, k-DOPs
+		- k-ary tree
+		- temporal bounding volume
+	- BSP trees
+		- axis-aligned, polygon-aligned
+	- octrees
+	- cache-oblivious and cache-aware representation
+	- scene graph
+		- 类似Ogre的默认场景管理器
+* culling technique
+	- backface culling, view frustum culling, occlusion culling
+	- exact visible set - EVS, potentially visible set - PVS.
+	- backface culling
+		- 测试法线
+* hierarchical view frustum culling
+	- 检查 BV 是否和 view frustum 相交
+	- frame-to-frame coherency
+* portal culling
+	- view frustum culling
+	- 图14.13
+* detail culling
+* occlusion culling
+	- point-based, cell-based
+	- 图像空间, 物体空间, 光线空间
+	- 14.18伪代码
+	- hardware occlusion queries
+		- occlusion queries
+	- hierarchical z-buffering
+		- z-buffer 图像金字塔
+	- other occlusion culling technique
+		- HOM
+		- occlusion horizons
+		- occluder shrinking
+		- frustum growing
+		- shaft
+		- instant visibility
+		- IOM
+* level of detail
+	- fog
+	- generation, selection, switching
+	- 毛发例子
+	- LOD Switching
+		- discrete geometry lods
+		- blend lods
+		- clods and geomorph lods
+			- 边塌缩
+			- vertex split, 顶点之间的插值
+			- fractional tessellation
+	- LOD selection
+		- range-based
+		- projected area-based
+		- hysteresis
+		- other selection methods
+	- time-critical lod rendering
+		- 启发式的算法
+		- cost(o, l), benefit(o, l)
+* large model rendering
+* point rendering
+
+chapter 15 pipeline optimization
+* 瓶颈---最慢的stage. 步骤: 定位, 优化.
+* 其他的stages可以和最慢的stage时间一样长
+* profiling tools
+	- windows的pix, gDEBugger, NVIDIA的工具
+* 定位瓶颈
+	- 几种测试方法
+	- GPU维护 load blancing
+	- testing the application stage
+		- cpu-limitted
+		- code profiler
+		- 其他stage做很少或者不做工作, 如null driver
+		- underlock the cpu
+	- testing the geometry stage
+		- 瓶颈主要区域: vertex fetching and processing
+	- testing the rasterizer stage
+		- 测试方法
+* performance measurements
+	- 性能测量: geometry stage每秒处理的顶点数; rasterizer stage每秒填充的像素数.
+	- peak rates
+	- CPU: 避免IPS, FLOPS等. 代替为时钟周期计数器等
+	- 禁止测双缓存
+* Optimization
+	- application stage
+		- 编译器优化flag
+		- code profiler
+		- 基本原则:不同的策略
+		- cache
+		- Memory issues
+			- 内存层次体系
+			- 考虑的几个问题
+		- code issues
+			- 几个代码技巧问题
+		- API 调用
+			- 少且大的meshes比许多小的meshes更有效率
+			- 公式 15.1
+			- 目标: 更少的API调用
+			- 组合在一起要限制一个mesh使用一个着色程序集.
+			- instancing可以最小化API调用
+			- 最小化状态的改变, 注纹理可以放到更大纹理中以减少纹理的数量.
+			- 静态和动态缓存
+		- Geometry stage
+			- 低精度数据
+			- culling技术, large-scale
+			- 尽可能低的精度
+			- 压缩形式存储顶点数据.
+		- lighting
+			- 预先计算光照而后在顶点存储颜色.
+			- 光源数量的影响和优化
+		- rasterizer stage
+			- backface culling
+			- z-buffering, blend mode.
+			- 使用原生的纹理和像素格式, 纹理压缩
+			- 根据到viewer的距离选择像素着色器程序
+			- 视觉化深度复杂度
+			- two-pass得到通过和未通过z-buffer像素的数量.
+			- 绘制的平均次数
+			- early z pass
+* multiprocessing
+	- 信息传送架构和共享内存的多处理器
+	- symmetric multiprocessing(SMP) design
+	- multiprocessor piplining(temporal parallelism), parallel processing(spatial parallelism)
+	- multiprocessor piplining(同时处理不同帧的内容)
+		- 分割一个job为管线stage
+		- application stage可分割为APP, CULL, DRAW
+		- latency, 注意其与FPS的区别
+		- 两种减少latency的方法, 第二个在stages之间有一些buffering
+	- parallel processing(同时处理一帧的内容)
+		- 平行运行代码
+		- 划分工作包
+		- 线性加速
+		- 图15.6显示了multiprocessor piplining和parallel processing的区别
+	
+chapter 16 intersection test methods
+* ray/object和object/object相交测试
+* picking-clicking选择物体
+* ray和带层次的bound volume之间的测试
+* hardware-accelerated picking
+	- 颜色值作为identifier
+	- 在color buffer中发现三角形内部一个点的相对位置.
+* definition and tools
+	- 公式 16.1 光线
+	- 距离l
+	- 公式 16.2 隐式surface
+	- 公式 16.3 显式surface
+	- AABB, OBB, k-DOP
+	- SAT测试
+	- rejection test
+	- epsilon值
+* bounding volume creation
+	- AABB and k-DOP 的创建, 两者很类似, 都是求在轴或法线上投影的最大和最小值.
+	- sphere creation
+		- AABB
+		- Ritter法
+		- Welzl法
+	- OBB creation
+		- 从 convex hull中计算出
+		- Eberl使用最小化技术计算一个minimum-volume OBB
+* geometric probability
+	- 一个点, ray或平面与一个物体相交的概率
+	- 点在一个物体内的概率和体积相关
+	- 线和物体相交的概率与表面积相关
+	- 平面和box相交的概率与mean width相关, 有几何mean width
+* rules of thumb
+	- 一些需要记住的经验技巧
+* ray/sphere intersection
+	- mathematical solution
+		- 球体的隐式公式
+		- 代入射线公式求解
+	- optimized solution
+		- 预先rejection
+		- 见图16.6示意图
+* Ray/Box Intersection
+	- slabs method
+		- 见伪代码和公式16.14
+	- line segment/box overlap test
+		- 见公式16.16
+		- 见公式16.17
+		- 见伪代码
+	- ray slope method
+		- 二维的测试方法
+* ray/triangle intersection
+	- 求出平面交点, 而后降至二维空间解决
+	- 求解公式16.21
+	- 后续公式的一系列改进
+	- 伪代码
+* ray/polygon intersection
+	- 计算出与平面相交的点, 而后降到二维处理.
+	- the crossing test
+		- jordan curve theorem: 任意方向通过奇数数量的边
+* plane/box intersection detection
+	- box 顶点带入平面查看结果的正反
+	- 可以只代入两个顶点
+	- AABB
+		- 计算box到平面法线的投影
+		- 公式 16.28
+		- 计算出s
+	- OBB
+		- 公式 16.29
+* triangle/triangle intersection
+	- 首先判断两个三角形是否和对方平面相交, 使用公式16.31测试
+	- 使用16.32测试是否相交
+	- 共面和接近共面的考虑
+* triangle/box overlap
+	- 三个测试步骤
+	- 公式33 到 35 测试
+* BV/BV intersection test
+	- sphere/sphere intersection
+		- 计算球心和半径
+	- sphere/box intersection
+		- SSE矢量化
+		- 见伪代码和公式13.38
+	- AABB/AABB intersection
+		- 见伪代码
+	- k-DOP/k-DOP intersection
+		- 相交测试由k/2个间隔重合测试组成
+		- 测试所有slabs对的重合
+		- 伪代码
+	- OBB/OBB intersection
+		- 要进行15个测试
+		- 实现可用球体进行快速测试
+* view frustum intersection
+	- 三个结果: outside/inside/intersect
+	- 变换一个BV/frustum测试为一个point/frustum测试, 创建出两个大小不同的frustum
+	- frustum plame extraction
+	- frustum/sphere intersection
+	- frustum/box intersection
+* shaft/box and shaft/sphere intersection
+* line/line intersection tests
+	- two dimensions
+		- first method
+		- second method
+	- three dimensions
+* intersection between three planes
+* dynamic intersection testing
+	- sphere/plane
+	- sphere/sphere
+	- sphere/polygon
+	- dynamic separating axis method
+
+chapter 17 collision detection
+* collision detection with rays
+* dynamic cd using bsp trees
+* general hierarchical collision detection
+	- hierarchy building
+	- collision testing between hierarchies
+	- cost function
+* OBBTrees
+	- Choice of bounding volume
+	- hierarchy building
+	- handling rigid-body motions
+	- miscellaneous
+* A multiple objects CD System
+	- broad phase collision detection
+		- sweep-and-prune
+		- grids
+	- summary
+* miscellaneous topics
+	- time-critical collision detection
+	- distance queries
+	- deformable medels
+	- collision response
+	- gpu-based collision detection
+* other work

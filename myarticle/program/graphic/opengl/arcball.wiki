@@ -1,0 +1,27 @@
+= 实现Arcball效果(OpenGL) =
+* 主要讲解如何在OpenGL中实现Arcball效果.
+* Arcball效果: 当按下鼠标左键并移动时, 场景窗口中鼠标下方的物体会围绕其中心旋转. 好比人用手指按住地球仪让其旋转的效果.
+* 本例主要运用矩阵变换来实现. 首先根据鼠标的移动得到旋转轴以及旋转角度. 而后转换成四元数格式, 再转换成变换矩阵.
+* 首先得到投影矩阵和视图变换矩阵
+{{{c++
+GLdouble projection_matrix[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+GLdouble modelview_matrix[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+int viewport_matrix[4] = {0,0,640,480};
+
+glGetDoublev(GL_PROJECTION_MATRIX,projection_matrix);
+glGetIntegerv(GL_VIEWPORT,viewport_matrix);
+}}} 
+* 得到鼠标位置在模型空间中的位置
+{{{c++
+GLdouble x,y,z;
+gluUnProject(mouse_x, mouse_y, 0.0,
+             modelview_matrix,
+             projection_matrix,
+             viewport_matrix,
+             &x, &y, &z);
+}}}
+* 而后从眼睛位置以及上面得到的鼠标位置得到一条射线, 而后根据射线方程得到球面上一点的位置.
+* 而后根据鼠标的移动得到另外一个球面点的位置. 从而得到球心到达两个球面上点的向量, 叉乘得到旋转轴, 点乘得到旋转角度.
+* 根据旋转轴和旋转角度得到四元数. 而后四元数变换得到旋转矩阵. <br />
+
+参考资料: http://rainwarrior.ca/dragon/arcball.html

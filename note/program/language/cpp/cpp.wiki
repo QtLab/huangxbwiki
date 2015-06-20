@@ -1,0 +1,7 @@
+=书籍=
+	[[book/cppprimer/cppprimer|C++ Primer]]<br />
+	[[book/effectivecplusplus/effectivecplusplus|Effective c++]]<br />
+
+= 笔记 =
+	[[note/boostcpplib|Boost C++ Library]]<br />
+

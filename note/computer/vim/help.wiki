@@ -1,0 +1,16 @@
+* 移动 --- h, j, k, l
+* 退出 --- :q  :qa!
+* 跳至一个主题 --- CTRL-]/鼠标双击
+* 跳回 --- CTRL-T/CTRL-0
+* 查找帮助 --- :help command
+	- 进一步指定
+| 用途         | 前缀 | 例子              |
+|--------------|------|-------------------|
+| 普通模式命令 | 无   | :help x           |
+| 视图模式命令 | v_   | :help v_u         |
+| 插入模式命令 | i_   | :help i_<Esc>     |
+| 命令行命令   | :    | :help :quit       |
+| 命令行编辑   | c_   | :help c_<Del>     |
+| Vim命令参数  | -    | :help -r          |
+| 选项         | '    | :help 'textwidth' |
+* 帮助中的查找 --- :help word 而后使用 CTRL-D, 或者使用 helpgrep word

@@ -1,0 +1,28 @@
+* 配置文件所在地: HOME目录 (C:\Documents and Settings\用户名)
+	- Win8 则位于"C:\Users\用户名"中
+* 设置全局配置. 当你在某个特定项目中使用其他的用户名和用户邮箱, 可以不用加上 --global参数.
+	- 用户名和邮箱
+{{{
+$ git config --global user.name "John Doe"
+$ git config --global user.email johndoe@example.com
+}}}
+	- 编辑器
+{{{
+$ git config --global core.editor emacs
+}}}
+	- 比较工具
+{{{
+$ git config --global merge.tool vimdiff
+}}} 
+	- 列出配置和特定的配置选项
+{{{
+$ git config --list
+$ git config user.name
+}}} 
+* 得到帮助
+{{{
+$ git help <verb>
+$ git <verb> --help
+$ man git-<verb>
+}}} 
+* 在线咨询: IRC服务器(irc.freenode.net上的#git 或 #github)

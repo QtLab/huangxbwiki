@@ -1,0 +1,14 @@
+* class HardwareBuffer
+	- 'hard ware' 表示核心系统内存之外所控制的内存. 常用于影音的内存. 定义了所有缓存通用的接口.
+	- 可创建只写缓存. HBU_DYNAMIC 可用于频繁更新缓存
+* HardwareBufferManager
+	- hardware buffer manager 的包装类
+	- createVertexDeclaration() 创建一个 VertexDeclaration
+* MeshManager
+	- 运行时期的mesh数据管理
+	- createBezierPatch
+* PatchMesh
+	- 由 MeshManager::createBezierPatch 创建
+	- setSubDIVISION
+* Pass
+	- setPolygonMode 

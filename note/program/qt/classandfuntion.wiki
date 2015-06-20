@@ -1,0 +1,55 @@
+QApplication
+	exec
+	quit
+
+
+QCheckBox
+QComboBox
+	clear
+	addItem
+	setMinimumSize
+QLabel
+	show
+	setBuddy
+QLineEdit
+	textChanged
+	text
+	setValidator
+	hasAcceptableInput
+QPushButton
+	clicked
+	setDefault
+	setEnable
+QSlider
+	setRange
+	valueChanged
+	setValue
+QSpinBox
+	setRange
+	valueChanged
+	setValue	
+QTableWidgetItem
+QWidget
+	setWindowTitle
+	setLayout
+	show
+	close
+	accept
+	reject
+	layout
+
+
+QHBoxLayout
+	addWidget
+QVBoxLayout
+	addStretch
+	setSizeConstraint
+
+Qt::CaseSensitivity
+Qt::TextAlignmentRole
+
+QString
+	isEmpty
+QStringList
+QRegExp
+QVariant

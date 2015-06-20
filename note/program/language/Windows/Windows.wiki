@@ -1,0 +1,2 @@
+[[ProgrammingWindows|Programming Windows]] <br />
+[[ExportCclass|HowTo: Export C++ classes from a DLL]] <br />

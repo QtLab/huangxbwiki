@@ -1,0 +1,33 @@
+* 着色器分析:
+* 内置的变量:
+	- gl_ModelViewMatrix
+	- gl_Vertex: 传递的用户模型空间顶点坐标
+	- gl_ProjectionMatrix
+	- gl_Normal: 传递的用户模型空间法线向量
+	- gl_NormalMatrix
+	- gl_Color
+* 用于输出的变量:
+	- gl_TexCoord[0]
+	- gl_Position: 通常为 gl_ProjcetionMatrix * gl_ModelViewMatrix * glVertex
+	- gl_FrontColor
+* 算法:
+	- 根据当前顶点和当前模型视图矩阵得到视觉空间的坐标, 而后根据另一个模型视图矩阵得到另一个视觉空间坐标, 而后根据权重值混合
+	- 根据法线计算颜色值, 一维纹理根据眼睛和光的方向得到纹理值.
+* 一位纹理的生成, 实现镜面光照
+	* 计算纹理最大的大小, 而后和512比较
+	* r * (float)pow(((double)x / (double)(texSize-1)) * 0.125f + 0.875f, 128.0);
+	* texels[0] = texels[1] = texels[2] = 0.0f;
+	* vec3 H = normalize(L + vec3(0.0, 0.0, 1.0)); // 计算光线方向和眼睛朝向的中间线
+	* 如果 NdotL 大于0, 则 NdotH = max(0.0, dot(N, H) * 8.0 - 7.0);
+	* 纹理坐标 gl_TexCoord[0] = vec4(NdotH, 0.0, 0.0, 1.0);
+* 着色程序光照的计算
+	* 传送给着色程序之前, 将光源位置转换为视觉空间坐标(注意非世界坐标), uniform vec3 lightPos;
+	* glUniform3fv(lightPosLoc, 1, lightPosEye);  // 传送视觉光源坐标
+	* 求出世界空间的法线 vec3 N = normalize(gl_NormalMatrix * gl_Normal);
+	* 世界空间中顶点到光源的方向 vec3 L = normalize(lightPos - Vertex.xyz);
+	* 点乘 float NdotL = max(0.0, dot(N, L));
+	* 算出最终颜色 gl_FrontColor = 0.1 + gl_Color * vec4(NdotL);
+* 另一个矩阵的求法
+	* 表示在另一个模型中延伸的矩阵. 即该顶点位于另一个模型延伸的虚拟模型中.
+	* 传递法线矩阵时第三个参数要为 GL_TRUE, 表示为逆矩阵: glUniformMatrix3fv(shader("mv2IT"), 1, GL_TRUE, mv2IT_3x3);
+* 为了绘制圆锥体内的线条, 可以禁止深度测试

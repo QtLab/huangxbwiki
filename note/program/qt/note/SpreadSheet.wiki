@@ -1,0 +1,113 @@
+* QMainWindow::setCentralWidget(): 将一个widget设置为该主窗口程序的中心widget, Main Window 程序必设
+* MainWindow::createAction()
+	* QAction::setIcon, setShortcut, setStatusTip, setVisible, setCheckable, setChecked
+	* QAction 信号有 triggered(), toggled(bool)
+	* newAction --- 新建文件
+		* MainWindow::newFile
+			* 调用 okToContinue()
+				* isWindowModified() 判断是否修改
+				* 如修改则跳出 QMessageBox::warning
+				* 如 QMessageBox::warning 返回 QMessageBox::Ye, 则调用 QMainWindow::save().
+			* 如果 okToContinue() 为真, 则调用 Spreadsheet::clear().
+	* openAction --- 打开文件
+		* MainWindow::open
+			* 调用 okToContinue()
+			* QFileDialog::getOpenFileName 打开文件夹对话框
+			* MainWindow::loadFile() 加载文件
+				* SpreadSheet::readFile 读取文件
+	* saveAction --- 保存文件
+		* MainWindow::save
+			* 如当前文件为空, 调用 MainWindow::saveAs()
+			* 否则调用 MainWindow::saveFile()
+				* 其调用 SpreadSheet::writeFile
+	* saveAsAction
+		* MainWindow::saveAs
+			* 根据 QFileDialog::getSaveFileName 得到文件名
+			* 调用 saveFile 保存文件
+	* recentFileActions 数组 --- 最近文件
+		* MainWindow::openRecentFile
+			* 使用 qobject_cast<QAction *>(sender()) 得到 QAction.
+			* 根据其 data() 调用 MainWindow::loadFile()
+	* exitAction --- 退出
+		* 调用 QWidget::close[slot]
+	* cutAction --- 剪切
+		* 连接至 SpreadSheet::cut() [slot]
+		* 同样的操作还有 copy, paste, delete, selectRow, selectColumn, selectAll
+	* findAction --- 查找
+		* MainWindow::find()
+			* new FindDialog, 无模式对话框
+			* 建立两个连接
+				* FindDialog::findNext --- SpreadSheet::findNext
+				* FindDialog::findPrevious --- SpreadSheet::findPrevious
+			* FindDialog::show(), raise(), activateWindow().
+	* goToCellAction --- 跳至
+		* MainWindow::goToCell()
+			* 模式对话框 GoToCell, 使用 exec() 执行
+			* 调用 SpreedSheet::setCurrentCell(实际调用基类 QTableWidget::setCurrentCell)
+	* recalculateAction
+		* SpreadSheet::recalculate
+	* sortAction
+		* MainWindow::sort()
+			* 模式对话框 SortDialog
+			* SpreadSheet::selectedRange() 返回 QTableWidgetSelectionRange
+			* 调用 SortDialog::setColumnRange 给其ComboBox添加可选择的列
+			* 执行对话框
+				* 根据选择的内容设置 SpreadsheetCompare
+				* 调用 SpreadSheet::sort()
+	* showGridAction
+		* SpreadSheet::setShowGrid(bool)
+	* autoRecalcAction
+		* SpreadSheet::setAutoRecalculate(bool)
+	* aboutAction
+		* MainWindow::about()
+			* QMessageBox::about
+	* aboutQtAction
+		* qApp aboutQt() 
+
+* MainWindow::createMenu
+	* menuBar()->addMenu()  添加菜单
+	* QMenu::addAction() 添加菜单条目
+	* QMenu::addSeparator() 添加分隔条
+
+* MainWindow::createContextMenu 创建右键菜单
+	* SpreadSheet::addAction(实际调用 QTableWidget::addAction())
+	* SpreadSheet::setContextMenuPolicy(实际调用 QWidget::setContextMenuPolicy)
+
+* MainWindow::createToolBars
+	* 调用 QMainWindow::addToolBar() 添加工具条
+	* QToolBar::addAction 添加条目
+
+* MainWindow::createStatusBar()
+	* statusBar()->addWidget()
+	* 连接信号
+		* SpreadSheet::currentCellChange(TableWidget的信号) --- MainWindow::updateStatusBar
+			* 调用 SpreadSheet::currentLocation, currentFormula 设置状态栏内容
+		* SpreadSheet::modified() --- MainWindow::spreadSheetModified
+			* setWindowModified 表示文档已修改
+			* updateStatusBar
+
+* MainWindow::readSettings()
+	* QSetting
+	* restoreGeometry(settings.value("geometry").toByteArray());  // 设置窗口大小
+
+* MainWindow::setCurrentFile()
+	* setWindowModified 文档状态
+
+* 在注册表中保存窗口大小, 以及恢复
+{{{c++
+void MyWidget::closeEvent(QCloseEvent *event)
+{
+	QSettings settings("MyCompany", "MyApp");
+	settings.setValue("geometry", saveGeometry());
+	QWidget::closeEvent(event);
+}
+
+// 恢复
+QSettings settings("MyCompany", "MyApp");
+myWidget->restoreGeometry(settings.value("myWidget/geometry").toByteArray());
+}}}
+
+* 使用 QMutableStringListIterator 遍历一个 StringList. 有方法 hasNext(), next(), remove().
+	* typedef QMutableListIterator<QString> QMutableStringListIterator;
+
+* QTableWidget::viewport() 返回滚动区域所在的widget

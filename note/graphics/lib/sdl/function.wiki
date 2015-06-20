@@ -1,0 +1,33 @@
+* 函数
+	- SDL_Init --- 初始化 SDL, 根据参数初始化SDL的不同部分
+	- SDL_GetError
+	- SDL_SetVideoMode
+	- SDL_MapRGB
+	- SDL_LockSurface
+	- SDL_UnLockSurface
+	- SDL_UpdateRect
+	- SDL_LoadBMP
+	- SDL_BlitSurface
+	- SDL_WateEvent
+	- SDL_GetKeyName
+	- SDL_EnableUNICODE
+	- SDL_PollEvent
+	- SDL_EventState
+	- SDL_PumpEvents
+	- SDL_OpenAudio
+	- SDL_PauseAudio
+	- SDL_CloseAudio
+	- SDL_ConverteAudio
+	- SDL_CreateThread
+	- SDL_Delay
+	- SDL_WaitThread
+	- SDL_mutexP
+	- SDL_mutexV
+	- SDL_GetTicks
+* 类型
+	- SDL_Surface
+	- SDL_Rect
+	- SDL_Event
+	- SDL_BYTEORDER
+	- SDL_VideoInfo
+	- SDL_Mod

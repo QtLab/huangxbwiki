@@ -1,0 +1,48 @@
+= 颜色转换 =
+== Grayscale ==
+* 缩放值分别为 0.299, 0.587, 0.114
+* gl_FragColor
+* 缩放值之和大于1则过度曝光, 小于1则曝光不足.
+== Sepia Tone ==
+* 给图像一个老旧的西部图像色彩.
+== Inversion ==
+* 求反即可
+== Heat Signature ==
+* 光谱描述从黑色到蓝色到绿色到红色.
+* 一般情况, 热度值要在顶点作为一致变量或者顶点属性传递给着色器.
+* 本例使用一维纹理根据灰度值进行查找.
+== Dependent Texture Lookups ==
+* 现在可以自己逐片段计算纹理坐标.
+* 注意有些OpenGL实现可能有一个dependency链条长度的硬件限制.
+== Per-Fragment Fog ==
+* 在片段着色器中计算雾因子和执行混合.
+* mix 函数用于混合
+* 着色器尽可能常量值, 这样可以让着色器更快.
+
+= Image Processing =
+* 如果 OpenGL 版本大于2.0, 且支持 ARB_texture_non_power_of_two 扩展, 则纹理可不使用2的幂次方大小.
+* 这里使用 glCopyTexImage2D 取的内容在窗口中心且和纹理大小一致.
+* 片段着色器根据纹理坐标查找3x3的区域样本. 而后应用八个不同的偏移值查找周边八个点. 最后执行一些filter得到新的颜色用于中心点.
+* Blur, Sharpen, Dilation and Erosion, Edge Detection
+	- 三个常用的边缘检测法为 Laplacian, Sobel, Prewitt
+	- Sobel和Prewitt法为gradient filters, 在每个颜色通道强度的第一个derivative中检测变化
+	- Laplacian, 检测第二个derivative的zero-crossing, 即为强度变化剧烈的地方.
+
+= 光照 =
+* 带颜色求和的分离镜面颜色, 以及用于镜面指数的指数方程纹理.
+* 同时使用顶点着色器和片段着色器. 顶点用于设置需要在线或三角形上插值的数据, 如法线和光线向量, 片段着色器则做大部分的工作产生最终的颜色.
+== 散射着色 ==
+* 散射颜色在线上和三角形上变化不快, 所以最好在顶点着色器计算.
+== Multiple Specular Lights ==
+
+= Procedural Texture Mapping =
+* 对于 precedural texture mapping, 不需要执行纹理加载和纹理查找. 而是算法性描述纹理的样子.
+* 缺点: 你所表达纹理的复杂度与片段着色器的复杂度相同. 
+== Checkerboard Texture ==
+* 3D 黑白棋, 类似于从一个交替的黑白立方体上切割.
+* mod
+* step
+* mix
+== Beach Ball Texture ==
+* smoothstep
+== Toy Ball Texture ==

@@ -1,0 +1,14 @@
+= 笔记 =
+	[[Manual|Vim 手册 01]]<br />
+	[[Manual2|Vim 手册 02]]<br />
+	[[Manual3|Vim 手册 03]]<br />
+	[[help|帮助文件]]<br />
+	[[findoperator|查找操作]]<br />
+= 插件 =
+	[[a.vim|a.vim]]<br />
+	[[vimperator|Vimperator]]<br />
+	[[NERDTree|Nerd_tree]]<br />
+	[[tagbar|tagbar]]<br />
+	[[UltiSnips|UltiSnips]]<br />
+	[[vimcommentary|vimcommentary]]<br />
+	[[syntastic|syntastic]]<br />

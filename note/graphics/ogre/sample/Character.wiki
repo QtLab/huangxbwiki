@@ -1,0 +1,61 @@
+* 本例演示了如何实现一个角色, 该角色有不同的动作动画, 如跳舞, 出刀
+* 构造场景的过程演示了如何设置视图的背景颜色, 雾, 场景的阴影, 环境光, 光源
+	- Ogre::Viewport::setBackgroundColour()
+	- Ogre::SceneManager::setFog
+	- Ogre::SceneManager::setShadowTechnique, setShadowColour, setShadowTextureSize, setShadowTextureCount
+	- Ogre::SceneManager::createLight, Ogre::Light::setType, setPosition, setSpecularColour
+* 如何创建一个平面
+	- Ogre::MeshManager::createPlane() 创建一个平面mesh
+	- Ogre::SceneMager::createEntity() 从上面创建的平面mesh创建一个实体
+	- 本例的平面使用了材质 Examples/Rockwall
+	- Ogre::Entity::setCastShadow() 设置是否投射阴影
+	- 创建常见节点挂接该平面实体
+* 本例阴影的创建
+	- 两个基本方法用于生成阴影 Stencile-based 和 Texture-based
+		# Stencile-based 方法可用于绘制非常长和远的阴影. 缺点边缘处会棱角分明, 且不能处理透明效果, 且占用一部分的CPU资源用于计算阴影锥
+		# Texture-based 方法可以很好的处理透明效果, 只需要很少的CPU负荷. 且很易投影一个经过顶点着色程序变形的几何体, 不过对于巨大的阴影会产生"锯齿"效果,
+	- 支持两个类型的模板阴影, 两个类型的纹理阴影, 以及一个简单的贴花方法(decal approach)
+		# 两个不同的模板阴影在要求的多通道工作数量上有所不同.  modulative 方法在主渲染之后仅仅简单的"加深"阴影区域. addtive 方法执行每个光源的渲染, 以及添加其累积效果, 其代价更为昂贵. 
+		# 基于纹理的阴影两种方法大体一致, 唯一的不同就是 shadowmap 方法结果更为精确, 但是要求更好的显卡
+	- 一次只允许一个阴影技术
+	- void Ogre::SceneManager::setShadowTechnique  (ShadowTechnique  technique)  
+		- technique
+			- SHADOWTYPE_NONE --- 无阴影
+			- SHADOWTYPE_STENCIL_MODULATIVE --- 模板阴影技术
+			- SHADOWTYPE_STENCIL_ADDITIVE 
+			- SHADOWTYPE_TEXTURE_MODULATIVE 
+			- SHADOWTYPE_TEXTURE_ADDITIVE 
+			- SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED
+			- SHADOWTYPE_TEXTURE_MODULATIVE_INTEGRATED 
+* 这里使用SinbadCharacterController类包装了该角色
+* 创建了 RibbonTrail 对象用于实现刀的轨迹动画
+	- Ogre::SceneManager::createMoveableObject 方法是用"RibbonTrail"创建一个RibbonTrail对象, 该对象参数numberOfChains为2, maxElements为80
+	- 材质为 Examples/LightRibbonTrail
+	- Ogre::RibbonTrial::setTrailLength 设置长度20
+	- Ogre::RibbonTrial::setVisible 设置是否可见
+	- 常见创建节点挂接该RibbonTrail对象
+	- setInitialColour 设置初始颜色
+	- setColourChange 设置颜色变化
+	- setWidthChange 设置宽度变化
+	- setInitialWidth 设置初始宽度
+	- addNode, removeNode 添加和移除一个节点
+* Sinbad.mesh 创建该角色实体, Sword.mesh 创建刀剑实体, Sheath.L/R, Handle.L/R 分别为出刀收刀的额外骨骼
+* 使用 OgreEntity::attachObjectToBone, detachAllObjectsFromBone, 挂接和卸载该实体的一部分骨骼
+* 这里有动画 "IdleBase", "IdleTop", "RunBase", "RunTop", "HandsClosed", "HandsRelaxed", "DrawSwords", "SliceVertical", "SliceHorizontal", "Dance", "JumpStart", "JumpLoop", "JumpEnd"
+* 这里设置了 Base 动画和 Top 动画
+* 在该类里面控制相机 setupCamera(), updateCamera(), updateCameraGoal()
+	* 相机使用了一个 createChildSceneNode() 创建了 mCameraPivot 和 mCameraGoal 的父子关键, 当 mCameraPivot 节点旋转时, mCameraGoal 会自动旋转至新位置
+* updateBody() 更新角色的位置, 计算出要旋转的四元组, 而后转换为旋转的角度, 其中用到的方法有:
+	* Ogre::SceneNode::getOrientation()
+	* Ogre::Quaternion::xAxis(), zAxis()
+	* Ogre::Vector3::getRotationTo()
+	* Ogre::Quaternion::getYaw()
+	* Ogre::Radian::valueDegrees()
+	* Math::abs(), std::min, std::max
+	* Ogre::SceneNode::yaw()
+	* Ogre::SceneNode::translate()
+* updateAnimation()
+	* 计算动画的状态, 然后调用 Base 动画 和 Top 动画的 addTim().
+* fadeAnimation()
+	* 根据 fading in 和 fading out 状态更改各自动画的权重值
+* 有 injectKey, injectMouse 的函数, 所有需要的鼠标键盘操作都在此

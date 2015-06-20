@@ -1,0 +1,6 @@
+* 用 $BOOST_ROOT 表示boost根目录.
+* IDE的include地址包括boost根目录的boost目录.
+* 不要关心doc子目录, libs\index.html 为文档的开始位置.
+* 大部分boost仅有头文件, 无需编译.
+	- 需要单独构建的boost库: Chrono, Context, Filesystem, GraphParallel, IOStreams, Locale, MPI, ProgramOptions, Python, Regex, Serialization, Signals, System, Thread, Timer, Wave.
+	- 有可选的单独编译二进制文件的boost库: DateTime, Graph, Math, Random, Test, Exception.

@@ -1,0 +1,165 @@
+= Chpater 1 Getting start =
+== 1.1 Chunks ==
+* chunk看成一个语句序列.
+* 分号和换行并不起任何作用, 仅可提高代码可读性.
+* chunk可有任意大小.
+* CMD中输入lua进入互动模式, C-Z或者输入os.exit()退出互动模式.
+* 互动模式中, 每行输入看成一个完整的chunk, 如果一行形成不了一个完整chunk, 则会在下一行开头">>"继续输入.
+* 为了执行一个chunk序列, 可以将这些chunk作为参数以及使用-l选项传递给lua解释器.
+{{{lua
+--连续执行文件a和b
+lua -la -lb
+}}} 
+* 使用-i选项, 在运行给定的chunk之后开始一个interactive session. 对于调试和手动测试很有用.
+{{{lua
+lua -i -la -lb
+}}} 
+* 使用 dofile 函数链接chunks, 该函数对于调试很有益, 可以同时打开文本编辑器和CMD进行调试.
+== 1.2 Global Variables ==
+* 访问一个未初始化的变量, 其返回nil值.
+* 如果想让一个变量有一个短的生命期, 可使用关键字local. 或者给全局变量赋值nil.
+== 1.3 Some Lexical Conventions ==
+* 标识符不要数字开头, 避免下划线开头且之后跟随数个大写字母
+* 区域依赖性(locale dependent), 可使用其他语言的文字作为标识符.
+* 保留标识符: and, break, do, else, elseif, end, false, for, function, if, in, local, nil, not, or, repeat, return, then, true, until, while
+* Lua语言是大小写敏感的
+* 单行注释: --开头. 多行注释: --[[ 开头
+	- 多行注释: --]] 结尾.
+== 1.4 The Stand-Alone Interpreter ==
+* 解释器加载一个文件, 如果第一行开头带有数字记号('#'), 则忽略之. 这样可以让其作为Unix系统中的脚本解释器.
+* 格式
+{{{
+lua [options] [script [args]]
+}}} 
+* -e 选项可以让我们将代码直接输入到命令行中.
+{{{
+lua -e "print(math.sin(12))"
+}}} 
+* -l 加载文件, -i 进入互动模式
+* 无论何时定义全局变量 _PROMPT, 互动的时候会使用该值
+{{{
+prompt> lua -i -e "_PROMPT=' lua> '"
+}}} 
+* 在运行参数之前, 查找环境变量 LUA_INIT, 如果其为"@filename", 则预先加载该文件, 如果不带"@"开头, 则运行该部分代码.
+* script 可以使得在全局变量arg中返回参数
+{{{
+lua -e "sin=math.sin" script a b
+}}} 
+    - arg[-3] = "lua"
+    - arg[-2] = "-e"
+    - arg[-1] = "sin=math.sin"
+    - arg[0] = "script"
+    - arg[1] = "a"
+    - arg[2] = "b"
+
+= Chapter 2 Types and Values =
+* lua是动态类型语言, 每个值带有自己的类型.
+* 八个基本类型: nil, boolean, number, string, userdata, function, thread, table. type函数返回参数的类型信息.
+* 变量不包含任何预定义的值, 其可含任何类型的值.
+== 2.1 Nil ==
+== 2.2 Booleans ==
+* true和false
+* 只有false和nil被认为假, 其余为真, 包括0和空字符串都为真.
+== 2.3 Numbers ==
+* 使用双精度表示整数, 没有取舍错误.
+* 数字常量可使用可选的小数部分, 可选的十进制指数
+== 2.4 Strings ==
+* 可在字符串中存储二进制数据, 字符串为不可改变的值
+* 使用双引号或单引号界限字符串常量, 可以使用反斜号来代表其他字符.
+* 可以使用\ddd表示一个字符
+* 可以使用[\[..]]表示字符串
+* lua提供了数字和字符串的自动转换. 任何数字操作都将字符串试图转换为一个数字.
+* 可以将数字转换为字符串. 例如使用 .. 字符串连接操作符. 可以使用函数 tonumber 显式地将一个字符串转换为数字. 可以调用函数 tostring 或者连接一个数字至一个空字符串来转换数字为字符串.
+== 2.5 Tables ==
+* table还可表示一个package.
+* 通过构造函数表达创建table. 最简单的形式为{};
+* table 永远是匿名的. 即在table变量名和table之间没有固定的联系.
+* 支持使用field name作为做引. 例如 a.x 等同于 a["x"]
+{{{
+    -- read 10 lines storing them in a table
+    a = {}
+    for i=1,10 do
+      a[i] = io.read()
+    end
+
+    -- print the lines
+    for i,line in ipairs(a) do
+      print(line)
+    end
+}}} 
+* 遍历数组时, 可以将第一个未初始化的数值元素(即nil值)作为结束.
+* 通常数组索引从1开始, 而不是从0开始.
+== 2.6 Functions ==
+* 函数在Lua中是first-class值, 可存储为变量, 作为参数, 作为返回值.
+* Lua可以调用用Lua或者C语言编写的函数.
+== 2.7 Userdata and Threads ==
+* userdata允许任意的C数据存储在Lua变量中. 其在Lua中没有预定义的操作, 除了分配和相等测试. 
+
+= Chapter 3 Expressions =
+* 表达式包括数字常量, 字符串, 变量, 一元和二元操作, 函数调用, 还有非常规的函数定义和表格构造器.
+== 3.1 Arithmetic Operators ==
+* 加减乘除, 负号, 指数.
+== 3.2 Relation Operators ==
+* <   >   <=  >=  ==  ~=, 返回 true 或者 false
+* 对于表格, userdata, 函数而言, 两个值只有相同的对象才相等.
+* 只有数字和字符串才能比较大小. 否则只能比较两者是否相等.
+== 3.3 Logical Operators ==
+* 逻辑操作符有 and, or, not. 只有false和nil为假. 当第一个参数为false时, and操作符返回第一个参数, 当第一个参数不为假时, or操作符返回第一个参数.
+* 一个技巧 x = x or v. 等同于 if not x then x = v end
+* (a and b) or c 等同于C表达式 a ? b : c
+* 求出最大值: max = (x > y) and x or y
+== 3.4 Concatenatioin ==
+* 操作符 "..", 如果操作数为number, 则转换为字符串.
+== 3.5 Precedence ==
+* 操作数优先级
+* 所有二元操作符都是左连接的, 除了 ^ 和 .. 是右连接的.
+* 尽量使用括弧.
+== 3.6 Table Constructor ==
+* 构造器为创建和初始化表格的表达式.
+* 空构造器: {}. 初始化数组, 列表体第一个数组元素索引为1.
+{{{lua
+    days = {"Sunday", "Monday", "Tuesday", "Wednesday",
+            "Thursday", "Friday", "Saturday"}
+}}}
+* 构造器不仅使用常量表达式, 还使用任意类型的表达式作为元素值.
+* 可以将表格当成记录使用.
+* 我们可以在一个构造器中混合记录体和列标题初始化.
+{{{lua
+    polyline = {color="blue", thickness=2, npoints=4,
+                 {x=0,   y=0},
+                 {x=-10, y=0},
+                 {x=-10, y=1},
+                 {x=0,   y=1}
+               }
+}}}
+* 你不能使用负值索引或者不正确标识符的字符串来初始化域(fields), 更正式通用的格式, 使用方括号表达式初始化索引.
+{{{lua
+    opnames = {["+"] = "add", ["-"] = "sub",
+               ["*"] = "mul", ["/"] = "div"}
+    
+    i = 20; s = "-"
+    a = {[i+0] = s, [i+1] = s..s, [i+2] = s..s..s}
+    
+    print(opnames[s])    --> sub
+    print(a[22])         --> ---
+}}}
+* {x=0, y=0} 等同于 {["x"]=0, ["y"]=0}
+* {"red", "green", "blue"} 等同于 {[1]="red", [2]="green", [3]="blue"}
+* 可以在最后一个元素后添加逗号. 还可以使用分号代替逗号.
+
+= Chapter 4 Statements =
+* Lua支持的语句有复制, 控制结构, 过程调用(procedure calls), 还支持多重复制, 局部变量声明.
+== 4.1 Assignment ==
+* 复制可以改变变量和表格域的值.
+* 允许多重赋值. 即一个值的列表赋值给一个变量列表, 两个列表都用逗号分隔.
+{{{lua
+	a, b = 10, 2*x
+}}}
+* 多重赋值中, 先求解所有值, 而后再赋值, 故可以用于交换.
+{{{lua
+	x, y = y, x
+	a[i], a[j] = a[j], a[i]
+}}}
+* 当左边的变量数量比右边值的数量多, 则多余的变量被赋值为nil. 当左边的变量数量少于右边值的数量, 则多余的值被抛弃.
+多重赋值最常用于交换两个值, 以及一个函数返回多个值.
+== 4.2 Local Variables and Blocks ==

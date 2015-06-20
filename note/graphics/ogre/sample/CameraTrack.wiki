@@ -1,0 +1,12 @@
+* OgreBites::SdkCameraMan
+	- setStyle(CS_MANUAL) --- 表示手动操作详细
+* 实现相机动画
+	- Ogre::Camera::setAutoTracking --- 设置相机始终朝向某个场景节点
+	- 创建一个场景节点 camNode 作为相机节点, 挂接相机
+	- Ogre::SceneManager::createAnimation --- 创建一个动画, 注意动画名称, 可根据该名称创建动画状态
+	- Ogre::Animation::setInterpolationMode --- 设置动画的插值模式
+	- Ogre::Animation::createNodeTrack --- 创建一个节点轨迹, 参数为camNode
+	- Ogre::NodeAnimationTrack::createNodeKeyFrame --- 创建关键帧
+	- Ogre::SceneManger::createAnimationState --- 创建动画状态
+	- Ogre::AnimationState::setEnable --- 允许播放该动画
+	- Ogre::AnimationState::addTime --- 播放动画

@@ -1,0 +1,10 @@
+= 基本算法 =
+
+= 笔记 =
+	[[note/Algorithmss|算法导论]]
+	[[note/advanceddatastructures|Advanced Data Structures]]
+
+= 游戏算法 =
+	[[game/gamealgorithm|游戏算法]]
+	[[game/gamealgorithm2|游戏算法]]
+	[[game/gamealgorithm3|游戏算法2]]

@@ -1,0 +1,15 @@
+* 使用MSBuild生成项目和解决方案
+* VC++目录位于项目属性页和属性管理器
+* _ITERATOR_DEBUG_LEVEL宏调用对迭代器的调试支持
+* /analyze 警告 --- 移除大多数 /analyze（企业代码分析）警告
+* 重新启动管理器
+* MFC 库 --- 使用 CTaskDialog 类来代替标准的 AfxMessageBox 消息框
+* SafeInt 库执行能够消除整数溢出的安全算术运算
+* auto 关键字
+* decltype 运算符
+* Lambda 表达式
+* Rvalue 引用
+* static_assert 声明
+* nullptr 和 __nullptr 关键字
+* /Zc:trigraphs 编译器选项
+* Visual Studio 2010 重新引入了“MFC 类向导”。

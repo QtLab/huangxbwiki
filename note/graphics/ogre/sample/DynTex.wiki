@@ -1,0 +1,43 @@
+* 类 DynTex
+	* 数据成员
+		- const unsigned int TEXTURE_SIZE --- 128
+		- const unsigned int SQR_BRUSH_RADIUS --- 12的平方
+		- HardwarePixelBufferSharedPtr mTexBuf
+		- Real mPlaneSize
+		- RaySceneQuery* mCursorQuery
+		- Vector2 mBrushPos
+		- Real mTimeSinceLastFreeze
+		- bool mWiping
+		- SceneNode* mPenguinNode
+		- AnimationState* mPenguinAnimState
+	* 类方法
+		- setupContent
+			- Examples/StormySkyBox 天空盒
+			- 手工纹理 "thaw", 大小 128x128
+			- Texture::getBuffer() 得到 HardwarePixelBufferSharedPtr, 而后调用 HardwarePixelBufferShared::lock, unlock, getCurrentLock().data. 用memset初始化器其数据为 0xff
+			- penguin.mesh 创造实体, 用场景节点挂勾, 该mesh有动画 "amuse"
+			- 根据 Examples/Snow 创建粒子系统
+			- 根据 SceneManager::PT_PLANE 创建一个平面, 设置材质 "Examples/Frost". 模拟玻璃板效果
+			- 上面创建的平面调用 Entity::getBoundingBox()::getSize().x 得到该平面的宽度
+			- SceneManager::createRayQuery() 创建一个光线查询, 参数为 Ray() 缺省构造的一个光线
+		- frameRenderingQueued
+			- 调用 SdkTrayManager::getCursorRay(mCamera) 得到光线 Ray
+			- 光线查询设置光线为上面的道德Ray, 而后调用 excute() 得到结果 RaySceneQueryResult
+			- 如果结果不会空, 则以 RaySceneQueryResult::back().distance 为参数, 调用 Ray::getPoint() 得到该点
+			- Vector2(pt.x, -pt.y) / mPlaneSize 得到该点的相对位置, 再加上Vector2(0.5, 0.5), 而后乘以 TEXTURE_SIZE, 得到笔刷位置
+			- 调用 updateTexture 更新纹理
+			- 更新动画
+	* 主要是在 updateTexture 中实现汽车挡风板效果
+	* 注意光线查询如何正确得到光标位置的算法, 在 SdkTrayManager 中查看
+	* 查看粒子材质
+		- Examples/Snow: 材质 Examples/Flare, Box 发射器, Affector DirectionRadomiser
+	* 查看平面材质
+		- Examples/Frost: 多纹理单元---frost.png和thaw手工纹理, thaw的数据全为0xff时则完全显示前者, 两个纹理单元会进行与操作.
+	* 如何根据光线查询的结果得到纹理坐标的位置 
+		- 纹理图像数据是从左上角开始一直到右下角
+		- 首先得到光标在图形纹理上的比例位置 (pt.x, -pt.y)/平面大小+(0.5, 0.5), 而后该比例加上(0.5, 0.5), 因为左上角为(0.0, 0.0), 右下角为(1.0, 1.0)
+		- 该比例乘以纹理大小, 即可得到第几行第几列的数据值.
+	* 更新纹理
+		- 首先判断该点的数据是否小于0xff,小于的话逐步添加
+		- 而后判断是否有鼠标活动, 有的话, 根据该点与鼠标中心的位置刷新数据.
+* 本书主要是通过多重纹理实现汽车的雨刷器效果, 第二个纹理单元手工纹理的数据首先初始化为0xff, 由于两个纹理单元进行与操作, 这样就会完全显示第一个纹理单元的数据. 然后通过更新手工纹理的部分数据为0x00, 实现透明的效果. 这是由于其材质设置的混合方案为源颜色*源颜色 + 目标颜色*(1-源颜色), 所以一旦用鼠标檫屏幕, 就会很清晰的显示背后的企鹅

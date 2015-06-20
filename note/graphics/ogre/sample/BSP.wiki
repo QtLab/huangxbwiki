@@ -1,0 +1,20 @@
+* 需要插件 "BSP Scene Manager"
+* 增加资源位置
+	- ConfigFile::load() 加载一个cfg文件
+	- OgreBites::FileSystemLayer::getConfigFilePath() 遍历 Home 目录, 工作目录, 得到 quakemap.cfg 文件
+	- ConfigFile::getSetting 得到"Archive", "Map" 对应的值
+	- 使用 ResourceGroupManager::addResourceLocation 添加资源位置, 加入该BSP地图
+	- ResourceGroupManager::getWorldResourceGroupName() 默认为 DEFAULT_RESOURCE_GROUP_NAME, 即"General"
+* Root::createSceneManager("BspSceneManager"); 创建了 BSP 管理器
+* 加载地图资源
+	- OgreBits::SdkTrayManager::showLoadingBar(), hideLoadingBar() 用于显示加载进度条
+	- ResourceGroupManager::linkWorldGeometryToResourceGroup 链接具体的BSP地图
+	- ResourceGroupManager::initialiseResourceGroup, loadResourceGroup() 重新初始化和加载"General"资源组
+* 卸载地图资源
+	- ResourceGroupManager::unloadResourceGroup(), removeResourceLocation()
+* 建立视图
+	- 相机, 视口, 设置相机的纵横比, 相机与场景的最近距离
+	- 创建一个 OgreBits::SdkCameraMan 用于控制相机
+	- BspSceneManager::getSuggestedViewpoint(true) 从预先设置好的几个位置方向随机选择一个.
+	- Ogre::Camera::setFixedYawAxis, pitch, setPosition, rotate 设置相机
+	- OgreBits::SdkCameraMan::setTopSpeed() 设置最高速度

@@ -1,0 +1,3 @@
+= 教程 =
+[[tutorial/guide|Lua Prgram chapter 1-8]]<br />
+[[tutorial/guide2|Lua program chapter 9-13]]<br />

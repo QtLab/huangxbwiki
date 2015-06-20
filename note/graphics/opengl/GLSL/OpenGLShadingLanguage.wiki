@@ -1,0 +1,109 @@
+= 第9章 模拟固定管线功能 =
+== 9.1 变换 ==
+* 顶点位置变换至裁剪坐标
+{{{glsl
+uniform mat4 MVPmatrix;	// 模型视图投影矩阵
+// ...
+
+in vec4 MCVertex;
+// ...
+
+a(); // 一个不会修改 gl_Position, MVP 或 MCVertext 的函数.
+
+// ...
+// 变换顶点至裁剪控件
+gl_Position = MVP * MCVertex;
+}}} 
+	- 增加 invariant 限定符.
+{{{glsl
+uniform mat4 MVPmatrix;	// 模型视图投影矩阵
+// ...
+
+invariant gl_Position;
+in vec4 MCVertex;
+// ...
+
+a(); // 一个不会修改 gl_Position, MVP 或 MCVertext 的函数.
+
+// ...
+// 变换顶点至裁剪控件
+gl_Position = MVP * MCVertex;
+}}}
+* 计算视觉坐标
+{{{glsl
+uniform mat4 MVMatrix;
+// ...
+vec4 ecPosition;
+vec3 ecPosition3;
+// ...
+
+// 变换顶点至视觉坐标
+if (NeedEyePosition)
+{
+	ecPosition = MVMatrix * MCVertex;
+	ecPosition3 = (vec3(ecPosition)) / ecPosition.w;
+}
+}}} 
+* 将法线变换至视觉坐标
+{{{glsl
+uniform mat3 NormalMatrix;
+// ...
+
+in vec3 MCNormal;
+// ...
+
+vec3 normal;
+normal = NormalMatrix * MCNormal;
+}}}
+* 单元化法线
+{{{glsl
+normal = normalize(normal);
+}}} 
+	- 如果发送的法线始终为单元长度, 模型视图矩阵始终为一致缩放的矩阵. 则可以使用 rescaling, 以避免单元化的昂贵计算.
+{{{glsl
+uniform float NormalScale;
+// ...
+
+normal = normal * NormalScale;
+}}} 
+* 纹理坐标的变化
+{{{glsl
+uniform TextureMatrix[MaxTextureCoords];
+// ...
+
+in vec4 MultiTexCoord0;
+out vec4 TexCoord[MaxTexCoord];
+
+TexCoord[0] = TextureMatrix[0] * MultiTexCoord0;
+}}} 
+
+== 9.2 光源 ==
+=== 9.2.1 有向光 ===
+* 可以预先计算该光线方向, 并存储于 LightSource[i].halfVector.
+* 计算光的方向和面法线之间角度的余弦, 以及计算面法线与半角线之间角度的余弦. 前者乘以光的散射颜色, 后者则使用FrontMaterial.shininess求出幂值, 而后乘以镜面颜色.
+{{{class="brush: glsl"
+void DirectionalLight(const in int  i,
+                      const in vec3 normal,
+                      inout    vec4 ambient,
+                      inout    vec4 diffuse,
+                      inout    vec4 specular)
+{
+    float nDotVP; // normal . light direction
+    float nDotHV; // normal . light half vector
+    float pf; // power factor
+    nDotVP = max(0.0, dot(normal,
+                 normalize(vec3(LightSource[i].position))));
+    nDotHV = max(0.0, dot(normal, vec3(LightSource[i].halfVector)));
+    if (nDotVP == 0.0)
+        pf = 0.0;
+    else
+        pf = pow(nDotHV, FrontMaterial.shininess);
+    ambient  += LightSource[i].ambient;
+    diffuse  += LightSource[i].diffuse * nDotVP;
+    specular += LightSource[i].specular * pf;
+}
+}}} 
+=== 9.2.2 点光源 ===
+* 和方向光的两个不同点
+	- 每个顶点要计算最大高亮的方向.
+	- 随着距离衰减. 有常量, 线性, 二次衰减.

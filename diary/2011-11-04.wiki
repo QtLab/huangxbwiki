@@ -1,0 +1,5 @@
+记录
+	* VC 动态菜单
+	* hggit, vimwiki 网页头部问题 --- 未解决
+	* VC 右键弹出菜单
+	* OvertakeSystem 文档化, 修改车子方向变化的合理性

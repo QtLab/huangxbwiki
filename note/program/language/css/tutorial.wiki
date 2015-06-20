@@ -1,0 +1,599 @@
+== CSS 语法 ==
+* 一个CSS规则集由一个selector和一个声明块组成
+{{{class="brush: css"
+h1 {color:blue; font-size:12px;}
+}}} 
+	- h1 是选择器, 后面括号内是两个声明, color, font-size是属性, blue, 12px则是值.
+	- 选择器为要设置风格的HTML元素
+	- 声明块为由分号分隔的一个或多个声明.
+	- 每个声明由一个属性名称和一个值组成, 由冒号分隔.
+* 注释格式 /* ... */
+
+== CSS 选择器 ==
+* CSS 选择器查找 HTML 元素, 有id, classes, types, attributes, value of attributes 和更多
+=== 元素选择器 ===
+* 根据element name选择, 例如 <p>
+{{{class="brush: css"
+p
+{
+text-align:center;
+color:red;
+} 
+}}} 
+=== id选择器 ===
+* 使用 HTML tag 的id属性选择元素.
+* id 在页面内必须唯一.
+* 一个井号后跟随一个id.
+{{{class="brush: css"
+#para1
+{
+text-align:center;
+color:red;
+} 
+}}} 
+=== class选择器 ===
+* 使用 HTML 的class属性
+* 句号跟随一个类名.
+{{{class="brush: css"
+.center
+{
+text-align:center;
+color:red;
+} 
+}}} 
+* 带有一个类影响的HTML元素
+{{{class="brush: css"
+p.center
+{
+text-align:center;
+color:red;
+} 
+}}} 
+* 分组选择器, 用逗号分组
+{{{class="brush: css"
+h1,h2,p
+{
+text-align:center;
+color:red;
+}
+}}} 
+
+== CSS How To... ==
+* 三种方式插入一个 style sheet
+	- External style sheet
+	- Internal style sheet
+	- Inline style
+=== External style sheet ===
+* 使用 <link> tag 链接至该 style sheet. 其内容必须位于head部分内.
+{{{class="brush: html"
+<head>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+</head>
+}}} 
+=== Internal style sheet ===
+* head部分内使用 <style> tag
+{{{class="brush: html"
+<head>
+<style>
+hr {color:sienna;}
+p {margin-left:20px;}
+body {background-image:url("images/background.gif");}
+</style>
+</head>
+}}} 
+=== Inline Styles ===
+* 在相关tag中使用 style 属性.
+{{{class="brush: html"
+<p style="color:sienna;margin-left:20px;">This is a paragraph.</p>
+}}} 
+=== Multiple Style Sheets ===
+* 如果在不同 style sheet 为相同的 selector 设置了一些属性, 则会从更具体的style sheet中继承其值.
+* 例如
+	- external style sheet
+{{{class="brush: css"
+h3
+{
+color:red;
+text-align:left;
+font-size:8pt;
+}
+}}} 
+	- internal style sheet
+{{{class="brush: css"
+h3
+{
+text-align:right;
+font-size:20pt;
+}
+}}} 
+	- 则结果为
+{{{
+color:red;
+text-align:right;
+font-size:20pt;
+}}} 
+=== 多个 style 会串连成一个 ===
+* Style 可以定义于
+	-  HTML 元素内
+	-  HTML 页的头部内
+	-  外部 CSS 文件
+* 串联次序, 第四个的优先级最高.
+	# 浏览器默认
+	# 外部 style sheet
+	# 内部 style sheet
+	# Inline style
+* 如果外部 style sheet 其链接位置在内部 style sheet 之后, 则外部 style sheet 覆盖内部 style sheet.
+
+== CSS 背景 ==
+* CSS 背景用于定义元素的背景效果, 有以下属性.
+    - background-color
+    - background-image
+    - background-repeat
+    - background-attachment
+    - background-position
+* 背景颜色
+{{{class="brush: css"
+body {background-color:#b0c4de;} 
+}}} 
+	- 颜色值可以表示成 #ff0000, rgb(255,0,0), red
+* 背景图像
+{{{class="brush: css"
+body {background-image:url("paper.gif");} 
+}}} 
+* 背景图像 - 水平重复或垂直重复
+	- 默认水平重复和垂直重复
+{{{class="brush: css"
+body
+{
+background-image:url("gradient2.png");
+background-repeat:repeat-x;
+} 
+}}}
+	- 上例仅水平重复 
+* 背景图像 - 设置位置和无重复
+{{{class="brush: css"
+body
+{
+background-image:url("img_tree.png");
+background-repeat:no-repeat;
+} 
+}}} 
+{{{class="brush: css"
+body
+{
+background-image:url("img_tree.png");
+background-repeat:no-repeat;
+background-position:right top;
+} 
+}}}
+	- 带位置, 无重复.
+* 背景 - shorthand 属性.
+{{{class="brush: css"
+body {background:#ffffff url("img_tree.png") no-repeat right top;}
+}}} 
+	- 只需要属性按照如下顺序
+		- background-color
+		- background-image
+		- background-repeat
+		- background-attachment
+		- background-position
+
+== CSS Text ==
+=== 文本颜色 ===
+* 在 CSS 中, 颜色通常有三种表达方式
+	- 十六进制值: 如 "#ff0000"
+	- RGB颜色值: 如 "rgb(255,0, 0)"
+	- 颜色名: 如 "red"
+* 一个页面的默认颜色在body选择其中定义.
+{{{class="brush: css"
+body {color:blue;}
+h1 {color:#00ff00;}
+h2 {color:rgb(255,0,0);}
+}}} 
+=== 文本对齐 ===
+* 居中, 左右对齐, justified(每行相同宽度)
+* text-align 属性
+=== 文本修饰 ===
+* text-decoration 属性. 常用于移除链接的下划线.
+{{{class="brush: css"
+a {text-decoration:none;} 
+}}} 
+* 也可用于修饰文本
+{{{class="brush: css"
+h1 {text-decoration:overline;}
+h2 {text-decoration:line-through;}
+h3 {text-decoration:underline;}
+}}} 
+=== 文本变换 ===
+* text-transform 属性: 设置文本的大写和小写字母.
+{{{class="brush: css"
+p.uppercase {text-transform:uppercase;}
+p.lowercase {text-transform:lowercase;}
+p.capitalize {text-transform:capitalize;}
+}}} 
+=== 文本缩进 ===
+* text-indent 属性: 设置文本第一行的缩进
+{{{class="brush: css"
+p {text-indent:50px;}
+}}} 
+=== 所有 CSS 文本属性 ===
+* color --- Sets the color of text
+* direction --- Specifies the text direction/writing direction
+* letter-spacing --- Increases or decreases the space between characters in a text
+* line-height --- Sets the line height
+* text-align --- Specifies the horizontal alignment of text
+* text-decoration --- Specifies the decoration added to text
+* text-indent --- Specifies the indentation of the first line in a text-block
+* text-shadow --- Specifies the shadow effect added to text
+* text-transform --- Controls the capitalization of text
+* unicode-bidi --- Used together with the direction property to set or return whether the text should be overridden to support multiple languages in the same document
+* vertical-align --- Sets the vertical alignment of an element
+* white-space --- Specifies how white-space inside an element is handled
+* word-spacing --- Increases or decreases the space between words in a text
+
+== CSS 字体 ==
+=== CSS Font Families ===
+* CSS 中, 有两种类型的字体family name
+	- generic family: Serif, Sans-serif, Monospace
+	- font family: Times New Roman/Georgia, Aria/Verdana, Courier New/Lucida Console
+=== Font Family ===
+* font-family 属性.
+* 下面设置多个font family
+{{{class="brush: css"
+p{font-family:"Times New Roman", Times, serif;} 
+}}} 
+=== Font Style ===
+* font-style 属性, 可设置斜体, 三个值: normal, italic, oblique
+=== 字体大小 ===
+* font-size 属性, 可以是绝对值, 也可以是相对值. 默认普通文本大小为 16px.
+=== 用像素值设置字体大小 ===
+{{{class="brush: css"
+ h1 {font-size:40px;}
+h2 {font-size:30px;}
+p {font-size:14px;}
+}}}
+=== 使用 EM 设置字体大小 ===
+* 1em 等于当前的字体大小.
+{{{class="brush: css"
+h1 {font-size:2.5em;} /* 40px/16=2.5em */
+h2 {font-size:1.875em;} /* 30px/16=1.875em */
+p {font-size:0.875em;} /* 14px/16=0.875em */
+}}} 
+=== 使用百分比和EM的组合 ===
+{{{class="brush: css"
+body {font-size:100%;}
+h1 {font-size:2.5em;}
+h2 {font-size:1.875em;}
+p {font-size:0.875em;}
+}}}
+=== 所有CSS的字体属性 ===
+* font --- Sets all the font properties in one declaration
+* font-family --- Specifies the font family for text
+* font-size  --- Specifies the font size of text
+* font-style --- Specifies the font style for text
+* font-variant --- Specifies whether or not a text should be displayed in a small-caps font
+* font-weight --- Specifies the weight of a font
+
+== CSS 链接 ==
+=== Styling Links ===
+* 可设置链接的不同风格
+* 有四种链接状态, a:link, a:visited, a:hover, a:active
+{{{class="brush: css"
+a:link {color:#FF0000;}      /* unvisited link */
+a:visited {color:#00FF00;}  /* visited link */
+a:hover {color:#FF00FF;}  /* mouse over link */
+a:active {color:#0000FF;}  /* selected link */ 
+}}} 
+* 次序规则: a:hover 必须位于 a:link 和 a:visited 之后, a:active 必须位于 a:hover 之后.
+* text-decoration 属性可以移除链接的下划线
+{{{class="brush: css"
+ a:link {text-decoration:none;}
+a:visited {text-decoration:none;}
+a:hover {text-decoration:underline;}
+a:active {text-decoration:underline;}
+}}} 
+* background-color 属性设置链接的背景颜色
+{{{class="brush: css"
+a:link {background-color:#B2FF99;}
+a:visited {background-color:#FFFF85;}
+a:hover {background-color:#FF704D;}
+a:active {background-color:#FF704D;} 
+}}} 
+
+== CSS 列表 ==
+* 该属性允许你:
+	- 设置列表标志为有序列表
+	- 设置列表标志为无序列表
+	- 设置一个图像为列表标志
+=== 不同的列表条目标志 ===
+* list-style-type 属性
+{{{class="brush: css"
+ul.a {list-style-type: circle;}
+ul.b {list-style-type: square;}
+
+ol.c {list-style-type: upper-roman;}
+ol.d {list-style-type: lower-alpha;}
+}}} 
+=== 图像作为列表标志 ===
+* list-style-image 属性
+{{{class="brush: css"
+ul
+{
+list-style-image: url('sqpurple.gif');
+}
+}}} 
+=== 跨浏览器解决方案 ===
+{{{class="brush: css"
+ul
+{
+list-style-type: none;
+padding: 0px;
+margin: 0px;
+}
+ul li
+{
+background-image: url(sqpurple.gif);
+background-repeat: no-repeat;
+background-position: 0px 5px;
+padding-left: 14px;
+}
+}}}
+=== 列表 - 缩写属性 ===
+* list-style 属性.
+{{{class="brush: css"
+ul
+{
+list-style: square url("sqpurple.gif");
+}
+}}}
+* 次序如下: 
+	- list-style-type
+	- list-style-position
+	- list-style-image
+=== 所有属性 ===
+* list-style --- Sets all the properties for a list in one declaration
+* list-style-image --- Specifies an image as the list-item marker
+* list-style-position --- Specifies if the list-item markers should appear inside or outside the content flow
+* list-style-type --- Specifies the type of list-item marker
+
+== CSS 表格 ==
+=== 表格边框 ===
+* border 属性
+{{{class="brush: css"
+table, th, td
+{
+border: 1px solid black;
+}
+}}} 
+* 单边框 border-collapse 属性.
+{{{class="brush: css"
+table
+{
+border-collapse:collapse;
+}
+table, th, td
+{
+border: 1px solid black;
+}
+}}} 
+=== 表格宽度和高度 ===
+* width 和 height 属性
+{{{class="brush: css"
+table
+{
+width:100%;
+}
+th
+{
+height:50px;
+} 
+}}} 
+=== 表格文本对齐 ===
+*  text-align 和 vertical-align 属性
+{{{class="brush: css"
+td
+{
+text-align:right;
+}
+
+td
+{
+height:50px;
+vertical-align:bottom;
+}
+}}} 
+=== Table Padding ===
+* 设置文本和边框之间的空间
+{{{class="brush: css"
+td
+{
+padding:15px;
+}
+}}} 
+=== 表格颜色 ===
+{{{class="brush: css"
+table, td, th
+{
+border:1px solid green;
+}
+th
+{
+background-color:green;
+color:white;
+}
+}}}
+
+== CSS BOx Model ==
+* 所有的HTML元素都可看成boxes. 设计和布局时使用术语 "box model".
+* box model 封装了一个html 元素, 包括margins, borders, padding, 和实际内容.
+* 注: 当你设置CSS一个元素的高宽时, 你仅设置内容区域的高宽, 要得到完整的大小, 还需要加上 padding, borders, 和 margins.
+
+== CSS Border ==
+* border-style 属性设置显示何种类型的 border.
+	- none: Defines no border
+	- dotted: Defines a dotted border
+	- dashed: Defines a dashed border
+	- solid: Defines a solid border
+	- double: Defines two borders. The width of the two borders are the same as the border-width value
+	- groove: Defines a 3D grooved border. The effect depends on the border-color value
+	- ridge: Defines a 3D ridged border. The effect depends on the border-color value
+	- inset: Defines a 3D inset border. The effect depends on the border-color value
+* border-width 属性设置边框宽度. 为像素值或者三种预定义值: thin, medium, thick. 这个属性要和 border-style 一起使用.
+* border-color 属性设置颜色.
+* 不同的边可以有不同的border
+{{{class="brush: css"
+p
+{
+border-top-style:dotted;
+border-right-style:solid;
+border-bottom-style:dotted;
+border-left-style:solid;
+}
+// 两者一致.
+p
+{
+border-style:dotted solid;
+}
+}}} 
+* border-style 可以有一个到四个的值, 分别表示
+	- border-style:dotted solid double dashed;
+		- top border is dotted
+		- right border is solid
+		- bottom border is double
+		- left border is dashed
+	- border-style:dotted solid double;
+		- top border is dotted
+		- right and left borders are solid
+		- bottom border is double
+	- border-style:dotted solid;
+		- top and bottom borders are dotted
+		- right and left borders are solid
+	- border-style:dotted;
+		- all four borders are dotted
+* Border - 缩写属性.
+	- border 属性
+		- border-width
+		- border-style (required)
+		- border-color
+=== 所有属性 ===
+* border - Sets all the border properties in one declaration
+* border-bottom - Sets all the bottom border properties in one declaration
+* border-bottom-color - Sets the color of the bottom border
+* border-bottom-style - Sets the style of the bottom border
+* border-bottom-width - Sets the width of the bottom border
+* border-color - Sets the color of the four borders
+* border-left - Sets all the left border properties in one declaration
+* border-left-color - Sets the color of the left border
+* border-left-style - Sets the style of the left border
+* border-left-width - Sets the width of the left border
+* border-right - Sets all the right border properties in one declaration
+* border-right-color - Sets the color of the right border
+* border-right-style - Sets the style of the right border
+* border-right-width - Sets the width of the right border
+* border-style - Sets the style of the four borders
+* border-top - Sets all the top border properties in one declaration
+* border-top-color - Sets the color of the top border
+* border-top-style - Sets the style of the top border
+* border-top-width - Sets the width of the top border
+* border-width - Sets the width of the four borders
+
+== CSS Outlines ==
+* 在元素周边绘制的线条, border 之外.
+=== 所有属性 ===
+* outline - Sets all the outline properties in one declaration - outline-color, outline-style, outline-width, inherit
+* outline-color - Sets the color of an outline - color_name, hex_number, rgb_number, invert, inherit
+* outline-style - Sets the style of an outline - none, dotted, dashed, solid, double, groove, ridge, inset, outset, inherit
+* outline-width - Sets the width of an outline - thin, medium, thick, length, inherit
+
+== CSS Margin ==
+* 该属性定义围绕元素的空间, 没有背景颜色, 完全透明.
+=== 可能的值 ===
+* auto - The browser calculates a margin
+* length - Specifies a margin in px, pt, cm, etc. Default value is 0px
+* % - Specifies a margin in percent of the width of the containing element
+* inherit - Specifies that the margin should be inherited from the parent element
+* 还可以使用负值, 会覆盖内容上.
+* 每个边可以用不同的margin
+{{{class="brush: css"
+margin-top:100px;
+margin-bottom:100px;
+margin-right:50px;
+margin-left:50px;
+}}} 
+* Margin 缩写属性
+{{{class="brush: css"
+margin:100px 50px;
+}}} 
+* 可以有一个到四个值
+	- margin:25px 50px 75px 100px;
+		- top margin is 25px
+		- right margin is 50px
+		- bottom margin is 75px
+		- left margin is 100px
+	- margin:25px 50px 75px;
+		- top margin is 25px
+		- right and left margins are 50px
+		- bottom margin is 75px
+	- margin:25px 50px;
+		- top and bottom margins are 25px
+		- right and left margins are 50px
+	- margin:25px;
+		- all four margins are 25px
+=== 所有属性 ===
+* margin - A shorthand property for setting the margin properties in one declaration
+* margin-bottom - Sets the bottom margin of an element
+* margin-left - Sets the left margin of an element
+* margin-right - Sets the right margin of an element
+* margin-top - Sets the top margin of an element
+
+== CSS Padding ==
+* 定义了border和内容之间的空间.
+=== 可能的值 ===
+* length --- Defines a fixed padding (in pixels, pt, em, etc.)
+* % --- Defines a padding in % of the containing element
+=== 每个边都不同 ===
+{{{class="brush: css"
+padding-top:25px;
+padding-bottom:25px;
+padding-right:50px;
+padding-left:50px;
+}}}
+=== 缩写 ===
+{{{class="brush: css"
+padding:25px 50px;
+}}}
+=== 所有属性 ===
+* padding --- A shorthand property for setting all the padding properties in one declaration
+* padding-bottom --- Sets the bottom padding of an element
+* padding-left --- Sets the left padding of an element
+* padding-right --- Sets the right padding of an element
+* padding-top --- Sets the top padding of an element
+
+== CSS Dimension ==
+* dimension 属性允许控制元素的高度和宽度
+* height - Sets the height of an element - auto, length, %, inherit
+* max-height - Sets the maximum height of an element - none, length, %, inherit
+* max-width - Sets the maximum width of an element - none, length, %, inherit
+* min-height - Sets the minimum height of an element - length, %, inherit
+* min-width - Sets the minimum width of an element - length, %, inherit
+* width - Sets the width of an element - auto, length, %, inherit
+
+== CSS 显示和可视性 ==
+=== 隐藏一个元素 - display:none 或 visibility:hidden ===
+* visibility:hidden 仍受布局影响.
+* display:none 不占用空间, 不受布局影响.
+{{{class="brush: css"
+h1.hidden {visibility:hidden;}
+}}} 
+=== CSS Display - Block and Inline Elements ===
+* block 元素占据可用的完整宽度. 在其后有一条线.
+* 元素例子: <h1>, <p>, <div>
+* inline元素仅占据需要的宽度, 如 <span>, <a>
+== 改变元素如何显示 ==
+{{{class="brush: css"
+li {display:inline;}
+span {display:block;}
+}}}
+
+== CSS Positioning ==
+* 设置元素位置.

@@ -1,0 +1,11 @@
+= 类型 =
+	* M3DMatrix44f
+	* M3DVector4f
+
+= 数学 =
+	* m3dGetPlaneEquation --- 根据三个点得到平面方程
+	* m3dMakePlanarShadowMatrix --- 根据平面和光的方向就可以得到阴影矩阵.
+
+= glt函数 =
+	* gltGetOpenGLVersion 
+	* gltLoadTGA

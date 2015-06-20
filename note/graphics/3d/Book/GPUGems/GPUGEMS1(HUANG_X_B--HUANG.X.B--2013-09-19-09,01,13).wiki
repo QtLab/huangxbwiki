@@ -1,0 +1,52 @@
+= Chapter 1. Effective Water Simulation from Physical Models =
+* 正弦的合并模仿. 写入纹理空间生成 normal map, 方法为在渲染至目标纹理的像素着色器操作中, 正弦之和的法线的采样.
+	- 波长(L)
+	- 波幅(A)
+	- 速度(S)
+	- 方向(D)
+* 随机生成波的参数. 波连续消失且以不同的参数出现.
+
+= 源码分析 =
+* CMyD3DApplication 主要运行类, 从 CD3DApplication 派生而来. 
+* CMyD3DApplication 构造函数调用了 ResetWater() 函数
+	- InitTexState(); --- 初始化 m_TexState
+	- InitGeoState(); --- 初始化 m_GeoState
+	- InitWaves();
+		- InitTexWaves();
+			- InitTexWave(i); // 初始化每个波
+		- InitGeoWaves();
+			- InitGeoWave(i); // 初始化几何波
+* CMyD3DApplication::OneTimeSceneInit() 程序初始化
+	- 设置视觉矩阵和物体矩阵
+* CMyD3DApplication::InitDeviceObjects()
+	- CreateCosineLUT() --- 求出一个一维纹理表, 保存公式8b中的正弦余弦部分
+	- CreateBiasNoiseMap() --- 只是求解一个二维噪值纹理
+	- 创建 cubic 纹理和mesh, 以及其他纹理
+	- CreateWaterMesh()
+		- 根据第一个顶点和第二个顶点之间的距离设置所有的顶点的alpha值及白色颜色.
+		- 保存mesh每个面的位置数据
+	- CreateClearBuffer()
+		- 在 m_BumpVBuffer 中保存了四个顶点的数据
+	- 加载着色器文件
+	- GetWaterParams()
+		- 得到着色器文件中的参数
+* CMyD3DApplication::FrameMove() --- 每帧调用的函数
+	- MoveOnInput()
+		- 处理键盘输入
+	- UpdateTexWaves()
+		- 更新纹理波的状态
+	- UpdateGeoWaves()
+		- 更新几何波的状态
+* CMyD3DApplication::Render()
+	- RenderTexture()
+	- 清空缓存
+	- 绘制 mesh
+	- RenderWater()
+	- 绘制 Bump Map
+		- 设置纹理 m_BumpTex
+		- 设置顶点的类型(包含了哪些数据)
+		- 流源为 m_BumpVBuffer
+	- RenderText()
+* CMyD3DApplication::DeleteDeviceObjects()
+* CMyD3DApplication::FinalCleanup()
+* CMyD3DApplication::MsgProc() 处理窗口消息

@@ -1,0 +1,109 @@
+= 第八章 纹理贴图基础知识 =
+<br />
+1. 使用 glTexImage*D 的时候纹理大小必须为2的幂次方大小, 否则会被隐式禁用纹理<br />
+2. 使用纹理的过程, 像素操作函数仍可对其进行影响, 如缩放, 像素包装, 颜色表, 回绕等<br />
+3. 纹理矩阵, 纹理坐标可以通过纹理矩阵来进行转换, 纹理矩阵堆栈的深度只有两个元素:glMatrixMode(GL_TEXTURE);<br />
+4. GL_DECAL 和 GL_REPLACE, 如果纹理不具有 Alpha 成分, 则两者行为完全一样, 如果有 Alpha 成分, 则GL_DECALE的纹理会与底层几何图形混合在一起<br />
+5. 可以使用 OpenGL 的硬件加速功能加快所有必要的Mip层的生成<br />
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);<br />
+6. glPrioritizeTextures 设定纹理优先级.<br />
+<br />
+= 第9章 纹理贴图高级知识 =
+	使用第二镜面颜色来增加亮点的可见性, 打开镜面辅助颜色<br />
+		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);<br />
+	切换回常规的光照模型<br />
+		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_COLOR_SINGLE);<br />
+<br />
+	如果禁用光照, 纹理贴图使用第二颜色. 则需要指定第二颜色. 并显式的启用第二颜色<br />
+		glEnable(GL_COLOR_SUM);<br />
+<br />
+	要激活或取消抖动，可以用glEnable(GL_DITHER)和glDisable(GL_DITHER)函数。默认情况下，抖动是激活的。<br />
+<br />
+== 9.2 各向异性过滤 ==
+如果我们在进行纹理过滤时考虑了观察角度, 这种过滤方法叫做各向异性过滤<br />
+<br />
+使用各向异性过滤的步骤<br />
+1. 判断是否支持GL_EXT_texture_filter_anisotropic<br />
+2. 查询支持的各向异性过滤的最大数量.(越大, 沿最大修改方向(最强观察点)所采样的纹理单元就越多, 1.0表示各向同性过滤)<br />
+	GL_MAX_TEXTURE_MAX_ANISOTRORY_EXT<br />
+3. 使用glTexParameter函数以及GL_TEXTURE_MAX_ANISOTROPY_EXT设置希望应用的各向异性过滤的数量<br />
+<br />
+== 9.3 纹理压缩 ==
+扩展: GL_ARB_texture_compression字符串测试这个扩展是否得到支持<br />
+	glTexImage使用GL_COMPRESS_*内部格式<br />
+	用glGetTexLevelParameteriv(以GL_TEXTURE_COMPRESSED为参数)判断这个纹理是否成功压缩<br />
+	glGetTexLevelParameteriv函数接受几个新的参数值, 与压缩纹理有关<br />
+	glHint设置GL_TEXTURE_COMPRESSION_HINT提示<br />
+	glCompressedTexImage载入压缩纹理<br />
+GL_REFLECTION_MAP和GL_NORMAL_MAP立方体贴图<br />
+	GL_TEXUTRE_CUBE_MAP_POSITIVE_X<br />
+	GL_TEXUTRE_CUBE_MAP_NEGATIVE_X...<br />
+多重纹理<br />
+	带光照或颜色的几何图形 + 纹理+环境0 + 纹理+环境1 ...<br />
+	<br />
+= 第10章 曲线和表面 =
+== 10.1 内部支持的表面 ==
+=== 10.1.1 设置二次方程状态 ===
+1.	GLUquadricObj* pObj;<br />
+	// ...<br />
+	pObj = gluNewQuadric();<br />
+	// 设置二次方程渲染参数<br />
+	// 绘制二次方程表面<br />
+	// ...<br />
+	gluDeleteQuadric(pObj);    // 释放二次方程对象<br />
+<br />
+2.gluNewQuadric函数不仅为它分配空间, 而且把它的数据成员初始化为合理的缺省值.<br />
+	设置二次方程绘图风格的第一个函数是:<br />
+		void gluQuadricDrawStyle(GLUquadricObj *qobj, GLenum drawStyle);<br />
+		GLU_FILL, GLU_LINE, GLU_POINT, GLU_SILHOUETTE<br />
+<br />
+3. 接下来的函数指定了二次方程表面几何图形在生成时是否带有表面法线<br />
+	void gluQuadricNormals(GLUquadricObj *qobj, GLenum normals);<br />
+		GLU_NONE--没有法线.<br />
+		GLU_SMOOTH--平滑法线<br />
+		GLU_FLAT--扁平法线<br />
+	法线是指向屏幕外部还是内部<br />
+		void gluQuadricOrientation(GLUquadricObj *quadObject, GLenum orientation);<br />
+			GLU_OUTSIDE, GLU_INSIDE<br />
+	对于圆盘, 它的正面就是沿z轴正方向的那个面.<br />
+<br />
+4. 为二次方程表面生成纹理坐标<br />
+	void gluQuadricTexture(GLUquadricObj *quadObject, GLboolean textureCoords);<br />
+<br />
+=== 10.1.2 绘制二次方程图形 ===
+1. 绘制球体<br />
+	void gluSphere(GLUquadricObj *qobj, GLdouble radius, GLint slices, GLint stacks);<br />
+		沿着z轴正方向绘制的<br />
+<br />
+2.绘制圆柱体<br />
+	void gluCylinder(GLUquadricObj *qobj, GLdouble baseRadius, GLdouble topRadius,<br />
+  		GLdouble height, GLint slices, GLint stacks);<br />
+<br />
+3. 绘制圆盘<br />
+	void gluDisk(GLUquadricObj *qobj, GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops);<br />
+<br />
+=== 10.1.3 用二次方程进行建模 ===
+
+== 10.2 Bezier曲线和表面 ==
+=== 10.2.1 参数方程表示形式 ===
+	x = f(t)<br />
+	y = g(t)<br />
+	z = h(t)<br />
+<br />
+=== 10.2.2 求值器 ===
+	首先指定控制点以及参数方程中u和v参数的定义域<br />
+	然后调用适当的求值函数<br />
+	OpenGL可以生成组成曲线或表面的点.<br />
+<br />
+	定义控制点的个数<br />
+	设置点数组<br />
+	调用glMap1f函数, 创建曲线的映射<br />
+	glEnable(GL_MAP1_VERTEX_3); 启用求值器<br />
+	调用glEvalCoord函数产生定点<br />
+<br />
+	进一步简化<br />
+		glMapGrid函数设置一个网格<br />
+		调用glEvalMesh函数使用指定的图元<br />
+		GL_AUTO_NORMAL 自动法线<br />
+<br />
+NURBS表面<br />

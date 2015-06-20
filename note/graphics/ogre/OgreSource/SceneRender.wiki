@@ -1,0 +1,9 @@
+一. RenderSystem
+	* RenderSystem 虚基类, 派生D3D9RenderSystem, D3DRenderSystem, GLRenderSystem
+	* RenderSystem 还负责 RenderWindow 的管理: initialise, createRenderWindow, destroyRenderWindow
+	* 各种 RenderTarget 都是由 RenderSystem 统一管理
+二. RenderTarget
+	* RenderTarget --- 用来接收渲染操作的结果, 可以是屏幕上的窗口
+	* RenderTarget负责FPS信息的统计,创建维护Viewport. 一Viewport对应一Camera和个RenderTarget. 一个Camera对应一Viewport, 一RednderTarget对应多Viewport
+三. 渲染过程
+	* Root -> RenderSystem -> RenderTarget -> Viewport -> Camera -> SceneManager -> RednerSystem 

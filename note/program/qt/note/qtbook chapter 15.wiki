@@ -1,0 +1,317 @@
+= Chapter 15 Networking =
+* Qt 提供了 QFtp, QHttp类来处理FTP和HTTP. QTcpSocket和QUdpSocket类处理TCP和UDP.
+* QTcpServer类处理进来的TCP连接, SSL/TLS连接处理需要使用QSslSocket类来替代QTcpSocket
+    
+== 15.1 Writing FTP Clients ==
+* QFtp 实现实现FTP协议的客户方, 执行FTP的大部分普通操作, 需要我们执行任意的FTP命令.
+* OCoreApplication::arguments() --- 返回命令行参数, 保存为QStringList格式. 第一个条目为程序名称, 移除所有-style的参数,
+* QUrl 类提供了一个高层接口用于操作一个URL, 分析他的文件名, 路径, 协议 和 端口.
+* QFtp 提供了一些FTP命令:　connectToHost(), login(), close(), list(), cd(), get(), put(), remove(), mkdir(), rmdir(), rename().
+	- 所有这些函数都会安排FTP命令进序列, 而后返回一个ID标志命令. 我们也可控制传输模式(缺省为被动的)以及传输类型(缺省为二进制)
+	- 可以使用rawCommand()执行任意的FTP命令. 如: ftp.rawCommand("SITE CHMOD 755 fortune");
+	- 当执行一个命令时, QFtp发送commandStarted(int)信号. 当命令完成时发送commandFinished(int, bool)信号. int参数为命令ID.
+	- 跟踪命令ID, 可以提供给用户该命令的细节情况, 如
+{{{c++
+            bool FtpGet::getFile(const QUrl &url)
+            {
+                ...
+                connectId = ftp.connectToHost(url.host(), url.port(21));
+                loginId = ftp.login();
+                getId = ftp.get(url.path(), &file);
+                closeId = ftp.close();
+                return true;
+            }
+            
+            void FtpGet::ftpCommandStarted(int id)
+            {
+                if (id == connectId) {
+                    std::cerr << "Connecting..." << std::endl;
+                } else if (id == loginId) {
+                    std::cerr << "Logging in..." << std::endl;
+                ...
+            }
+}}}
+	- 另一个提供反馈信息的方法是连接 stateChanged() 信号. 当连接为新状态时会发送该信号(QFtp::Connecting, QFtp::Connected, QFtp::LoggedIn, 等).
+	- 当所有命令完成后, QFtp会发送done(bool)信号
+* listInfo(const QUrlInfo &) 信号 --- 当QFtp需要列出一个目录的表单时遇到每一个文件都会发送该信号.
+* 如果我们不想使用QFile, 把内容保存在内存中, 可以使用QBuffer, 其为QIODevice的派生类, 包装了QByteArray. 如
+{{{c++
+        QBuffer *buffer = new QBuffer;
+        buffer->open(QIODevice::WriteOnly);
+        ftp.get(urlInfo.name(), buffer);
+}}}
+	- 如果我们在QFtp的get函数中第二个参数设置为Null, 或者省略该函数, 则当每次有新的数据可以用到时会发送readyRead()信号,
+	- 而后可以通过read()和readAll()读取该数据.
+* 本例的信号如下, 每个list()结束, 完成该目录, 发送done().
+{{{c++
+    connectToHost(host, port)
+    login()
+
+    cd(directory_1)
+    list()
+        emit listInfo(file_1_1)
+            get(file_1_1)
+        emit listInfo(file_1_2)
+            get(file_1_2)
+        ...
+    emit done()
+    ...
+
+    cd(directory_N)
+    list()
+        emit listInfo(file_N_1)
+            get(file_N_1)
+        emit listInfo(file_N_2)
+            get(file_N_2)
+        ...
+    emit done()
+}}}
+	- 如果一个目录中有20个文件, 下载到第5个文件出了错误. 剩下的文件则可能不会下载了
+		- 解决方法是每个文件使用一次GET命令, 而后等到done(bool), 然后才安排新的GET操作.
+		- 在本例中, 我们不在ftpListInfo调用get(), 而是在done(bool)中调用get(), 则信号发送如下:
+{{{c++
+            connectToHost(host, port)
+            login()
+
+            cd(directory_1)
+            list()
+            ...
+            cd(directory_N)
+            list()
+                emit listInfo(file_1_1)
+                emit listInfo(file_1_2)
+                ...
+                emit listInfo(file_N_1)
+                emit listInfo(file_N_2)
+                ...
+            emit done()
+
+            get(file_1_1)
+            emit done()
+
+            get(file_1_2)
+            emit done()
+            ...
+
+            get(file_N_1)
+            emit done()
+
+            get(file_N_2)
+            emit done()
+            ...
+}}}
+	- 另一种解决方法是对每个文件使用一个QFtp, 这可以让我们平行下载文件.
+
+== 15.2 Writing HTTP Clients ==
+* QHttp 类实现Qt中HTTP的客户方, 提供了许多函数执行普通的HTTP操作, 包括get(), post()
+* 例子, 构造函数
+{{{c++
+        HttpGet::HttpGet(QObject *parent)
+            : QObject(parent)
+        {
+              connect(&http, SIGNAL(done(bool)), this, SLOT(httpDone(bool)));
+        }
+        bool HttpGet::getFile(const QUrl &url)
+        {
+            if (!url.isValid()) {
+                std::cerr << "Error: Invalid URL" << std::endl;
+                return false;
+            }
+
+            if (url.scheme() != "http") {
+                std::cerr << "Error: URL must start with 'http:'" << std::endl;
+                return false;
+            }
+
+            if (url.path().isEmpty()) {
+                std::cerr << "Error: URL has no path" << std::endl;
+                return false;
+            }
+
+            QString localFileName = QFileInfo(url.path()).fileName();
+            if (localFileName.isEmpty())
+                localFileName = "httpget.out";
+
+            file.setFileName(localFileName);
+            if (!file.open(QIODevice::WriteOnly)) {
+                std::cerr << "Error: Cannot write file "
+                          << qPrintable(file.fileName()) << ": "
+                          << qPrintable(file.errorString()) << std::endl;
+                return false;
+            }
+
+            http.setHost(url.host(), url.port(80));
+            http.get(url.path(), &file);
+            http.close();
+            return true;
+        }
+}}}
+	- 同FTP操作, 不需要登录. 仅仅设置host和端口.
+{{{c++
+        void HttpGet::httpDone(bool error)
+        {
+            if (error) {
+                std::cerr << "Error: " << qPrintable(http.errorString())
+                          << std::endl;
+            } else {
+                std::cerr << "File downloaded as "
+                          << qPrintable(file.fileName()) << std::endl;
+            }
+            file.close();
+            emit done();
+        }
+}}}
+	- main代码
+{{{c++
+        int main(int argc, char *argv[])
+        {
+            QCoreApplication app(argc, argv);
+            QStringList args = QCoreApplication::arguments();
+
+            if (args.count() != 2) {
+                std::cerr << "Usage: httpget url" << std::endl
+                          << "Example:" << std::endl
+                          << "   httpget http://doc.trolltech.com/index.html"
+                          << std::endl;
+                return 1;
+            }
+
+            HttpGet getter;
+            if (!getter.getFile(QUrl(args[1])))
+                return 1;
+
+            QObject::connect(&getter, SIGNAL(done()), &app, SLOT(quit()));
+
+            return app.exec();
+        }
+}}}
+* QHttp 类提供了许多操作, 如setHost(), get(), post(), head(). 如果一个站点要求验证, 则调用setUser() 设置用户名称和密码
+	- 使用QSalSock可以运用于SSL和TLS
+	- post代码
+{{{c++
+        http.setHost("www.example.com");
+        http.post("/cgi/somescript.py", "x=200&y=320", &file);
+        
+        QHttpRequestHeader header("POST", "/search.html");
+        header.setValue("Host", "www.trolltech.com");
+        header.setContentType("application/x-www-form-urlencoded");
+        http.setHost("www.trolltech.com");
+        http.request(header, "qt-interest=on&search=opengl");
+}}}
+	- 当开始执行request的时候发送 requestStarted(int)信号, 当request完成的时候发送requestFinished(int, bool) 信号
+		- int参数表示一个标识请求的ID.
+	- 大多数应用程序, 我们仅仅想知道整个系列的请求是否完成成功, 这个可以通过信号 done()了解. 当请求队列为空是发送该信号.
+	- 当发生错误时, 请求队列自动为空.
+
+
+== 15.3 Writing TCP Client–Server Applications ==
+* QTcpSocket 和 QTcpServer 类可用于实现TCP客户端和服务器.
+	- TCP是大部分应用程序的网络协议的基础, 包括FTP和HTTP, 也可用于自定义协议
+	- TCP是面向流的协议. 可分为面向行或者面向块的协议
+		- 面向行 --- 每次传输文本的一行
+		- 面向块 --- 每次传输一定数量的二进制数据块
+	- QTcpSocket间接从QIODevice 派生而来, 所以其可以向QDataStream或QTextStream读取和写入.
+		- 唯一要注意的与读取文件不同的地方, 在我们使用>>操作符之前, 我们要确保从管道中接收到足够的数据. 否则会产生未定义的行为
+* buttonBox->button(QDialogButtonBox::Close) --- 得到QDialogButtonBox的一个特定按钮
+* tableWidget->verticalHeader()->hide(); --- 隐藏列头.
+* QTcpSocket 的几个信号: connected(), disconnected(), readyRead(), error(QAbstractSocket::SocketError)
+* 连接至服务器: tcpSocket.connectToHost("tripserver.zugbahn.de", 6178);
+	- 如想使用本地的HOST, 则可用 QHostAddress::LocalHost
+	- 由于connectToHost为异步的, 所以其立即返回, 连接的建立还在其后步骤中.
+	- 连接建立成功则会发出 connected() 信号, 建立失败则会发出  error(QAbstractSocket::SocketError) 信号.
+	- connect() 信号会连接至 slot sendRequest()
+		- 用户输入的TCP数据
+			- quint16 --- 块的大小(字节为单位, 不包括该域)
+			- quint8 --- 请求类型(通常为'S')
+			- QString --- 本例, 离开城市
+			- QString --- 本例, 到达城市
+			- QDate --- 到达日期
+			- QTime --- 旅行的大概时间
+			- quint8 --- 离开('D')或到达('A')
+	- 代码示例:
+{{{c++
+            void TripPlanner::sendRequest()
+            {
+                QByteArray block;
+                QDataStream out(&block, QIODevice::WriteOnly);
+                out.setVersion(QDataStream::Qt_4_3);
+                out << quint16(0) << quint8('S') << fromComboBox->currentText()
+                    << toComboBox->currentText() << dateEdit->date()
+                    << timeEdit->time();
+
+                if (departureRadioButton->isChecked()) {
+                    out << quint8('D');
+                } else {
+                    out << quint8('A');
+                }
+                out.device()->seek(0);
+                out << quint16(block.size() - sizeof(quint16));
+                tcpSocket.write(block);
+
+                statusLabel->setText(tr("Sending request..."));
+            }
+}}}
+	- 发送请求: tcpSocket.write(block);
+* updateTableWidget() slot对应于readyRead()信号, 当QTcpSocket从服务器接收新的数据之时发送该信号.
+	- 当接收的大小为0xFFFF表示没有数据可以接收.
+	- 接收的数据格式
+		- quint16 --- 块的大小(不包括该域)
+		- QData --- 离开日期
+		- QTime --- 离开时间
+		- quint16 --- 时长
+		- quint6 --- 变化数量
+		- QString --- 火车类型
+	- 关闭TCP
+		- tcpSocket.close();
+	- 当服务器关闭连接时, 会发送给QTcpSocket的disconnected()信号.
+	- 使用QTcpSocket的errorString()显示错误信息,  QTcpSocket 的 error(QAbstractSocket::SocketError) 信号.
+* 实现服务器, 服务器由两个类组成: TripServer 和 ClientSocket. TripServer 继承自 QTcpServer, 该类允许我们接收TCP连接.
+	- ClientSocket重新实现 QTcpSocket 以及处理单个连接.
+	- TripServer 重新实现了函数 incomingConnection().
+		- 在函数内部, 创建了一个新的 ClientSocket 对象, 并调用其setSocketDescriptor函数.
+	- 在ClientSocket设置了两个signal-slot连接, 两个信号分别为 readyRead() 和 disconnected().
+		- disconnected -- deleteLater(), deleteLater 则是由QObject派生而来的函数, 用于当控制返回Qt的事件处理循环时删除该对象.
+			- 这样确保但连接中断之后会删除该对象.
+	- 通过调用QTcpSocket::listen()来实现监听.
+* 一般服务器希望无GUI, 在Qt中有这样的类 QtService
+* 本例是使用面向块的, 如果使用面向行的, 则用QTcpSocket的 canReadLine() 和 readLine() 函数更简单. 可以连接至readyRead()信号
+{{{c++
+        QStringList lines;
+        while (tcpSocket.canReadLine())
+            lines.append(tcpSocket.readLine());
+}}}
+	- 可在QTcpSocket中使用QTextStream
+	- 如果处理许多连接的话, 当有一个请求时, 服务器无法处理其他连接, 应当为每个连接启动一个新线程, 例子见 examples/network/threadedfortuneserver
+    
+== 15.4 Sending and Receiving UDP Datagrams ==
+* QUdpSocket 类用于发送和接收UDP数据报, UDP 是不可靠的, 面向数据包的协议. 使用UDP是因为其比TCP更轻量级.
+	- 发送数据:
+{{{c++
+        void WeatherBalloon::sendDatagram()
+        {
+            QByteArray datagram;
+            QDataStream out(&datagram, QIODevice::WriteOnly);
+            out.setVersion(QDataStream::Qt_4_3);
+            out << QDateTime::currentDateTime() << temperature() << humidity()
+                << altitude();
+
+            udpSocket.writeDatagram(datagram, QHostAddress::LocalHost, 5824);
+        }
+}}}
+	- 发送代码: udpSocket.writeDatagram(datagram, QHostAddress::LocalHost, 5824);
+		- 通过 QUdpSocket::writeDatagram() 发送数据包, 第二个参数和第三个参数为IP和端口.
+	- 我们可以使用静态函数 QHostInfo::fromName() 得到Host, 或者静态函数  QHostInfo::lookupHost() 得到对应的地址
+	- 接收UDP数据报, 首先设置signal - slot连接
+{{{c++
+            connect(&udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
+}}}
+	- 读取数据:
+{{{c++
+        do {
+            datagram.resize(udpSocket.pendingDatagramSize());
+            udpSocket.readDatagram(datagram.data(), datagram.size());
+        } while (udpSocket.hasPendingDatagrams());
+}}}
+	- 用while循环是由于发送者可能在readyRead()一次发送了好几个数据报. 我们只采取最后一个数据报.
+		- pendingDatagramSize() 函数得到第一个数据报的大小, readDatagram() 读取数据报内容.
+* QUdpSocket 可以从Host和端口读取并使用 bind()绑定. 以及写入其他的host和端口

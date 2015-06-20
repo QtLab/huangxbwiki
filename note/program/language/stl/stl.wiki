@@ -1,0 +1,64 @@
+= 1 容器 =
+== 1.1 概念 ==
+=== 1.1.1 通用概念 ===
+==== 1.1.1.1 容器 ====
+* 一个容器拥有其元素, 元素的生命期不能超过容器的生命期.
+* 关联的类型
+| 类型         | 表示               | 详述                             |
+|--------------|--------------------|----------------------------------|
+| 值的类型     | X::value_type      | 存储在容器中元素的类型           |
+| 迭代器类型   | X::iterator        |                                  |
+| 常量迭代器   | X::const_iterator  |                                  |
+| 引用类型     | X::reference       | 使得其行为类似于容器值类型的引用 |
+| 常量引用类型 | X::const_reference |                                  |
+| 指针类型     | X::pointer         | 指向容器值类型的指针             |
+| 距离类型     | X::difference_type |                                  |
+| 大小类型     | X::size_type       |                                  |
+* 定义
+	- 容器的size表示容器所含元素的数量
+	- 容器的area表示其所占的所有字节量
+	- 一个 variable sized 容器: 一个提供了插入和移除元素方法的容器. 在容器生命期内可能会改变其大小. 对应的容器为 fixed size 容器.
+* 有效的表达式
+	- 如果容器 Assignable, EqualityComparable, LessThanComparable, 则接下来的表达式必须有效.
+| 名称     | 表达式       | 返回类型                                           |
+|----------|--------------|----------------------------------------------------|
+| 范围开始 | a.begin()    | iterator if a is mutable, const_iterator otherwise |
+| 范围结束 | a.end()      | iterator if a is mutable, const_iterator otherwise |
+| 大小     | a.size()     | size_type                                          |
+| 最大大小 | a.max_size() | size_type                                          |
+| 空容器   | a.empty()    | 可转换的布尔值                                     |
+| 交换     | a.swap()     | void                                               |
+* 表达式语义
+	- 拷贝构造函数: X(a)
+	- 拷贝构造函数: X b(a)
+	- 赋值操作: b = a
+	- 析构函数: a.~X()
+	- 起始结束: a.begin() a.end()
+	- 大小: a.size()
+	- 最大大小: a.max_size()
+	- 空容器: a.empty()
+	- 交换: a.swap(b)
+* 复杂性
+	- 拷贝构造函数, 赋值操作, 析构函数的操作与容器大小成线性关系
+	- begin(), end() 常量时间
+	- size() 和容器大小呈线性关系, max_size() 和 empty() 常量时间.
+	- swap() 常量时间
+* 不变的东西
+	- 有效范围: 对于任意容器a, [a.begin(), a.end()) 是一个有效的范围
+	- 范围大小: a.size() 等于 a.begin() 到 a.end() 的距离
+
+==== 1.1.1.2 Forward Container ====
+* 该容器其元素以一个定义的次序存放.
+* 迭代器类型加强, 为 Forward Iterator 的一个模型
+* 有效表达式: 除了容器介绍的表达式之外, 相等性比较, 小于比较操作必须有效, 下面的表达式必须有效
+	- 相等性: a == b
+	- 不等性: a != b
+	- 小于:	a < b
+	- 大于: a > b
+	- 小于等于: a <= b
+	- 大于等于: a >= b
+* 复杂度保证: 相等和不等操作和容器大小呈线性关系.
+* 不变性: 两个迭代器以相同次序访问, 则不会有干预的变化操作.
+* 模型: vector, list, slist, deque, set, hash_set, map, hash_map, multiset, hash_multiset, multimap, hash_multimap
+
+==== 1.1.1.3 Reversible Container ====

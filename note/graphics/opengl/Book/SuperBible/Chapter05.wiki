@@ -1,0 +1,56 @@
+= OpenGL 超级宝典 第5第6章 =
+== 第5章 颜色, 材料, 光照基础知识 ==
+1. 颜色深度: 4位色彩模式, 8位色彩模式, 16位色彩模式. 32位色彩模式, 24位色彩模式<br />
+2. 着色模型GL_FLAT, 图元的内部颜色就是最后一个顶点所指定的颜色. 唯一的例外是GL_POLYGON图元.<br />
+3. 光照下物体颜色的计算<br />
+	假设有一红,绿,蓝强度均为一半的环境光源, 物体的环境光反射属性为(0.5, 1.0. 0.5).<br />
+		那么产生的颜色成分为 (0.5*0.5, 0.5*1.0, 0.5*0.5) = (0.25, 0.5, 0.25)<br />
+	反射光则具有方向性, 与物体表面与光源的角度, 表面与光源的距离以及衰减因子有关.<br />
+	环境光也是如此.<br />
+	最后三种颜色的值加在一起, 产生物体的最终颜色.<br />
+4. 一般而言, 光源和材料的环境和散射反射成分是相同的, 除非需要特殊的镜面光效果.<br />
+	镜面光和材料的镜面反射属性偏向于淡灰色或白色.<br />
+	全局环境光的缺省RGBA值是(0.2, 0.2, 0.2, 1.0)<br />
+5. GL_COLOR_MATERIAL--颜色追踪.<br />
+	GL_NORMALIZE-- OpenGL自动转换单位法线.    <br />
+6. 另glScale转换函数会对法线长度进行缩放.使用GL_RESCALE_NORMALS来替代GL_NORMALIZE来规范你指定的单位法线.<br />
+	可根据向量积来计算发现. V3 = V1xV2. 从V2转到V1的垂直向量.<br />
+<br />
+== 第6章 颜色和材料的更多细节 ==
+=== 6.1 混合 ===
+	1. 混合操作会和深度测试相冲突<br />
+==== 6.1.1 组合颜色 ====
+==== 6.1.2 抗锯齿 ====
+	像素的目标颜色与周围像素的颜色进行混合实现抗锯齿<br />
+	打开抗锯齿功能<br />
+		1. 首先打开混合<br />
+		glEnable(GL_BLEND);<br />
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);<br />
+			混合方程式为GL_ADD<br />
+		2. 打开下面的功能<br />
+		glEnable(GL_POINT_SMOOTH);<br />
+		glEnable(GL_LINE_SMOOTH);<br />
+		glEnable(GL_POLYGON_SMOOTH);<br />
+	多边形的抗锯齿不够理想.<br />
+	多重采样 --- 帧缓冲区中额外的缓冲区用于多重采样<br />
+		窗口模式要有GLUT_MULTISAMPLE<br />
+		打开多重采样<br />
+		glEnable(GL_MULTISAMPLE);<br />
+		多重采样不应该与点和直线的反锯齿同时使用. 仅仅绘制点和直线, 可以仅仅打开点和直线的平滑, 其他的实体则使用多重采样<br />
+		多重采样缓冲区默认使用片段RGB值, 不包括颜色的Alpha成分, 可使用函数glEnable和下面的参数来改变<br />
+			GL_SAMPLE_ALPHA_TO_COVERAGE<br />
+			GL_SAMPLE_ALPHA_TO_ONE<br />
+			GL_SAMPLE_COVERAGE(配合glSmapleCoverage()使用)<br />
+	如果阴影不是纯黑色, 使用模版测试可以让重复物体的阴影不用多次绘制, 造成部分阴影颜色更深的效果.<br />
+=== 6.2 雾 ===
+	1. 片段与眼睛的距离可以通过两个方法计算<br />
+		glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);<br />
+		glFogi(GL_FOG_COORD_SRC, GL_FOG_COORD);<br />
+=== 6.3 累计缓冲区 ===
+	1. void glAccum() 函数<br />
+	2. 申请 GLUT_ACCUM 缓冲区<br />
+=== 6.4 其他颜色操作 ===
+	1. glColorMask 设置掩码<br />
+	2. glLogicOp函数, 打开 GL_COLOR_LOGIC_OP 功能<br />
+	3. glAlphaFunc Alpha测试<br />
+	4. GL_DITHER 抖动功能, 缺省是打开的<br />

@@ -1,0 +1,336 @@
+= OpenGL 超级宝典 第7章 OpenGL中的图像 =
+== 功能 ==
+	设置光栅位置            glRasterPos, glWindowPos<br />
+	绘制位图                glBitmap<br />
+	读取和写入彩色图像        glReadPixels, glDrawPixels<br />
+	放大, 收缩和翻转图像    glPixelZoom<br />
+	设置颜色的操作            glPixelTransfer, glPixelMap<br />
+	执行颜色替换            glColorTable<br />
+	执行高级图像过滤        glConvolutionFilter2D<br />
+	收集图像统计信息        glHistogram, glGetHistogram<br />
+<br />
+	*位图的颜色是在glRasterPos和glWindowsPos被调用时设置的*, 意味着glColor所设置的当前颜色将作用于后续的位图操作中, 但是, 在光栅位置已经设置之后再调用glColor不会对位图的颜色产生影响<br />
+<br />
+== 像素包装 ==
+	缺省情况下, OpenGL采用4个字节的对齐.<br />
+	使用下面的函数修改位图或像素图的存储和提高像素的方式<br />
+		void glPixelStorei(GLenum pname, GLint param);<br />
+		void glPixelStoref(GLenum pname, GLfloat param);<br />
+	GL_UNPACK_ALIGNMENT指定了OpenGL如何从数据缓冲区中对图像数据进行解包<br />
+	GL_PACK_ALIGNMENT指定了OpenGL如何从颜色缓冲区读取的数据进行包装. 并把它放置在一个用户指定的内存缓冲区中.<br />
+<br />
+== 像素图 ==
+	像素图可能由超过1个位的存储空间来表示, 每个像素所多出来的这些位可以存储这个像素的强度(或称为亮度值)或颜色成分值<br />
+	绘制像素图的函数:<br />
+		void glDrawPixels(GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels)<br />
+	该函数不对光栅位置进行更新.<br />
+{{{c++
+////////////////////////////////////////////////////////////////////
+// 分配内存加载TGA数据, 返回缓存区的指针
+// 纹理的高度和宽度, 以及OpenGL的数据格式
+// 函数结束的时候调用free()释放缓存
+// 这个函数只能用于普通的targa图像
+// 8位, 24位或者32位, 不能使用调色板, 不能调用RLE编码
+GLbyte *gltLoadTGA(const char *szFileName, GLint *iWidth, GLint *iHeight, GLint *iComponents, GLenum *eFormat)
+{
+    FILE *pFile;                        // 文件指针
+    TGAHEADER tgaHeader;                // TGA 文件头
+    unsigned long lImageSize;           // 文件的大小(以字节计)
+    short sDepth;                       // 像素深度
+    GLbyte      *pBits = NULL;          // 指向位的指针
+
+    // 缺省/失败值
+    *iWidth = 0;
+    *iHeight = 0;
+    *eFormat = GL_BGR_EXT;
+    *iComponents = GL_RGB8;
+
+    // 打开文件
+    fopen_s(&pFile, szFileName, "rb");
+    if(pFile == NULL)
+        return NULL;
+
+    // 读取文件头
+    fread(&tgaHeader, 18/* sizeof(TGAHEADER)*/, 1, pFile);
+
+    // 对大端和小端字节顺序进行字节交换
+#ifdef __APPLE__
+    LITTLE_ENDIAN_WORD(&tgaHeader.colorMapStart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.colorMapLength);
+    LITTLE_ENDIAN_WORD(&tgaHeader.xstart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.ystart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.width);
+    LITTLE_ENDIAN_WORD(&tgaHeader.height);
+#endif
+
+
+    // 获取纹理的高度, 宽度和深度
+    *iWidth = tgaHeader.width;
+    *iHeight = tgaHeader.height;
+    sDepth = tgaHeader.bits / 8;
+
+    // 在此进行一些有效性验证. 只理解或关心8, 24和32位的targa图像
+    if(tgaHeader.bits != 8 && tgaHeader.bits != 24 && tgaHeader.bits != 32)
+        return NULL;
+
+    // 计算图像缓冲区的大小
+    lImageSize = tgaHeader.width * tgaHeader.height * sDepth;
+
+    // 分配内存
+    pBits = (GLbyte*)malloc(lImageSize * sizeof(GLbyte));
+    if(pBits == NULL)
+        return NULL;
+
+    // 读取数据位
+    if(fread(pBits, lImageSize, 1, pFile) != 1)
+    {
+        free(pBits);
+        return NULL;
+    }
+
+    // 设置期望的OpenGL格式
+    switch(sDepth)
+    {
+        case 3:     // 最可能出现的情况
+            *eFormat = GL_BGR_EXT;
+            *iComponents = GL_RGB8;
+            break;
+        case 4:
+            *eFormat = GL_BGRA_EXT;
+            *iComponents = GL_RGBA8;
+            break;
+        case 1:
+            *eFormat = GL_LUMINANCE;
+            *iComponents = GL_LUMINANCE8;
+            break;
+    };
+
+
+    // 完成对文件的操作
+    fclose(pFile);
+
+    // 返回指向图像数据的指针
+    return pBits;
+}
+}}}
+读取像素数据.<br />
+{{{c++
+	void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height,
+    	GLenum format, GLenum type, GLvoid *pixels);
+}}}
+复制像素数据<br />
+	void glCopyPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum type);<br />
+<br />
+缺省情况下, 双缓冲区渲染环境中, 这些像素操作在后缓冲区进行. 单缓冲区渲染环境中, 在前缓冲区中进行.<br />
+使用以下函数修改像素操作的源或目标<br />
+	void glDrawBuffer(GLenum mode);<br />
+	void glReadBuffer(GLenum mode);<br />
+{{{c++
+// 捕捉当前的视口, 并把它保存为一个targa文件
+// 在调用这个函数之前, 对于双缓冲区上下文环境, 确信调用了SwapBuffers函数.
+// 对于单缓冲区上下文环境, 确信调用了glFinish函数
+// 如果出现了错误, 这个函数返回0, 否则返回1
+GLint gltWriteTGA(const char *szFileName)
+{
+    FILE *pFile;                    // 文件指针
+    TGAHEADER tgaHeader;            // TGA 文件头
+    unsigned long lImageSize;       // 图像大小
+    GLbyte      *pBits = NULL;      // 指针
+    GLint iViewport[4];             // 视口大小
+    GLenum lastBuffer;              // 用于存储当前读取缓冲区的设置
+
+    // 得到当前视口大小
+    glGetIntegerv(GL_VIEWPORT, iViewport);
+
+    // 图像的大小
+    lImageSize = iViewport[2] * 3 * iViewport[3];
+
+    // 分配内存
+    pBits = (GLbyte *)malloc(lImageSize);
+    if(pBits == NULL)
+        return 0;
+
+    // 从颜色缓冲区中读取数据
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+
+    // 获取当前读取缓冲区的设置并进行保存
+    // 切换到前缓冲区并进行读取操作
+    // 最后, 恢复读取缓冲区的状态
+    glGetIntegerv(GL_READ_BUFFER, (GLint *)&lastBuffer);
+    glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, iViewport[2], iViewport[3], GL_BGR_EXT, GL_UNSIGNED_BYTE, pBits);
+    glReadBuffer(lastBuffer);
+
+    // 初始化Targa数据
+    tgaHeader.identsize = 0;
+    tgaHeader.colorMapType = 0;
+    tgaHeader.imageType = 2;
+    tgaHeader.colorMapStart = 0;
+    tgaHeader.colorMapLength = 0;
+    tgaHeader.colorMapBits = 0;
+    tgaHeader.xstart = 0;
+    tgaHeader.ystart = 0;
+    tgaHeader.width = iViewport[2];
+    tgaHeader.height = iViewport[3];
+    tgaHeader.bits = 24;
+    tgaHeader.descriptor = 0;
+
+    // 指定大端和小端字节顺序的字节变换
+#ifdef __APPLE__
+    LITTLE_ENDIAN_WORD(&tgaHeader.colorMapStart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.colorMapLength);
+    LITTLE_ENDIAN_WORD(&tgaHeader.xstart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.ystart);
+    LITTLE_ENDIAN_WORD(&tgaHeader.width);
+    LITTLE_ENDIAN_WORD(&tgaHeader.height);
+#endif
+
+    // 打开文件
+    fopen_s(&pFile, szFileName, "wb");
+    if(pFile == NULL)
+                {
+        free(pBits);    
+        return 0;
+                }
+
+    // 写入文件头
+    fwrite(&tgaHeader, sizeof(TGAHEADER), 1, pFile);
+
+    // 写入图像数据
+    fwrite(pBits, lImageSize, 1, pFile);
+
+    // 释放临时缓冲区并关闭文件
+    free(pBits);
+    fclose(pFile);
+
+    // 成功
+    return 1;
+}
+}}}
+== 像素缩放 ==
+	void glPixelZoom(GLfloat xfactor, GLfloat yfactor);<br />
+<br />
+== 像素转移 ==
+	void glPixelTransferf(GLenum pname, GLfloat param);<br />
+		scale和bias参数允许你缩放和偏转单独的颜色通道. 缩放因子将与颜色成分值相乘. 偏转值将会加到颜色成分值中.<br />
+		新值 = (旧值 * 缩放值) + 偏转值<br />
+		缺省情况下, 缩放值为1.0, 偏转值为0.0.<br />
+<br />
+== 黑白模式 ==
+	首先在颜色缓冲区中绘制完整彩色图像<br />
+		glDrawPixels(iWidth, iHeight, eFormat, GL_UNSIGNED_BYTE, pImage);<br />
+	分配一缓冲区, 容纳每个像素的亮度值<br />
+		pModifiedBytes = (GLbyte*)malloc(iWidth * iHeight);<br />
+	读取亮度值<br />
+		glReadPixels(0, 0, iWidth, iHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, pModifiedBytes);<br />
+	亮度值写回颜色缓冲区<br />
+		glDrawPixels(iWidth, iHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, pModifiedBytes);<br />
+<br />
+	缺点: 亮度的计算仅仅是三个颜色通道的相加.很容易超过1.0, 所以要做像素转移模式.<br />
+	NTSC标准<br />
+		亮度 = (0.3 * 红色) + (0.59 * 绿色) + (0.11 * 蓝色)<br />
+<br />
+== 颜色映射 ==
+	用于查找一种颜色值可以转换为另外哪一种颜色值.<br />
+	可用于执行色彩修正, 执行gamma调整. 或者不同的颜色表示形式之间进行转换.<br />
+	启用像素映射: glPixelTransferi(GL_MAP_COLOR, GL_TRUE);<br />
+	设置像素映射<br />
+		glPixelMapuiv(GLenum map, GLint mapsize, GLuint *value);<br />
+		glPixelMapusv(GLenum map, GLint mapsize, GLushort *value);<br />
+		glPixelMapfv(GLenum map, GLint mapsize, GLfloat *value);<br />
+<br />
+== 图像"子集" ==
+	扩展 GL_ARB_imaging<br />
+<br />
+{{{c++
+///////////////////////////////////////////////////////////////////////////////
+// This function determines if the named OpenGL Extension is supported
+// Returns 1 or 0
+int gltIsExtSupported(const char *extension)
+{
+        GLubyte *extensions = NULL;
+        const GLubyte *start;
+        GLubyte *where, *terminator;
+
+        where = (GLubyte *) strchr(extension, ' ');
+        if (where || *extension == '\0')
+                return 0;
+
+        extensions = (GLubyte *)glGetString(GL_EXTENSIONS);
+
+        start = extensions;
+        for (;;)
+                {
+                where = (GLubyte *) strstr((const char *) start, extension);
+
+                if (!where)
+                        break;
+
+                terminator = where + strlen(extension);
+
+                if (where == start || *(where - 1) == ' ')
+                        {
+                        if (*terminator == ' ' || *terminator == '\0')
+                                return 1;
+                        }
+                start = terminator;
+                }
+        return 0;
+}
+}}}
+<br />
+	图像处理子集根据功能分为3个主要领域: 颜色矩阵和颜色表, 回绕以及柱状图.<br />
+	图像处理管线: 红宝书P214<br />
+<br />
+=== 1. 颜色矩阵 ===
+	将颜色值看成是色彩空间中的坐标, RGB近似于以三种颜色为轴的XYZ坐标系统. Alpha成分看成向量的W成分. 则可以适当的转换为一个4X4的颜色矩阵.<br />
+	颜色矩阵类似于其他的矩阵(GL_PROJECTION, GL_MODELVIEW, GL_TEXTURE).<br />
+	通过调用glMatrixMode函数并使用参数GL_COLOR把颜色矩阵设置为活动矩阵.<br />
+{{{c++
+// 加亮图像
+glMatrixMode(GL_COLOR);
+glScalef(1.25f, 1.25f, 1.25f);
+glMatrixMode(GL_MODELVIEW);
+
+// 设置为缺省值
+glMatrixMode(GL_COLOR);
+glLoadIdentity();
+glMatrixMode(GL_MODELVIEW);
+}}}
+=== 2. 颜色查找 ===
+	指定一个包含各个颜色值的表格, 用于替换一个像素的当前颜色.<br />
+		void glColorSubTableEXT(GLenum target, GLsizei start, GLsizei count, GLenum format, GLenum type, const GLvoid *data);<br />
+			target: 指定了在图像处理管线的什么阶段应用颜色表<br />
+	启用颜色表 GL_COLOR_TABLE<br />
+		glGetCOlorTableParameter函数使你能够查询颜色表的各种设置<br />
+<br />
+	颜色表可以对颜色成分值应用缩放因子和偏色.<br />
+	使用glColorTableParameter实现.<br />
+<br />
+	颜色缓冲区的内容作为颜色表的源数据对颜色表进行渲染.<br />
+		glCopyColorTable函数<br />
+	也可以使用glColorSubTable替换颜色表的全部或部分内容.<br />
+	用glCopyColorSubTable替换眼色缓冲区中一个颜色表的全部或部分内容.<br />
+<br />
+== 回绕 ==
+	回绕是一种过滤器, 根据一些权重模式(称为核心)在一幅图像中进行像素处理.<br />
+	回绕用这个像素以及邻近像素的加权平均值对它进行替换. 每个像素的颜色值根据核心中的权值进行缩放.<br />
+		见 红宝书218<br />
+	在典型情况下, 回绕核心是浮点值的矩阵数组, 表示图像中一个对应的像素排列权重.<br />
+{{{c++
+static GLfloat mSharpen[3][3] = {
+{0.0f, -1.0f, 0.0f},
+{-1.0f, 5.0f, -1.0f},
+{0.0f, -1.0f, 0.0f} };
+}}}
+	为了应用回绕过滤器, 调用两个函数<br />
+	glConvolutionFilter2D<br />
+	glEnable(GL_CONVOLUTION_2D)<br />
+<br />
+== 柱状图 ==
+	glHistogram函数
+	收集柱状图数据
+	glGetHistogram

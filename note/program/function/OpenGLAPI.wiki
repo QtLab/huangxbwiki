@@ -1,0 +1,17 @@
+= 系统 =
+	* glGetString
+	* glHint
+	* gluProject --- 求出顶点P在屏幕中的位置
+
+= 像素 =
+	* glReadPixel
+
+= 纹理 =
+	* glTexSubImage*
+
+= Windows =
+	* wglChoosePixelFormat
+	* wglGetCurrentDC --- 获取当前DC
+	* wglGetExtensionsStringARB
+	* wglGetProcAddress
+	* wglUseFontOutlines

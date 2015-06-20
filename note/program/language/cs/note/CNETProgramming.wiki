@@ -1,0 +1,365 @@
+= 第一章 .NET基础 =
+== .NET技术特征 ==
+	* 基于XML的共同语言
+	* 定制服务软件
+	* 融合多平台和设备
+	* 新一代的人机界面
+== .NET 组成 ==
+	* Windows.Net
+	* NET Framework
+	* 模块构建服务
+	* Visual studio .NET
+	* Orchestration
+== 公共语言运行时(CLR) ==
+	* 中间语言IL和元数据
+	* 即时编译器(JITers)
+== 虚拟对象系统 ==
+	* VOS类型系统
+	* 元数据
+	* 公共语言规范(CLS)
+	* 虚拟执行系统 VES
+
+= 第2章 C#语言基础 =
+== 数据类型 ==
+=== 值类型 ===
+	* 简单类型
+		* sbyte, byte, short, ushort, int, uint, decimal, long, ulong, char, float, double, bool. 
+		* 对应别名: System.Sbyte, System.Byte, System.Int16, System.UInt16, System.Int32, System.UInt32, System.Decimal, System.Int64, System.UInt64, System.Char, System.Single, System.Double, System.Bool
+	* 枚举类型 enum. 常用方法有 CompareTo(比较列表清单项目的大小), Format(转换成文字格式显示), GetName(返回代表特点常数的字符串名称), GetUnderLyingType(得到枚举类型底层的数据类型)
+	* 结构类型 struct.
+	* 引用类型
+		* 类
+		* 委托(delegate)---相当于C#函数中的指针原型
+{{{cnet
+using System;
+    delegate string MyDelegate();
+    public class Mydg
+    {
+        // 非静态方法声明
+        public string Mydg_Normal()
+        {
+            return "非静态委托调用";
+        }
+
+        // 静态方法声明
+        public static string Mydg_Static()
+        {
+            return "静态委托调用";
+        }
+    }
+
+    public class UserPerson
+    {
+        // 定义程序入口
+        static void Main(string[] args)
+        {
+            Mydg dg = new Mydg();
+            MyDelegate d = new MyDelegate(dg.Mydg_Normal);
+            Console.WriteLine(d());
+            d = new MyDelegate(Mydg.Mydg_Static);
+            Console.WriteLine(d());
+            Console.ReadKey();
+        }
+    }
+
+}}}
+	* 数组
+		* 数组有一个"秩", 即维度.
+		* 数组的声明与创建: Type[] Array-Identifier [Initializer];
+		* 使用数组之前必须初始化数组, 创建数组实例时, 需要确定数组的秩和各维度的长度. System.Array 类型是不能实例化的抽象类型
+{{{cnet
+	// 一维数组
+	int[] numbers = new int[5];
+	// 多维数组
+	string[,] names = new string[5,4];
+	// 交错数组
+	byte[][] scores = new byte[5][];
+	for(int x = 0; x < scores.Length; x++)
+	{
+		scores[x] = new byte[4];
+	}
+}}}
+		* 数组的初始化
+{{{cnet
+	// 一维数组
+	int[] numbers = new int[5] {1, 2, 3, 4, 5};
+	string[] names = new string[3] {"Matt", "Joanne", "Robert"};
+	// 可省略数组的大小
+	int[] numbers = new int[] {1, 2, 3, 4, 5};
+	string[] names = new string[] {"Matt", "Joanne", "Robert"};	
+	// 如提供了初始值设定项, 还可以省略new运算符
+	int[] numbers = {1, 2, 3, 4, 5};
+	string[] names = {"Matt", "Joanne", "Robert"};	
+	// 多维数组
+	int[,] numbers = new int[3, 2]{ {1, 2}, {3, 4}, {5, 6} };
+	string[,] names = new string[2, 2] { {"Mike", "Amy"}, {"Mary", "Albert"}};
+	// 省略数组大小
+	int[,] numbers = new int[,]{ {1, 2}, {3, 4}, {5, 6} };
+	string[,] names = new string[,] { {"Mike", "Amy"}, {"Mary", "Albert"}};	
+	// 省略new运算符
+	int[,] numbers = { {1, 2}, {3, 4}, {5, 6} };
+	string[,] names = { {"Mike", "Amy"}, {"Mary", "Albert"}};	
+	// 交错数组
+	int[][] numbers = new int[2][] { new int[]{2, 3, 4}, new int[]{5, 6, 7, 8, 9} };
+	// 可省略第一个数组的大小
+	int[][] numbers = new int[][] { new int[]{2, 3, 4}, new int[]{5, 6, 7, 8, 9} };
+	int[][] numbers = { new int[]{2, 3, 4}, new int[]{5, 6, 7, 8, 9} };
+}}}
+		* 数组可通过[]来访问数组元素,  Length属性得到数组元素的数量
+		* ArrayList, 提供方法 Count, Add, Insert, Remove, Clear, IndexOf
+=== 装箱和拆卸 ===
+	* 装箱转换 --- 将一个值类型数据隐式地转换成一个object类型, 或者其他可接受该值类型的接口类型
+{{{cnet
+	int i = 123;
+	object box = i;
+	if(box is int)
+	{
+		Console.Write("Box contains an int");
+	}
+}}}
+	* 拆箱转换, 步骤: 1) 检查对象实例是否是给定值类型的一个装箱值. 2) 将该值从实例复制到值类型变量中
+{{{cnet
+	int i = 123;
+	object box = i;
+	int j = (int)box;
+}}}
+=== 类型转换 ===
+	* 隐式转换: 从表示范围小的类型到表示范围大的类型的转换, 是一种安全转换, 例如从int转换到long
+	* 隐式美剧转换: 把十进制的整数0转换成任何枚举类型
+	* 显示转换: 从表示范围大的类型到表示范围小的类型的转换
+	* 显式枚举转换
+== 表达式 ==
+=== 变量类型 ===
+	* 静态变量
+	* 非静态变量
+	* 数组元素
+	* 局部变量 --- 独立的程序块, switch语句, for语句, 或者using语句中声明的变量. 不会自动被初始化, 没有默认值
+	* 值参数 --- 未使用ref或out修饰符声明的参数
+	* 引用参数 --- ref修饰符声明的参数
+	* 输出参数 --- out修饰符声明的参数`
+=== 常量 ===
+	* const 可以使用的修饰符号有 new, public, protected, internal, private
+	* 只能用于以下范围: sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, decimal, bool, string, 枚举, 引用类型
+=== 操作符 ===
+==== 赋值操作符 ====
+	* 有 =, *=, +=, -=, /=, %=, ^=, <<=, >>=
+	* 左操作符必须为变量, 属性访问器或者索引访问器的表达式.
+	* 可以被连续赋值, 如 x=y=z;
+	* 两侧操作数类型如果不一致, 则先进行类型转换
+==== 算术操作符 ====
+	* +, -, *, /, %
+	* 加法类型还可以用于 delegate类型, 这时称为合并. D operator+ (D x, D y);
+==== 逻辑操作符 ====
+	* &&, ||, !
+==== 比较操作符 ====
+	* ==, !=, <, >, <=, >=
+	* 引用类型和字符串, 委托类型只能使用 ==, != 操作符
+==== 位操作符 ====
+	* <<, >>, &, ^, !(位或), ~(取补)
+==== 特殊操作符 ====
+	* 条件操作符: expression ? expression1 : expression2
+	* 自增自减操作符: ++, --
+	* new 操作符: 创建对象, 创建数组, 创建 delegate.
+	* typeof 操作符: 用于获得系统原型对象的类型, 也就是Type 对象
+{{{cnet
+Type myType = typeof(int);
+}}}
+	* checked 和 unchecked 操作符, 用于控制整数算术当前环境的溢出情况, unchecked()表示即使溢出也忽略错误
+	* is 操作符: 检查变量是否指定的类型
+	* as 操作符: 用于抓换引用类型
+{{{cnet
+	Int i = 0;
+	object obj = i as string;  // 转换失败, obj = null
+}}}
+	* sizeof 操作符: 用于操作非安全代码
+=== 条件语句 ===
+	* if 语句
+	* 串联 if 语句
+	* switch 语句: C#要求每个case标签项后必须出现break语句或者goto. 字符串可当成常量表达式
+=== 循环语句 ===
+	* while
+	* do-while
+	* for
+	* foreach: 处理数组及集合, foreach(type identifier in expression) 程序代码.
+=== 跳转语句 ===
+	* goto
+	* break, continue
+	* return
+	* throw: 格式 -- throw [expression]
+
+= 第3章 面向对象程序设计 =
+== 基本概念 ==
+	* 对象(Object)
+	* 消息(Message)
+	* 类(Class)
+	* 实例(Instance)
+	* 封装(Encapsulation)
+	* 抽象画(Abstraction)
+	* 继承(Inheritance)
+	* 覆盖(Overriding)和重载(Overloading)
+	* 动态联编(Dynamic Binding)与多态(Ploymophism)
+== 类 ==
+	* 类的声明
+{{{cnet
+attributes class-modifiers class identifier class-base
+{
+	[class-body]
+}[;]
+}}}
+		* 类的修饰符: new(嵌套类), public, protected, internal(所在类才能访问), private, abstract, sealed(密封类, 不能被继承)
+{{{cnet
+class A;
+class B
+{
+	void F
+	{
+		A a = new A();
+	}
+}
+}}}
+		* 类的继承, 只能单继承.
+=== 类的成员 ===
+	* 常数, 字段, 方法, 属性, 事件, 索引器, 运算符, 构造函数, 析构函数
+	* 成员的访问级别: 共有,私有, 保护, 内部(internal修饰)
+	* this 保留字
+	* 静态成员
+	* 成员常量, 类的常量可以加的修饰符有: new, public, protected, internal, private
+{{{cnet
+	class Tess
+	{
+	public const double X = 1.0;
+	public const double Y = 2.0;
+	public const double Z = 3.0;
+	}
+}}}
+	* 构造函数, 一般总是 public类型, 如果为 private 类型, 表示该类不能被实例化, 常用于静态类型的类
+== 方法 ==
+=== 方法格式 ===
+{{{cnet
+attributees method_modifiers return-type member-name (formal-parameter-list)
+{
+	method-body;
+}
+}}}
+=== 方法参数 ===
+	* 值参数
+	* 引用参数
+	* 输出参数
+	* 参数数组, 参数数组必须使用 params 修饰符明确指定. 必须放在参数列表的最后位置, 只允许有一个参数数组, 且只允许一维数组
+=== 方法重载 ===
+	* 同一方法名称使用不同的数据类型和次序
+
+== 命名空间 ==
+=== 编译单元 ===
+	* 一个编译单元定义了一个源文件全部的结构
+{{{cnet
+using-directives namespace-member-declarations
+}}}
+	* 一个C#程序包括一个或多个编译单元, 每个都包含在独立的源文件中. 
+{{{cnet
+	File A.cs:
+	class A{}
+	File B.cs:
+	class B{}
+}}}
+=== 命名空间声明 ===
+{{{cnet
+	namespace name [.name1 ...
+	{
+		type-delcarations
+	}
+}}}
+	* 命名空间内可定义类型: 另一个命名空间, class, interface, struct, enume, delegate
+=== using指示符 ===
+	* using 指示符可以引进在其他命名空间中定义的命名空间和类型
+		* using 别名指示
+{{{cnet
+namespace N1.N2
+{
+	class A{}
+}
+
+namespace N3
+{
+	using A = N1.N2.A;
+	class B : A {}
+}
+}}}
+	* using 命名空间指示符
+{{{cnet
+namespace N1.N2
+{
+	class A
+	{}
+}
+
+namespace
+{
+	using N1.N2;
+	class B : A
+	{}
+}
+}}}
+== 封装, 继承和多态 ==
+=== 封装 ===
+=== 继承 ===
+=== 多态 ===
+	* 编译时的多态性通过重载来实现
+	* 运行时的多态性通过虚成员来实现
+== 接口 ==
+	* 接口可以从多个基接口继承, 而类和结构可以实现多个接口
+{{{cnet
+[attributes] [modifiers] interface identifier [: base-list]
+{
+	interface-body
+}
+}}}
+	* 接口成员: 不能是常量, 域, 操作符, 构造函数或析构函数, 且不能包含任何静态成员
+	* 接口成员定义不能包含任何修饰符
+	* 接口的成员之间不能相互同名
+	* 接口可以采用全权名. 接口名加小圆点(.)
+	* 显式接口成员执行体不能通过类的实例进行访问, 只能在类内部访问
+	* 类必须为在基类表中列出的所有接口的成员提供具体实现
+== 域和属性 ==
+	* 域格式: attributes field-modifires type variable-declarators
+	* 域修饰符: new, public, protected, internal, private,  static, readonly(只读)
+	* 实例变量初始化放在实例构造器中, 静态变量初始化会放在静态构造器中
+	* 对于所有有必要在类外可见的域, 推荐采用属性
+	* 属性格式: attributes property-modifires type"member-name" {accessor-declarations}
+	* 属性修饰符: new, public, protected, internal, private, static, virtual, scaled, override, abstract
+	* 属性种类: 可读写(实现set,get), 只读(实现get), 只写(实现set), static属性(只能存取静态资料)
+== 事件和索引 ==
+=== 事件 ===
+	* 事件就是一个 callback 的函数指针, 通过 delegate 达成
+	* 两个角色: 事件发行者和事件订阅者
+	* 声明: attributes event-modifiers event type variable-declarators;
+	* 修饰符: new, public, protected, internal, private, static, virtual, sealed, override, abstract, extern
+	* 通过操作符 += 实现事件的订阅, -= 实现事件的撤销
+	* 事件的访问器声明由一个访问器声明和一个移除访问器声明组成. 每个访问器声明包含标记 add 或 remove, 后跟一个块
+	* 静态事件
+=== 索引器 ===
+	* 可以让对象像使用数组那样对对象使用下标
+	* attribute indexer-modifiers indexer-declarator
+
+= 第4章 异常处理, 预处理和反射 =
+== 错误和异常处理 ==
+=== 校验语句 ===
+	* checked, unchecked
+=== 异常处理 ===
+	* 引发的异常是从 System.Exception 派生的对象
+	* 一些属性: Message, InnerException, StackTrace
+	* 基类Exception下存在两类异常: SystemException派生的预定义异常类; ApplicationException 派生的用户异常类
+=== C#预处理指令 ===
+	*  #define symbol
+	*  #undef symbol
+	*  #if cond_exp
+	*  #else
+	*  #elif cond_exp
+	*  #endif
+	*  #warning msg
+	*  #error msg
+	*  #line num[file]
+	*  #region name
+	*  #endregion
+== 反射 ==
+

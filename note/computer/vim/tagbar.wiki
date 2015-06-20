@@ -1,0 +1,42 @@
+== 介绍 ==
+* 该插件用于浏览源代码的tag. 在窗口的一边显示当前文件 ctag 生成的tag. 根据它们的范围排序.
+=== PSEUDO-TAGS ===
+* pseudo-tags 用于表示那些没有显式定义但有子内容在其中的tag. 例如没有名称的namespace. 还有就是在头文件中定义的类, 但其成员方法和成员变量在实现文件中定义所形成的tag.
+* 这些 pseudo-tags 在名称尾部用'*'表示.
+
+== 要求 ==
+* Vim 7.0 以及更高版本.
+* ctags 5.5 以及更高
+* TagBar 由自己生成tag信息, 不需要任何已有的tag文件.
+* 开启文件类型检测
+{{{
+	filetype on
+}}} 
+* 不能工作于 restricted-mode 或有'compatible' set.
+
+== 使用 ==
+* 两种方式使用
+	- 始终都在屏幕的一边运行.  不能设置 g:tagbar_autoclose 变量.
+	- 只有在你想要跳到某个tag时, 才打开 tagbar. 设置 g:tagbar_autoclose 变量.
+=== 打开和关闭 Tagbar 窗口 ===
+* 使用 TagbarOpen 或 TagbarToggle 打开 Tagbar 窗口, 默认在右边打开. 设置 g:tagbar_left 变量则在左边打开. :TagbarClose 关闭该窗口.
+* 可以分配键给这些命令
+{{{
+	nnoremap <silent> <F9> :TagbarToggle<CR>
+}}} 
+* 可以用命令 :TagbarOpenAutoClose 打开 Tagbar 窗口, 当选择了一个tag则自动关闭窗口.
+=== 暂停 Tagbar 窗口 ===
+* :TagbarTogglePause 命令暂停该窗口, 避免切换文件时更新Tagbar窗口内容.
+=== 跳至Tag ===
+* 回车或者双击
+=== 排序 ===
+* 两种排序方式: 按名称或者按文件次序. 在Tagbar窗口中按's'以切换排序方式.
+=== Folding ===
+* 用鼠标点击Folding图标可以收缩或展开
+=== 高亮当前Tag ===
+* 修改 updatetime 可以改变高亮之前的暂停时间长.
+=== 显示一个Tag的原型 ===
+* 可以显示Tag原型, 更准确的说可以显示Tag在哪一行定义, 用空格或者鼠标移动其上方来做到这点. 前者在命令行显示原型, 后者在弹出菜单上显示原型.
+
+== 命令 ==
+* :TagbarOpen [{flags}]    

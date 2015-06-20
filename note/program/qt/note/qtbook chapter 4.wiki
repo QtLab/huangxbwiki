@@ -1,0 +1,276 @@
+= Chapter 4 Implementing Application Functionality =
+== 4.1 The Central Widget ==
+* QMainWindow的中心区域可以是任意类型的widget.
+	- 使用标准的Qt Widget
+	- 使用自定义widget
+	- 使用带layout管理器的简单QWidget
+	- 使用splitter(分割器) --- QSplitter
+	- 使用MDI区域 --- QMdiArea widget
+* 本例使用QTabelView的派生类用于中间widget. 其支持了许多spreadsheet操作, 但不支持剪贴板操作, 不理解spreadsheet公式
+
+== 4.2 Subclassing QTableWidget ==
+* QTabelWidget为一有效的网格来显示两维稀疏数组. 随着用户的滚动显示需要的网格. 当用户输入内容时, 会自动创建一个QTabelWidgetItem保存文本.
+	- 另外一个更多功能的table是 QicsTable, 见 http://www.ics.com/    
+* QTabelWidgetItem 不是widget, 为纯数据类, Cell是其派生类.
+* 一般而言, QTabelWidget在一空白单元格输入文本时, 会自动创建一QTabelWidgetItem来保存该文本.
+	- 在本spreadsheet中, 我们希望创建Cell对象来保存文本, 则通过在构造函数中调用setItemPrototype来实现,
+	- 在内部, 每当需创建一个新的条目时, QTabelWidget就会克隆被当作prototype的条目
+	- setSelectionMode(ContiguousSelection);    // 允许矩形选择内容
+	- setHorizontalHeaderItem(i, item);        // 设置第一行的头内容
+* 将数据存储为条目的方式在QListWidget和QTreeWidget中也运用到, 操作为QListWidgetItems 和 QTreeWidgetItem
+	- item类可以作为数据控制器, 如QTableWidgetItem则可以保存一些属性, 如字符串, 字体, 颜色和图标, 以及返回QTableWidget的指针. 也保存QVariant数据
+	- Qt中保存自定义数据的做法是使用 setData()和QVariant实现, 如果需要void指针, 则通过派生item类, 并增加void指针成员变量
+* QTableWidget::setItem 设置条目
+
+== 4.3 Loading and Saving ==
+* 使用QFile和QDataStream实现文件操作, 跨平台的二进制I/O操作
+{{{c++
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        ... ...
+    }
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_4_3);
+    out << quint32(MagicNumber);
+    
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    out << .......
+    QApplication::restoreOverrideCursor();
+}}}
+* 整数类型: qint8, quint8, qint16, quint16, qint32, quint32, qint64, quint64
+* QDataStream 使用二进制近期的大多数版本, 可以明确指定QDataStream的版本, 解决读取的兼容问题
+* QDataStream不仅可以用于QFile, 也可用于QBuffer, QProcess, QTopSocket, QUdpSocket, QSalSocket
+* QTextStream可以用来读取写入文本文件
+
+== 4.3 Implementing the Edit Menu ==
+* QApplication::clipboard()->setText(str);        // 设置剪贴板内容
+    
+== 4.5 Implementing the Other Menus ==
+* qStableSort() 函数算法进行排序
+    
+== 4.6 Subclassing QTableWidgetItema ==
+* QTableWidgetItem可以保存数据, 每个数据都有两个值, 一个是编辑的值, 一个是显示的值, 大部分时候相同, 但是当其为公式的时候可能不同
+* Cell没有提供text()函数,由QTableWidgetItem解决, 等同于调用 data(Qt::DisplayRole).toString();
+* value() 函数
+	- 如果有 单引号"'", 则表示为字符串
+	- 如有"=", 则计算
+	- 否则直接转换为double
+	- 如果都不是就直接输出字符串
+    
+= Chapter 5: Creating Custom Widgets =
+* 创建自定义widget的方法: 现有Qt Widget派生或者直接从QWidget派生生成
+== 5.1 Customizing Qt Widgets ==
+* 本章节例子: 让SpinBox实现十六进制数的显示和使用
+	* 类HexSpinBox继承自类QSpinBox, 构造函数, 重写基类函数validate, valueFromText, textFromValue, 增加私有成员QRegExpValidator *validator;
+* 输入文本的验证
+	- 可能的三个返回值: Invalid, Intermediate, Acceptable
+{{{c++
+    QValidator::State HexSpinBox::validate(QString &text, int &pos) const
+    {
+        return validator->validate(text, pos);
+    }
+}}}
+    - QSpinBox在用户按下spin box的向上和向下箭头时, 调用该函数更新编辑区部分
+{{{c++
+    QString HexSpinBox::textFromValue(int value) const
+    {
+        return QString::number(value, 16).toUpper();
+    }
+}}}
+    - 当用户在编辑区输入一个值并回车的时候, 调用该函数. 执行字符串到值的转换
+{{{c++
+    int HexSpinBox::valueFromText(const QString &text) const
+    {
+        bool ok;
+        return text.toInt(&ok, 16);
+    }
+}}}
+* 实现自定义widget的步骤
+	- 选择合适的Qt Widget
+	- 派生类
+	- 重写部分虚函数改变其行为.
+* 如果我们仅仅想改变一个widget的外观, 我们可以应用一个style 表单或者实现一个自定义style, 而不是派生该widget类.
+
+== 5.2 Subclassing QWidget ==
+* 在Qt Designer中设计自定义widget
+	- 使用"Widget"创建一个新的form
+	- 增加需要的widget至该form, 并布局这些widget
+	- 设置signals和slots的连接
+	- 如果signals和slots还不能实现所有的行为, 则从QWidget和该uic生成类派生一个新类, 完成必要的代码实现这些行为
+* 当然, 也可使用纯代码实现自定义widget, 不管是什么方法, 都必须从QWidget派生该类.
+* 从QWidget派生类, 并重实现一些事件处理函数来绘制该widget, 对鼠标点击做出反应.
+    - 这个方法可以让我们完全自由的定义和控制该widget的外观和行为.
+* 代码中使用 Q_PROPERTY() 宏声明自定义属性. 每个属性有一数据类型, 读取函数, 可选的写入函数
+* 在Qt Designer中, 可以在 property editor 中自定义属性.
+* QRgb 为32位无符号整数, 可使用qRgba和qRgb来返回该值.
+* Qt 提供了两个类型保存颜色: QRgb和QColor, QRgb只用于QImage, 用来保存32位像素数据. QColor用于许多有用的函数保存颜色.除了QImage.
+* size policy用来告知layout 系统是否可以拉伸和收缩.
+    - QSizePolicy::Minimum 用来告诉layout管理器该widget的size hint是其最小值. 即可以拉伸, 但不能收缩至比该值更小的大小.
+    - QWidget::updateGeometry() 用于告知包含该widget的layout, 该widget的size hint发生了变化. 而后该layout则会自动适应新的size hint
+* 产生paint 事件的几种情况
+	- 第一次显示该widget
+	- 该widget的大小发生变化
+	- 被其他窗口覆盖, 且重新显示被覆盖的地方.
+    - 我们也可以通过调用 QWidget::update()和QWidget::repaint()函数使得paint事件发生.
+		- repaint() 需要立即重绘
+		- update() 则将绘制事件放入处理进程列表.
+* 每个widget都有一个调色板用于指定使用哪个颜色. 缺省设置, 一个widget的调色板都是采用操作系统的颜色方案.
+	- 一个widget的调色板由三个颜色组组成: 活跃的, 非活跃的, 不能够使用的.
+		- 活跃组用于当前活跃窗口
+		- 非活跃组用于其他窗口
+		- disable使用组用于任意窗口的disable widget
+    - QWidget::palette() 返回该widget的调色板 QPalette对象, 颜色组则为特定的枚举类型 QPalette::ColorGroup.
+    - 调色板则可以根据不同的role得到其笔刷brush, 如QPalette::foreground()
+* mouseMoveEvent 事件在按下鼠标的时候移动鼠标才产生, 除非你调用了QWidget::setMouseTracking() 函数
+* Qt::WA_StaticContents 属性, 该属性用于告知Qt该widget的内容在大小变化时不需要改变, 内容始终对应在widget的左上角.
+	- 每当大小变化是, paint 事件只对原来未显示的内容起作用.
+    
+== 5.3 Integrating Custom Widgets with Qt Designer ==
+* 在Qt Designer中使用自定义widget, 有两种方法:
+    - "提升"方法
+    - 插件方式
+* 在Widget上直接提升自定义widget的方法
+    - 创建基Widget在Qt Designer上
+    - 右键该widget, 选择 Promote to Custom Widget
+    - 填充弹出对话框的类名和头文件名称
+	* 而后该uic生成的代码会包含上面填充的头文件, 而非基Widget的头文件. 而在Qt Designer, 显示的还是基Widget, 修改基Widget的属性.
+    * 缺点:
+		- 不能够在Qt Designer修改该自定义widget的自定义属性
+		- 不能够显示该Widget, 而是显示其基Widget
+* 插件方式, 则生成一插件库让Qt Designer在运行期间动态加载
+{{{c++
+    #include <QDesignerCustomWidgetInterface>
+
+    class IconEditorPlugin : public QObject,
+                             public QDesignerCustomWidgetInterface
+    {
+        Q_OBJECT
+        Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+    public:
+        IconEditorPlugin(QObject *parent = 0);
+
+        QString name() const;
+        QString includeFile() const;
+        QString group() const;
+        QIcon icon() const;
+        QString toolTip() const;
+        QString whatsThis() const;
+        bool isContainer() const;
+        QWidget *createWidget(QWidget *parent);
+    };
+
+    IconEditorPlugin::IconEditorPlugin(QObject *parent)
+        : QObject(parent)
+    {
+    }
+    
+    // 返回插件的名称
+    QString IconEditorPlugin::name() const
+    {
+        return "IconEditor";
+    }
+
+    // 该函数用于返回自定义widget的头文件名称. 会在uic工具生成的代码中包含该头文件
+    QString IconEditorPlugin::includeFile() const
+    {
+        return "iconeditor.h";
+    }
+
+    // 用于Qt Designer的widget分组
+    QString IconEditorPlugin::group() const
+    {
+        return tr("Image Manipulation Widgets");
+    }
+    
+    // 返回在Qt Designer用于表示该自定义widget的图标
+    QIcon IconEditorPlugin::icon() const
+    {
+        return QIcon(":/images/iconeditor.png");
+    }
+    
+    QString IconEditorPlugin::toolTip() const
+    {
+        return tr("An icon editor widget");
+    }        
+    
+    // 用于"What's This?"
+    QString IconEditorPlugin::whatsThis() const
+    {
+        return tr("This widget is presented in Chapter 5 of <i>C++ GUI "
+                  "Programming with Qt 4</i> as an example of a custom Qt "
+                  "widget.");
+    }
+
+    // 该自定义widget是否为容器
+    bool IconEditorPlugin::isContainer() const
+    {
+        return false;
+    }
+    
+    // Qt Designer 通过该函数创建该widget的实例
+    QWidget *IconEditorPlugin::createWidget(QWidget *parent)
+    {
+        return new IconEditor(parent);
+    }
+    
+    // 使用该宏来使得其该插件可用于Qt Designer
+    // 第一个参数为插件的名称, 第二个则为实现的类
+    Q_EXPORT_PLUGIN2(iconeditorplugin, IconEditorPlugin)
+}}}
+    * 工程文件:
+{{{
+    TEMPLATE     = lib
+    CONFIG      += designer plugin release
+    HEADERS      = ../iconeditor/iconeditor.h \
+                   iconeditorplugin.h
+    SOURCES      = ../iconeditor/iconeditor.cpp \
+                   iconeditorplugin.cpp
+    RESOURCES    = iconeditorplugin.qrc
+    DESTDIR      = $$[QT_INSTALL_PLUGINS]/designer
+    // QT_INSTALL_PLUGINS --- Qt的插件安装目录
+}}}
+* 可以使用QDesignerCustomWidgetCollectionInterface将多个自定义widget集成至一个plugin中
+
+== 5.4 Double Buffering ==
+* 双缓存是GUI程序的一个技术, 有两个部分组成: 在屏幕背后渲染一个widget的像素映射内容, 而后将该像素映射拷贝至屏幕. 这个技术可以避免屏幕出现闪烁.
+* 当一个widget的渲染很复杂以及需要重复绘制时, 可以使用双缓存技术.
+	- 长时间保存像素映射(pixmap), 随时准备下一个paint事件, 当接收到paint事件时, 拷贝该pixmap至widget
+* QPointF 是一个浮点版本的QPoint
+* QPixmap类型变量, 可表示绘制到widget的pixmap. 先在屏幕后将像素写到pixmap, 然后拷贝该pixmap至屏幕的widget
+* QWidget::setBackgroundRole() 设置填充背景的方式, 本例使用调色板的"dark"成分来替换"window"成分. 用于填充任何新的增加窗口的像素, 在paint事件之前.
+	- 注意还需要调用 setAutoFillBackground(true); 来启动该机制.
+	- 缺省情况, 子widget都是继承父widget的背景
+* QSizePolicy::Expanding 表示widget可以拉伸收缩. QSizePolicy::Preferred 表示widget尽量选择size hint的大小, 可以收缩至 size hint的最小值, 拉伸至无限大小
+* QtWidget::setFocusPolicy(Qt::StrongFocus) 表示该widget通过鼠标点击或者键击tab接受焦点.
+	- 本例接受焦点后, 该widget会接受键盘事件, 本例+表示放大, -表示缩小. 向上表示向上滚动等等
+	- QtWidget::adjustSize() 表示设置为该widget的size hint的大小
+* 本例 setPlotSetting()表示设置一个PlotSetting, 每当放大一次该plot, 则调用PlotSetting构造函数构建一个新的缩放.
+* 调用refreshPixmap() 用于更新显示内容. 而不是使用update(), 先更新QPixmap至最新, 而后调用update()拷贝pixmap至widget
+* 当widget具有焦点时, 焦点矩形的绘制:
+	- painter调用drawPrimitive()方法, 第一参数为QStyle::PE_FrameFocusRect, 第二参数为QStyleOptionFocusRect对象: painter.drawPrimitive(QStyle::PE_FrameFocusRect, option);
+	- 第二个参数调用initForm初始化, 该函数的参数为widget
+{{{c++
+        QStyleOptionFocusRect option;
+        option.initFrom(this);
+}}}    
+	- 设置QStyleOptionFocusRect的背景颜色
+{{{c++
+        option.backgroundColor = palette().dark().color();
+}}}
+	- 当我们想要使用当前style(风格)绘制时, 我们可以直接调用一个QStyle函数: style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
+	- style()返回用于绘制该widget的style, 在Qt中, 一个widget的style都是QStyle的派生类.
+		- 内置的style包括: QWindowsStyle, QWindowsXPStyle, QWindowsVistaStyle, QMotifStyle, QCDEStyle, QMacStyle, QPlastiqueStyle, QCleanlooksStyle
+		- 每个style都重新实现了QStyle的虚函数, 通过枚举style在不同的平台上使用正确的style.
+		- QStylePainter的drawPrimitive()则会调用QStyle内的同名函数绘制"基本元素", 如panels, buttons, forcus rectangle.
+		- 一般而言, 一个应用程序中的widget style应当与所有的widget的style相同, 但是可以使用QWidget::setStyle()来改变每个widget.
+		- 通过实现QStyle的派生类, 你可以定义一个自定义style.
+		- 所有的Qt内置widget都是依赖于QStyle来绘制其本身. 这就是为何这些widget在不同的平台就像其平台自身的widget一样.
+		- 对于自定义widget, 通常实现QStyle来绘制其自身, 或者使用内置的Qt Widget作为widget来实现与Qt内置widget一样的style>
+		- 本例的focus rectangle则使用QStyle, 而两个放大缩小按钮则使用Qt 内置widget    
+* 大小变化则会引发resizeEvent函数的调用
+* Qt 提供了两个机制用于控制光标的形状
+	- QWidget::setCursor() 设置当光标在widget上方时的形状, 如果没有对应的光标, 则使用其父widget的光标设置. 顶层widget缺省使用 箭头光标
+	- QApplication::setOverrideCursor() 设置在整个应用程序中使用的光标形状, 覆盖各个widget的光标. 直到调用restoreOverrideCursor() 恢复
+* QScrollArea 会自动处理鼠标滚轮事件
+* QPainter的initFrom()函数用于初始化painter的笔刷, 背景, 字体等参数, 这些参数与给定Widget的设置相同. 由 QWidget 自动调用

@@ -1,0 +1,77 @@
+= 介绍 =
+* Windows 的 DLLs 将他们的功能显示为C函数和数据
+	- 一个DLL可能用任意语言实现, 但其接口仍需显示为最低的通用语言 - C 语言
+* C语言, 调用函数和被调用函数之间的二进制接口(binary interface)为定义明确的以及被广泛接受. C++语言, 则没有一个公认的 application binary interface(ABI), 其意为, 一个C++编译器生成的二进制代码和其他C++编译器并不兼容, 而且, 相同编译器的不同版本的二进制代码也不相互兼容. 
+* 本文的目的是介绍从一个DLL模块导出C++类的不同方法. 导出一个 imaginary Xyz 对象, 其只有一个方法 Foo: int Foo(int)
+* 源码由两个项目组成:
+	- XyzLibrary --- dll 库项目
+	- XyzExecutable --- 使用 "XyzLibrary.dll"的win32控制台程序.
+* XyzLibrary 使用如下宏导出代码
+{{{class="brush: c++"
+#if defined(XYZLIBRARY_EXPORT) // inside DLL
+#   define XYZAPI   __declspec(dllexport)
+#else // outside DLL
+#   define XYZAPI   __declspec(dllimport)
+#endif  // XYZLIBRARY_EXPORT
+}}} 
+	- 仅在 XyzLibrary 项目定义 XYZLIBRARY_EXPORT 符号.
+
+= C语言的方法 =
+== Handles ==
+* 面向对象编程的C语言法为不透明指针的使用, 也就是 handles. 用户调用一个函数在内部创建一个对象, 并返回该对象的handle. 此时, 用户调用不同的方法, 其使用handle作为参数, 并执行该对象所有类型的操作. 
+* 通过C接口将 imaginary Xyz 对象导出如下:
+{{{class="brush: c++"
+typedef tagXYZHANDLE {} * XYZHANDLE;
+
+// Factory function that creates instances of the Xyz object.
+XYZAPI XYZHANDLE APIENTRY GetXyz(VOID);
+
+// Calls Xyz.Foo method.
+XYZAPI INT APIENTRY XyzFoo(XYZHANDLE handle, INT n);
+// Releases Xyz instance and frees resources.
+XYZAPI VOID APIENTRY XyzRelease(XYZHANDLE handle);
+
+// APIENTRY is defined as __stdcall in WinDef.h header.
+}}} 
+* 客户端的C代码可能如下:
+{{{class="brush: c++"
+#include "XyzLibrary.h"
+
+...
+
+/* Create Xyz instance. */
+XYZHANDLE hXyz = GetXyz();
+
+if(hXyz)
+{
+    /* Call Xyz.Foo method. */
+    XyzFoo(hXyz, 42);
+
+    /* Destroy Xyz instance and release acquired resources. */
+    XyzRelease(hXyz);
+
+    /* Be defensive. */
+    hXyz = NULL;
+}
+}}} 
+* 这种方法, DLL必须提供对象的显式创建和删除.
+== 调用规则 ==
+* XyzLibrary 项目使用 APIENTRY 宏, 在 WinDef.h 头文件中其定义为 __stdcall
+== 异常安全 ==
+* 不要使用 C++ 的异常处理. 如果需要报告错误, 使用返回码.
+== 优点 ==
+* DLL 可以被大多数编程用户使用.
+* DLL和客户的C运行库相互独立.
+== 缺点 ==
+* 在正确的对象实例上调用正确的方法, 该责任由DLL的用户负责, 例如
+{{{class="brush: c++"
+/* void* GetSomeOtherObject(void) is declared elsewhere. */
+XYZHANDLE h = GetSomeOtherObject();
+
+/* Oops! Error: Calling Xyz.Foo on wrong object intance. */
+XyzFoo(h, 42);
+}}} 
+* 函数的显式调用要求依次创建和删除对象的实例. 一个对象的删除非常繁琐. 客户端的函数必须在函数离开之前调用 XyzRelease.
+* 如果对象方法返回其他对象或者接受其他对象作为参数. 则DLL的作者需要提供一个合适的C接口用于这些对象, 以便降级为C语言的符号.
+
+= C++ 的原生方法: 导出一个类 =

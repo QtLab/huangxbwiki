@@ -1,0 +1,6 @@
+{{{c++
+	QString sPath = app.applicationDirPath();
+	sPath += QString("/plugins");
+	app.addLibraryPath(sPath);
+	QTextCodec::setCodecForTr(QTextCodec::codecForName("GBK"));:q
+}}}

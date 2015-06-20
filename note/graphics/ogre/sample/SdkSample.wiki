@@ -1,0 +1,73 @@
+* 类 SdkSample
+	* 基类 Sample, SdkTrayListener
+	* 数据成员<br />
+{{{c++
+		Ogre::Viewport* mViewport;    		// main viewport
+		Ogre::Camera* mCamera;        		// main camera
+		SdkTrayManager* mTrayMgr;     		// tray interface manager
+		SdkCameraMan* mCameraMan;     		// basic camera controller
+		ParamsPanel* mDetailsPanel;   		// sample details panel
+		bool mCursorWasVisible;				// was cursor visible before dialog appeared
+		bool mDragLook;                     // click and drag to free-look
+}}}
+* 类 SdkTrayManager
+	* 基类 SdkTrayListener, Ogre::ResourceGroupListene
+* 类 SdkTrayListener
+	* 七个虚拟函数表示 tray 事件<br />
+{{{c++
+		virtual void buttonHit(Button* button) {}
+		virtual void itemSelected(SelectMenu* menu) {}
+		virtual void labelHit(Label* label) {}
+		virtual void sliderMoved(Slider* slider) {}
+		virtual void checkBoxToggled(CheckBox* box) {}
+		virtual void okDialogClosed(const Ogre::DisplayString& message) {}
+		virtual void yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit) {}
+}}}
+* 类 ResourceGroupListener
+	* 该类为基本类, 用于在资源组加载过程中指示加载进程. 资源组加载包裹两个阶段: 从声明中创建资源和加载资源
+	* ResourceGroupManager::initialiseResourceGroup 分析脚本, 进行组归纳
+	* 加载资源的事件序列为
+		* resourceGroupScriptingStarted 
+			* 纯虚函数. 当资源组开始分析脚本时触发该事件
+		* scriptParseStarted (*) 
+			* 分析脚本之时触发该事件
+		* scriptParseEnded (*) 
+		* resourceGroupScriptingEnded 
+		* resourceGroupLoadStarted 
+		* resourceLoadStarted (*) 
+		* resourceLoadEnded (*) 
+		* worldGeometryStageStarted (*) 
+			* 链接世界几何体时触发
+		* worldGeometryStageEnded (*) 
+		* resourceGroupLoadEnded 
+		* resourceGroupPrepareStarted 
+		* resourcePrepareStarted (*) 
+		* resourcePrepareEnded (*) 
+		* resourceGroupPrepareEnded
+	* 如果 OGRE_THREAD_SUPPORT为1, 则该类为线程安全的
+
+* 类 OverlayElement
+	* 在一个Overlay上显示的2D元素的抽象定义, 不是所有的 OverlayElement类的实例都可以直接添加至Overlay, 除了 OverlayContainer 的实例, OverlayContainer 对象可包含任意 OverlayElement.
+	* 使用 OverlayManager 管理 OverlayElements, OverlayManger 负责实例化/删除元素, 也接受扩展的新类型element
+	* 该类具有扩展性, 所以其基类之一为 StringInterface, 用于设置通用的参数列表
+	* 其内有一系列静态数据成员的类型为 OverlayElementCommands::Cmd(*), 这些类型为 ParamCommand 的派生类, 用于 gets/sets 参数
+	* 成员函数
+		* updatePositionGeometry --- 当element的位置更新时触发该函数
+		* updateTextureGeometry --- 当element的纹理坐标UV更新时触发
+		* addBaseParameters --- 每个类都有其自己的参数词典. 用于加自身类的参数词典. 派生类在调用该方法之前需调用其自身的createParamDictionary函数
+			* 首先调用基类 StringInterface::getParamDictionary 得到 ParamDictionary 对象
+			* 而后调用 ParamDictionary::addParameter 添加各参数定义以及其 get/set 命令
+		* setDimension --- 根据 mMatricsMode 设置 mPixelWidth/mPixelHeight 或者 mWidth/mHeight. 之后调用 _positionsOutOfDate
+		* setPosition --- 更新 mPixelLeft/mPixelRight 或者 mLeft/mRight. 
+		* _get(*)系列方法 --- 得到m(*), 得到该Element与屏幕的相对距离(0.0-1.0)
+		* _set(*)系列方法 --- 参数为Element与屏幕的相对距离(0.0-1.0), 设置m(*)和mPixel(*)
+		* setMaterialName 方法 --- 通过 MaterialManager的getByName方法得到Material对象指针, 而后调用方法load,并禁止光照和深度检测
+		* 重载的 Renderable 函数
+			* getMaterial
+			* getWorldTransforms
+			* _positionsOutOfDate
+			* getSquaredViewDepth
+		* _update方法--- 重新计算mLeft等参数, 调用_updateFromParent, 计算出 mClippingRegion, 调用 updatePositionGeometry 和 updateTextureGeometry
+		* _notifyParent方法 --- 设置父Element和最终Overlay
+		* _notifyZOrder方法 --- 当父Overlay的Zorder发生变化时通知元素, Overlay 有 Zorder, 但是 OverlayElement 没有 Zorder
+		* _updateRenderQueue 方法 --- 调用 RenderQueue::addRenderable 方法将该 OverlayElement 加入渲染序列

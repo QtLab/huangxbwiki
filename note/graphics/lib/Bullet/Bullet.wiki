@@ -1,0 +1,27 @@
+= 快速开始 =
+== 集成 Bullet 物理库到你的应用中 ==
+* 查看 CcdPhysicsDemo, 看看如何创建一个 btDiscreteDynamicsWorld, btCollisionShape, btMotionState 和 btRigidBody. 每一帧调用 stepSimulation 模拟动态的世界, 并同步图形对象的世界变化. 需求如下:
+	- #include "btBulletDynamicsCommon.h"
+	- 包含路径 Bullet/src 文件夹
+	- 添加库 BulletDynamics, BulletCollision, LinearMath.
+== 仅集成碰撞检测库 ==
+* 查看 CollisionInterface, 注意类 btCollisionWorld. 需求如下:
+	- #include "btBulletCollisionCommon.h"
+	- 包含路径 Bullet/src 文件夹
+	- 添加库 BulletCollision, LinearMath.
+== 仅使用 snippets, 就像 GJK 最近点计算 ==
+* Bullet 的设计以一种模块化的方式进行, 以保证依赖性最小化. 见 Demos/ConvexHullDistance 例子演示 btGjkPairDetector 的直接使用.
+
+= 物理库概览 =
+* 通过一个动态的世界描述整个物理管线计算和它的数据结构. 当在动态世界上执行 'stepSimulation'时, 所有的计算阶段都会被执行.
+* 默认的动态世界实现为 btDiscreteDynamicsWorld
+* 整合步骤:
+	- 创建一个 btDiscreteDynamicsWorld 或者 btSoftRigidDynamicsWorld, 这两个类都是 btDynamicsWorld 的派生类.
+	- 创建一个 btRigidBody 并添加至 btDynamicsWorld, 为了构造一个 btRigidBody, 你需要做到下面几点:
+		- 质量, 位置, 0表示静止物体
+		- 碰撞形状, CollisionShape, 如箱子, 球体, 圆锥, 凸出物体, 三角形mesh.
+		- 材质属性, 例如摩擦力和弹力(restitution).
+	- 调用 stepSimulation 更新每一帧. 其通过调用 btMotionState的setWorldTransform来更新物体的世界变换.
+
+= HelloWorld_Example =
+* 首先创建一个 Dynamic World, 其要设置的参数有 Dispatcher, Broadphase, ConstraintSolver, CollisionConfiguration

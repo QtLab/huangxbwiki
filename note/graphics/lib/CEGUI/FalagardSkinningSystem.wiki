@@ -1,0 +1,59 @@
+= 介绍和概览 =
+== The Unified Co-ordinate System ==
+=== UDim ===
+==== UDim定义 ====
+* 该统一系统的基本构件块为 UDim, 这个类型表示某种类型的单一维度, 定义如下:
+{{{
+UDim(scale, offset)
+}}} 
+	- scale 表示相对于父元素的比例. 值在0.0到1.0之间.
+	- offset 表示像素的任意数量. 对于位置类的值, offset 表示一个像素偏移, 对于一个大小的值, offset 表示一个附加的像素量(类似于padding value).
+	- UDim(0, 10) --- 10 的绝对值
+	- UDim(0.25f, 0) --- 相对坐标.
+	- UDim(0.33, -15) --- 1/3的大小且减去15.
+==== UDim属性格式 ====
+* 在窗口属性字符串中的格式为 {s, o}
+
+=== UVector2 ===
+* 由两个 UDim 元素组成, 一个用于x轴, 一个用于y轴. 定义如下
+{{{
+UVector2(x_udim, y_udim)
+}}} 
+* 属性格式 {{sx, ox}, {sy, oy}}
+
+=== URect ===
+{{{
+URect(left_udim, top_udim, right_udim, bottom_udim)
+URect(tl_uvec2, br_uvec2)
+}}}
+* 属性格式 {{sl, ol}, {st, ot}, {sr, or}, {sb, ob}}
+
+== 窗口对齐 ==
+=== 垂直对齐 ===
+* Window 类成员函数: void setVerticalAlignment(const VerticalAlignment alignment);
+* 窗口属性访问垂直对齐设置: "VerticalAlignment", 其为以下三个值之一:
+{{{
+"Top"
+"Centre"
+"Bottom"
+}}} 
+=== 水平对齐 ===
+* 函数: void setHorizontalAlignment(const HorizontalAlignment alignment);
+* 属性: "HorizontalAlignment"
+{{{
+"Left"
+"Centre"
+"Right"
+}}} 
+
+== Falagard in Schemes ==
+=== CEGUIFalagardWRBase模块 ===
+* CEGUIFalagardWRBase.dll. 
+* 使用之前将 CEGUIFalagardWRBase 模块加载进系统. 在XML文件中设置,
+{{{
+<WindowRendererSet Filename="CEGUIFalagardWRBase" />
+}}} 
+* 对于每个 widget 基类型, 定义了不同的需求元素和需求状态. 具体见 CEGUI Widget Base Type Requirements 和 Falagard Window Renderer Requirements.
+=== LookNFeel Elements ===
+* 加载含widget皮肤定义的XML 'looknfeel' 文件.
+* LookNFeel元素应当在任意Font或Imageset元素之后, 但在任意 WindowSet 元素之前.

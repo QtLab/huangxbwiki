@@ -1,0 +1,23 @@
+1. 本例使用了MFC代码
+2. 基于对话框编程, 主对话框为 IDC_GLVIEW_DIALOG, 对话框 IDC_GLVIEW_PFORMAT 用于显示细节信息
+3. CGLViewDlg 类
+	* OnInitDialog() 函数
+		* 注册窗口类 OpenGLClass 用于显示 OpenGL 窗口
+		* DescribePixelFormat 函数用于遍历所有像素格式
+	* OnSelchangeList() 函数
+		* 设计 CGLWindow 作为绘制OpenGL的类, 派生自 CWnd, 使用其Create函数创建一个窗口
+		* glGetString 或许显卡, 渲染器, 版本信息
+		* glGetString(GL_EXTENSIONS) 函数进行遍历扩展
+		* wglGetExtensionsStringARB 可用来获取 wgl 扩展
+4. CGLWindow 类
+	* OnCreate() 函数
+		* 设置像素格式, 创建 rendering context
+		* 设置纹理, 定时器
+	* OnDestroy() 函数
+		* 删除纹理, 删除 rendering context
+		* 释放 device context
+	* OnSize() 函数
+		* 设置投影矩阵
+	* OnPaint() 函数
+		* 进行OpenGL 渲染 
+	* 全局 gltResourceBMPBIts 用于进行位图读取

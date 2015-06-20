@@ -1,0 +1,26 @@
+= 主框架 =
+	* 从 QGLWidget 派生一个类用来显示 OpenGL 渲染的图形, 本例该派生类名为 GLWidget
+		* class GLWidget
+			* initializeGL
+			* paintGL
+			* resizeGL
+	* 结构体 Geometry --- 保存了所有顶点和法线数组, 以及索引数据数组
+	* 类 Patch
+		* 每一个 Patch 对象对应 Geometry数据的一部分. 每增加一个三角形, 则增加顶点和索引数据
+		* 每一个 Patch 都有其自身的 旋转, 移动, 绘制函数
+		* 顶点数据的增加有两种方式: Smooth 和 Faceted. 前者在存在顶点的情况下只增加索引和修正法线向量. 后者则直接增加顶点数据和递增索引
+		* 成员变量 start 表示创建该Patch时, 其顶点索引在Geometry数据中的起点, 这是由于或许前者有Patch占用了一部分数据
+	* 类 QLogo
+		* draw() 函数
+			* 绘制方法, 首先调用 glVertexPointer 和 glNormalPointer 上传数据
+			* 而后调用 glEnableClientState(GL_VERTEX_ARRAY) 和 glEnableClientState(GL_NORMAL_ARRAY)
+			* 调用各个Patch的draw函数, 主要是 glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, indices + start);
+
+= 主要函数 =
+	* qglClearColor --- glClearColor 函数的Qt版本
+	
+= 主要类与方法 =
+	* QGLWidget
+		* updateGL --- 调用方法 QGLWidget::glDraw (), 执行虚函数 paintGL()
+	* QMatrix4x4
+		* 缺省构造函数会创建一个单元矩阵

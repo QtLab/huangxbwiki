@@ -1,0 +1,44 @@
+* The Multiple-Document Interface(MDI)是一个用于处理微软Windows系统中文档的应用规格. 描述了一个窗口结构和用户接口, 使用户可以在单个应用中处理多个文档.
+* 一个MDI应用在单个客户端区域内维护多个文档窗口.
+= MDI 概念 =
+== MDI元素 ==
+* 一个MDI程序的应用主窗口有如下内容: 标题栏, 菜单, 可重置大小的边框, 系统菜单图标, 最小化/最大化/关闭按钮. 客户区域常被称为"workspace", 含有零个或多个子窗口, 用于显示每个文档.
+* 子窗口就像普通的应用窗口和MDI程序的主窗口. 大多有标题栏, 可重置大小的边框, 系统菜单图标, 最小化/最大化/关闭按钮, 还可能有滚动条, 但是其没有菜单. 但是MDI程序的菜单则会应用于文档窗口上.
+* 任意时刻只有一个文档窗口活跃.
+* 首先, 需要创建一个 WS_CHILD 窗口用于每个文档, 程序主窗口作为文档窗口的父窗口. 但其还有几个要点:
+	- MDI文档窗口可最小化, 在workspace底部显示文档窗口带图标的短标题栏. 每个类型的文档窗口和主窗口使用不同的图标.
+	- MDI文档窗口可最大化, 标题栏(通常用于显示文档文件名)消失, 文件名添加于应用主窗口标题栏的应用名称之后. 修改主窗口顶层菜单的第一个项目为文档的系统图标, 修改主窗口顶层菜单最右边的最后项目为文档的关闭按钮. 
+	- Ctrl-F4 关闭文档窗口, Ctrl-F6 在文档窗口之间切换. Alt+空格 激活主窗口的系统菜单, Alt+-(减号) 激活当前活跃文档窗口的系统菜单.
+	- 随着不同类型的文档显示不同的菜单
+	- 一般有"window"菜单, 用于不同布局以及显示所有的文档窗口.
+== MDI支持 ==
+* 主窗口被称之为 "frames window", 该窗口有 WS_OVERLAPPEDWINDOW style.
+* 一个MDI应用使用预定义的MDICLIENT窗口类创建一个 "client window",  通过调用函数 CreateWindow 以及使用该窗口类和WS_CHILD 风格来创建 client window. CreateWindow 的最后一个参数为 CLIENTCREATESTRUCT 结构变量的指针. 该客户区窗口的颜色为系统颜色 COLOR_APPWORKSPACE.
+* 文档窗口也称之为"子窗口", 通过初始化 MDICREATESTRUCT 结构类型以及发送 WM_MDICREATE 消息来创建这些窗口
+* 你需要一个窗口类(以及窗口消息处理函数-window procedure)分别用于frame window 和每种类型的子窗口.
+* Win98 的MDI支持包括一个窗口类, 五个函数, 两个数据结构, 十二个消息.
+	- 前面讲到 MDI 窗口类, CLIENTCREATESTRUCT 和 MDICREATESTRUCT 数据结构. 
+	- 五个函数中的两个代替了 MDI 应用的 DefWindowProc 函数. 分别为 DefFrameProc 和 DefMDIChildProc. TranslateMDISysAccel 则类似于 TranslateAccelerator.
+	- MDI 还支持 ArrangeIconicWindows, 但MDI有一个特殊的消息使得该函数无必要.
+	- 最后一个函数为 CreateMDIWindow, 其在单独的线程中创建子窗口.
+	- 消息前缀为 WM_MDI, frame window 发送消息给 client window, 而后在子窗口上执行操作或者获取子窗口的信息. 除 WM_MDIACTIVATE 消息之外.
+
+= A Sample MDI Implement =
+* GetWindow 和 GL_CHILD 参数可以获取子窗口.
+* TranslateMDISysAccel 和 TranslateAccelerator 快捷键消息处理
+* DestroyMenu 销毁菜单
+* WM_MDICREATE 消息创建 MDI 文档窗口
+* WM_MDIGETACTIVE 获取活跃文档窗口, WM_QUERYENDSESSION 和 WM_MDIDESTROY 可以关闭一个文档窗口
+* WM_CLOSE 可以关闭窗口
+* WM_MDITILE, WM_MDICASCADE, WM_MDIICONARRANGE 设置MDI文档窗口的排列
+* EnumChildWindows 枚举子窗口完成一个操作.
+* IsWindow 判断是否是一个窗口
+* WM_MDIRESTORE 文档窗口存储, WM_MDIDESTROY 文档窗口销毁
+* HeapAlloc 分配一个堆
+* WM_MDISETMENU 设置菜单
+* CheckMenuItem 设置菜单项
+* DrawMenuBar 绘制菜单栏
+== 三个菜单 ==
+* IDM_FIRSTCHILD 并不对应于任何菜单, 仅关联至在window子菜单列表中的第一个文档窗口, 其应该比任何菜单ID的值更大
+== 程序初始化 ==
+* WinMain 中, 里面创建了frame window 和两个 document window, 以及相应的处理函数

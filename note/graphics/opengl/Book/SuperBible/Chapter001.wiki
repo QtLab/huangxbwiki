@@ -1,0 +1,18 @@
+= OpenGL 和图形管线 =
+* OpenGL 可以将渲染工作分散并平行运行其基本的操作.
+* 当前GPU由大量的小型可编程处理器(shader cores)组成,每个core有相对少的吞吐量, 一个或多个时钟周期内处理shader的单个指令, 且缺乏一些高级功能, 如 out-of-order execution, branch prediction,  super-scalar issue等.
+
+= OpenGL的起源和发展 =
+* GL - Graphics Library
+* ARB - OpenGL Architectural Review Board. 现为 Khronos Group 的一部分.
+* 本书版本为 OpenGL 4.3
+* 2008年起, ARB分出两个分支:
+	- core profile: 移除所有之前的功能, 仅留当前管理硬件加速的功能
+	- compatibility profile: 兼容之前的 OpenGL 版本.
+* 本书仅关心 core profile.
+
+= 图元, 管线和像素 =
+* 三种基本类型图元: 点, 线, 三角形.
+* 使用一个叫 rasterizer 的硬件加速其渲染三角形. 其将三角形转换成在屏幕上绘制的一系列像素.
+* 图形管线拆分为两个部分, 第一部分为 front end, 其处理顶点和图元, 最终转换为点, 线, 三角形, 而后发送给 rasterizer. 这过程可看成 primitive assembly. 在rasterizer之后, 几何体则从向量表达式转换为大量各自独立的像素. 而后发送给 back end 处理. 其内包含深度和stencil测试, 片段着色, 混合, 更新输出图像.
+
