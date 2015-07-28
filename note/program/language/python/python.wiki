@@ -1,2 +1,3 @@
 [[python tutorial|入门指南]] <br />
 [[abyteofpython3||A Byte of Python3]]<br />
+[[automate_the_boring_stuff_with_python||Automate The Boring Stuff With Python]]<br />

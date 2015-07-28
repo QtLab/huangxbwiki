@@ -1,0 +1,14 @@
+= Chapter 7 Pattern Matching With Regular Expression =
+* re 模块
+* \d 数字, {数字} 重复次数
+* re.compile() 加上正则表达式得到一个Regex Pattern 对象. 该对象有 search() 方法, 如果有匹配, 则返回 Match 对象. 该对象有 group() 方法, 返回实际的匹配文本.
+* 添加括号可以分组正则表达式
+* '|' 匹配多个表达式
+* 正则模式的findall() 方法发现所有匹配, 返回一个列表
+* ? 字符表示可选, 匹配 0 次或 1 次
+* * 字符表示匹配0次或多次
+* + 字符表示匹配1次或多次
+
+== 函数与模块 ==
+* len() --- 求出一个列表的长度
+* String.isdecimal() --- 判断是否数字

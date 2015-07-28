@@ -12,6 +12,7 @@
 	* [[note/graphics/lib/lib|开发库]]
 
 === 程序设计 ===
+	* [[note/program/concept/concept|概念]]
 	* [[note/program/function/function|APIs]]
 	* [[note/program/language/language|语言]]
 	* [[note/program/algorithm/algorithm|算法]]

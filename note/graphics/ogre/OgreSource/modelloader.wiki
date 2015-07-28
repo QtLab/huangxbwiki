@@ -1,0 +1,4 @@
+* DObject_NT::_LoadEntity()
+* WX::loadMesh ╪сть mesh
+* static_cast<Entity*>(createMovableObject(entityName, EntityFactory::FACTORY_TYPE_NAME, &params));
+* SceneManager::createMovableObject й╣ож

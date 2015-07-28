@@ -9,4 +9,5 @@
 	[[sample/Sample|OgreSDK Sample ]]<br />
 
 	[[OgreSource/OgreSource|Ogre 源码分析 ]]<br />
-
+	[[OgreSource/modelloader|模型的加载 ]]<br />
+	
