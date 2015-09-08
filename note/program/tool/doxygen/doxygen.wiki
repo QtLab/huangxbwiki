@@ -42,22 +42,22 @@
 	- <A HREF="..."> Starts a hyperlink (if supported by the output format).
 	- <A NAME="..."> Starts an named anchor (if supported by the output format).
 	- </A> Ends a link or anchor
-	- <B> Starts a piece of text displayed in a bold font.
-	- </B> Ends a <B> section.
+	- < B> Starts a piece of text displayed in a bold font.
+	- < /B> Ends a < B> section.
 	- <BODY> Does not generate any output.
 	- </BODY> Does not generate any output.
-	- <BR> Forces a line break.
+	- < BR > Forces a line break.
 	- <CENTER> starts a section of centered text.
 	- </CENTER> ends a section of centered text.
 	- <CAPTION> Starts a caption. Use within a table only.
 	- </CAPTION> Ends a caption. Use within a table only.
-	- <CODE> Starts a piece of text displayed in a typewriter font. Note that for C# code, this command is equivalent to \code.
-	- </CODE> Ends a <CODE> section. Note that for C# code, this command is equivalent to \endcode.
+	- < CODE> Starts a piece of text displayed in a typewriter font. Note that for C# code, this command is equivalent to \code.
+	- < /CODE> Ends a < CODE> section. Note that for C# code, this command is equivalent to \endcode.
 	- <DD> Starts an item description.
 	- <DFN> Starts a piece of text displayed in a typewriter font.
 	- </DFN> Ends a <DFN> section.
-	- <DIV> Starts a section with a specific style (HTML only)
-	- </DIV> Ends a section with a specific style (HTML only)
+	- < DIV> Starts a section with a specific style (HTML only)
+	- < /DIV> Ends a section with a specific style (HTML only)
 	- <DL> Starts a description list.
 	- </DL> Ends a description list.
 	- <DT> Starts an item title.
@@ -66,16 +66,16 @@
 	- </EM> Ends a <EM> section.
 	- <FORM> Does not generate any output.
 	- </FORM> Does not generate any output.
-	- <HR> Writes a horizontal ruler.
-	- <H1> Starts an unnumbered section.
-	- </H1> Ends an unnumbered section.
+	- < HR> Writes a horizontal ruler.
+	- < H1> Starts an unnumbered section.
+	- < /H1> Ends an unnumbered section.
 	- <H2> Starts an unnumbered subsection.
 	- </H2> Ends an unnumbered subsection.
 	- <H3> Starts an unnumbered subsubsection.
 	- </H3> Ends an unnumbered subsubsection.
-	- <I> Starts a piece of text displayed in an italic font.
+	- < I> Starts a piece of text displayed in an italic font.
 	- <INPUT> Does not generate any output.
-	- </I> Ends a <I> section.
+	- < /I> Ends a < I> section.
 	- <IMG> This command is written with attributes to the HTML output only.
 	- <LI> Starts a new list item.
 	- </LI> Ends a list item.
@@ -94,10 +94,10 @@
 	- </SPAN> Ends an inline text fragment with a specific style (HTML only)
 	- <STRONG> Starts a section of bold text.
 	- </STRONG> Ends a section of bold text.
-	- <SUB> Starts a piece of text displayed in subscript.
-	- </SUB> Ends a <SUB> section.
-	- <SUP> Starts a piece of text displayed in superscript.
-	- </SUP> Ends a </SUP> section.
+	- < SUB> Starts a piece of text displayed in subscript.
+	- < /SUB> Ends a < SUB> section.
+	- < SUP> Starts a piece of text displayed in superscript.
+	- < /SUP> Ends a < /SUP> section.
 	- <TABLE> starts a table.
 	- </TABLE> ends a table.
 	- <TD> Starts a new table data element.
@@ -108,14 +108,14 @@
 	- </TR> Ends a table row.
 	- <TT> Starts a piece of text displayed in a typewriter font.
 	- </TT> Ends a <TT> section.
-	- <KBD> Starts a piece of text displayed in a typewriter font.
-	- </KBD> Ends a <KBD> section.
+	- < KBD> Starts a piece of text displayed in a typewriter font.
+	- < /KBD> Ends a < KBD> section.
 	- <UL> Starts an unnumbered item list.
 	- </UL> Ends an unnumbered item list.
 	- <VAR> Starts a piece of text displayed in an italic font.
 	- </VAR> Ends a <VAR> section.
 
-* doxygen 可以认识的 HTML字符 <br />
+* doxygen 可以认识的 HTML字符
 	- &copy; the copyright symbol
 	- &tm; the trade mark symbol
 	- &reg; the registered trade mark symbol
@@ -144,20 +144,20 @@
 * 两种注释: 简略注释, 详细注释, 还有函数体内的注释.
 * 支持多个简略注释和详细注释(不推荐).
 * 用于标识为详细注释的几个标记
-	* JavaDoc Style<br />
+	* JavaDoc Style
 {{{c++
 /**
  * ... text ...
  */
 }}}
-	* Qt Style<br />
+	* Qt Style
 {{{c++
 /*!
  * ... text ...
  */
 }}}
 	* 上面两者注释风格中, ... text ... 之前的星号'*' 不是必须的
-	* 第三种可选择的风格: 最少两行C++注释, 且每行要多一个'/'或者'!', 且以一个空格结束该文档块<br />
+	* 第三种可选择的风格: 最少两行C++注释, 且每行要多一个'/'或者'!', 且以一个空格结束该文档块
 {{{c++
 ///
 /// ... text ...
@@ -167,7 +167,7 @@
 //!... text ...
 //!
 }}}
-	* 其他格式<br />
+	* 其他格式
 {{{c++
 /********************************************//**
  *  ... text
@@ -178,7 +178,7 @@
 /////////////////////////////////////////////////
 }}}
 * 简短注释
-	* 在上面所介绍的注释风格中, 可以使用'\brief'开头, 该命令在段落末段结束, 所以详细描述位于空行之后<br />
+	* 在上面所介绍的注释风格中, 可以使用'\brief'开头, 该命令在段落末段结束, 所以详细描述位于空行之后
 {{{c++
 /*! \brief Brief description.
  *         Brief description continued.
@@ -186,7 +186,7 @@
  *  Detailed description starts here.
  */
 }}}
-	* 如果 JAVADOC_AUTOBRIEF 为真, 则使用 JavaDoc style 的注释会自动开始一个简短描述, 由第一个句号为终点, 该句号后为空白, 另外还有QT_AUTOBRIEF<br />
+	* 如果 JAVADOC_AUTOBRIEF 为真, 则使用 JavaDoc style 的注释会自动开始一个简短描述, 由第一个句号为终点, 该句号后为空白, 另外还有QT_AUTOBRIEF
 	* 另外 JAVADOC_AUTOBRIFE 对于多行的C++注释也有作用, 每行前多一个'/'或者'!', 这样句号也会终结一个简略注释
 {{{c++
 /** Brief description which ends at this dot. Details follow
@@ -196,7 +196,7 @@
 /// Brief description which ends at this dot. Details follow
 /// here. 
 }}}
-	* 其他方法, 注意第二个例子, JAVADOC_AUTOBRIEF 要设为NO<br />
+	* 其他方法, 注意第二个例子, JAVADOC_AUTOBRIEF 要设为NO
 {{{c++
 /// Brief description.
 /** Detailed description. */
@@ -212,7 +212,7 @@
 	* 简短描述包含在类, 名字空间, 文件的纵览中, 使用斜体字打印(BRIEF_MEMBER_DESC设为NO, 则隐藏该描述). 缺省情况简短描述为详细描述的第一句.(可以由REPEAT_BRIEF设为NO改变)
 	* JavaDoc Style的缺省设置其注释块的第一行不为简短描述, 除非设置 JAVADOC_AUTOBRIEF为YES, 设置之后如果不想一个句子中间的点号'.'为终结该句的标点, 则应当放置反斜号和一个空格在其后. 例如 /** Brief description (e.g.\ using only a few words). Details follow.  */
 	* 不同于其他文档系统, 可以在定义之前放置文档. 这种方式允许在源文件中放置文档, 而不仅仅是头文件. 这样可以在头文件的声明放置简短描述, 在源文件的定义中放置详细描述
-	* 在类, 结构体, 文件, 联合, 枚举的成员定义之后进行注释, 则需要注释块中添加记号'<', 该方法对函数参数也有效<br />
+	* 在类, 结构体, 文件, 联合, 枚举的成员定义之后进行注释, 则需要注释块中添加记号'<', 该方法对函数参数也有效
 	* 详细描述
 {{{c++
 int val: /*!< Qt风格详细描述 */
@@ -222,7 +222,7 @@ int var; //!< C++风格详细描述
 int var; ///< C++风格详细描述
 		///<
 }}}
-	* 简单描述<br />
+	* 简单描述
 {{{c++
 int var;	//!< 简单描述
 int var;	///< 简单描述
@@ -235,7 +235,7 @@ void foo(int v /**< [in] 描述输入参数v的文档  */);
 	* '<' 只能用于成员和参数, 不能用于文件, 类, union, struct, groups, namespaces, enums等, 另外 structural command 不允许出现在这些注释块中.
 * structural command
 	* 如果不将注释块放在其对象之前或者之后, 而是存放于其他地方. 则需要在注释块中放置 structural command. 平时尽量不要使用 structural command.
-	* Structural 命令由'\'开头或'@'开头, 而后跟随一个命令名称以及一个或多个参数. 下面的例子可以将该注释块存放于任何地方, 这是由于其有"\class"命令 <br />
+	* Structural 命令由'\'开头或'@'开头, 而后跟随一个命令名称以及一个或多个参数. 下面的例子可以将该注释块存放于任何地方, 这是由于其有"\class"命令
 {{{c++
 /*! \class Test
     \brief A test class.
@@ -256,7 +256,7 @@ void foo(int v /**< [in] 描述输入参数v的文档  */);
     	* \package
     	* \interface --- IDL 接口
 	* 更多的其他命令见 Special Command
-	* 要对类成员进行文档, 就需要先文档化该类, 同样, 对于名字空间也一样. 要文档全局C函数, typedef, enum和预处理定义, 就要文档化包含这些内容的文件. 所以文档至少包含一个命令: /*! \file */ 或者 /** @file */<br />
+	* 要对类成员进行文档, 就需要先文档化该类, 同样, 对于名字空间也一样. 要文档全局C函数, typedef, enum和预处理定义, 就要文档化包含这些内容的文件. 所以文档至少包含一个命令: /*! \file */ 或者 /** @file */
 {{{c++
 /*! \file structcmd.h
     \brief A Documented file.

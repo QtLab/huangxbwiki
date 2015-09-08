@@ -1,10 +1,11 @@
-= 基本算法 =
+= 鍩烘湰绠楁硶 =
 
-= 笔记 =
-	[[note/Algorithmss|算法导论]]
+= 绗旇 =
+	[[note/Algorithmss|绠楁硶瀵艰]]
+	[[note/AlgorithmssSolution|绠楁硶瀵艰棰樿В]]
 	[[note/advanceddatastructures|Advanced Data Structures]]
 
-= 游戏算法 =
-	[[game/gamealgorithm|游戏算法]]
-	[[game/gamealgorithm2|游戏算法]]
-	[[game/gamealgorithm3|游戏算法2]]
+= 娓告垙绠楁硶 =
+	[[game/gamealgorithm|娓告垙绠楁硶]]
+	[[game/gamealgorithm2|娓告垙绠楁硶]]
+	[[game/gamealgorithm3|娓告垙绠楁硶2]]

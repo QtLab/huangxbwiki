@@ -1,0 +1,2 @@
+[[GNU Project Manage|GNU 项目管理]]
+[[GNU Manual|GNU 中文手册]]

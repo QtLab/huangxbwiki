@@ -53,7 +53,7 @@ Send ^c!{tab}pasted:^v
 {{{
 Click 112, 223
 }}} 
-* 激活和操作窗口, 使用 WinActivate 激活窗口, 使用 IfWinExit 或 WinWait 检测窗口是否窗口
+* 激活和操作窗口, 使用 WinActivate 激活窗口, 使用 IfWinExist 或 WinWait 检测窗口是否窗口
 {{{
 IfWinExist Untitled - Notepad
 {

@@ -1,0 +1,30 @@
+* 10.4-2
+{{{
+# 使用中序遍历二叉树
+PRINTBTREE(T, t)
+	if t = NIL
+		then return
+	PRINTBTREE(T, left[t])
+	print(t)
+	PRINTBTREE(T, right[t])
+}}}
+* 10.4-3
+{{{
+PRINTBTREE(T, t)
+	STACK_PUSH(L, t)
+	while STACK_ISEMPTY(L) == FALSE
+		do p = STACK_POP()
+		   if left[p] != NIL
+		   		then STACK_PUSH(p)
+		   if right[p] != NIL
+		   		then STACK_PUSH(p)
+}}}
+* 10.4-4
+{{{
+ITERTREE(T, t)
+	if t = NIL
+		then return
+	print(t)
+	ITERTREE(T, leftchild(t))
+	ITERTREE(T, sibling(t))
+}}}

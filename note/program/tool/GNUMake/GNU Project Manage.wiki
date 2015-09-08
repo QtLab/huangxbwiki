@@ -1,0 +1,228 @@
+= 第一章 如何编写一个简单的 makefile =
+* "Hello, World" makefile
+{{{
+hello: hello.c
+	gcc hello.c -o hello
+}}}
+* 一项规则三个部分: target, prerequisite, command
+{{{
+target: prereq1 prereq2
+	commands
+}}}
+	- 举例
+{{{
+foo.o: foo.c foo.h
+	gcc -c foo.c
+}}}
+	- -l<NAME> 形式 先找 libNAME.so, 再找 libNAME.a
+* make 描述文件名为 makefile, Makefile 或 GNUMakefile
+* make lexer.c, 则先读取描述文件, 而后找出要更新的工作目标.
+* 命令行选项, --just-print(或 -n): 要求 make 显示将要为特定工作目标执行的命令, 但不执行这些命令
+* 较完整的规则:
+{{{
+target1 target2 target3 : prerequisite1 prerequisite2
+	command1
+	command2
+	command3
+}}}
+* "#"注释, 反斜线(\) 换行
+
+= 第二章 规则 =
+* 规则分类:
+	- 具体规则: 必要条件的文件比工作目标更新, 则进行更新动作
+	- 模式规则: 通配符, 与模式相符的工作目标应用该规则
+	- 隐含规则, 可以是模式规则, 也可以是内置于 make 的后缀规则
+	- 静态模式规则: 只能应用在一串特定的工作目标文件中
+* 具体规则, 例子
+{{{
+vpath.o variable.o: make.h config.h getopt.h gettext.h dep.h
+}}}
+* 一个变量可以是一个美元符号后面跟着单一字符, 或者跟着一个加圆括号的单词
+* 通配符: 问好单一字符, [...]字符集, [^...] 补集 "~" 主目录.
+	- 工作目标和必要条件中的通配符由 make 负责.
+* 不代表文件的工作目标为假想工作目标, 如 all(默认首先要处理的标准工作目标), clean
+{{{
+clean:
+	rm -f *.o lexer.c
+}}}
+	- make 总是会执行假想工作目标
+	- .PHONY 用来告诉 make, 该工作目标不是一个真正的文件
+{{{
+.PHONY: clean
+clean:
+	rm -f *.o lexer.c
+}}}
+* 假想工作目标作为 shell 脚本, 以作为另一个工作目标的必要条件, 使得其进行实际工作之前调用脚本
+{{{
+.PHONY: make-documentation
+make-documentation:
+	df -k . | awk 'NR == 2 ( printf( "%d" available\n", $$4))'
+}}}
+* 标准假想工作目标
+	- all --- 执行编译应用程序的所有工作
+	- install --- 已编译的二进制文件的安装
+	- clean --- 删除编译的二进制文件
+	- distclean --- 删除编译的生成文件
+	- TAGS --- 建立可供编辑器使用的标记表
+	- info -- info文件
+	- check --- 测试
+* 自动变量
+	- $@ --- 工作目标的文件名
+	- $% --- 档案文件成员结构中的元素名文件
+	- $< --- 第一个必要条件的文件名
+	- $? --- 时间戳在工作目标的时间戳之后的所有必要条件, 并以空格隔开这些必要条件
+	- $^ --- 所有必要条件的文件名
+	- $+ --- 同 S^, 只是包含重复的文件名
+	- $* --- 工作目标的主文件名(不含后缀)
+* 自动变量的两个变体, 附加D 返回值的目录部分, 附加F返回值的文件部分, 自动变量只能用于命令脚本部分
+{{{
+count_words: count_words.o counter.o lexer.o -lfl
+	gcc $^ -o $@
+count_words.o: count_words.c
+	gcc -c $<
+counter.o: counter.c
+	gcc -c $<
+lexer.o: lexer.c
+	gcc -c $<
+lexer.c: lexer.l
+	flex -t $< > $@
+}}}
+* VPATH 和 vpath 告诉 make 在哪里查找源文件
+* -I 选项隐含编译规则(头文件位于include内)
+{{{
+CPPFLAGS = -I include
+}}}
+8 VPATH有同名问题, 使用 vpath 指令
+{{{
+vpath pattern directory-list
+
+vpath %.l &.c src
+vpath %.h include
+}}}
+* 通过文件名模式的匹配来简化规则的建立, 以及提供内置规则来处理它们
+{{{
+VPATH = src include
+CPPFLAGS = -I include
+
+count_words: counter.o lexer.o -lfl
+count_words.o: counter.h
+counter.o: counter.h lexer.h
+lexer.o: lexer.h
+}}}
+	- 包含三条内置规则
+{{{
+%.o: %.c
+	%(COMPILE.c) %(OUTPUT_OPTION) $<
+
+%c: %.l
+	@$(RM) $@
+	$(LEX.l) $< > $@
+
+%: %.c
+	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
+}}}
+* make --print-data-base 列出 make 具有哪些默认规则(和变量)
+* 模式规则中的百分比符(%) 等效于 Unix shell 中的星号(*), 代表任意多个字符. 如 %.v, s%.o, wrapper_%
+* 静态模式规则只能应用在特定的工作目标上
+{{{
+$(OBJECTS): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+}}}
+	- 多了 $(OBJECTS), 只能应用在 $(OBJECTS)变量中所列举的文件上.
+* 后缀规则: 老式规则. 工作目标为一个扩展名或者两个被衔接在一起的扩展名
+{{{
+.c.o:
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+}}}
+	- 与下面相同
+{{{
+%o: %.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+}}}
+	- 单后缀, 源文件的扩展名
+{{{
+.p:
+	$(LINK.p) $^ $(LOADLIBES) $(LDLIBS) -o $@
+}}}
+	- 等效于
+{{{
+%: %.p
+	$(LINK.p) $^ $(LOADLIBES) $(LDLIBS) -o $@
+}}}
+	- .SUFFIXES 设定已知扩展名列表
+{{{
+.SUFFIXES: .out .a .ln .o .c .cc .C .p .f .F .r .y .l
+}}}
+* 隐含规则的使用很容易, 工作目标加入 makefile 时, 不指定脚本即可. 注意冲突问题, 例如 lisp 文件以 .l 为后缀, 则可能看成 flex 文件. 这种情况, 移除两条内置规则库的规则
+{{{
+%.o: %.l
+%.c: %.l
+}}}
+* 使用隐含规则的时候, 会搜索隐含规则的必要条件, 例如 .o 文件则会搜索 .c, .cc, cpp, .p, .f, .r, .s, .mod. 如果还没有找到, 则递归搜索产生必要条件文件的文件, 例如找到相应的 .l 文件生成 .c 文件, 这其中产生的中间文件会被删除掉
+* --just-print(或 -n) 要求 make 汇报它将会采取哪些行动, 但不要执行它们.
+* 从 C 源文件来更新目标文件的规则:
+{{{
+%.o: %.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+}}}
+	- COMPILE.c 由多个其他变量定义:
+{{{
+COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+CC = gcc
+OUTPUT_OPTION = -O $@
+}}}
+	- CPPFLAGS --- 编译选项
+	- TARGET-ARCH --- 结构选项
+{{{
+CPPFLAGS = -I project/include
+
+$ make CPPFLAGS=-DDEBUG
+}}}
+	- 上面这样做完全覆盖了原有的值, 可以这样做
+{{{
+COMPILE.c = $(CC) $(CFLAGS) $(INCLUDE) $(TARGET_ARCH) -c
+INCLUDE = -I project/include
+}}}
+* 下面例子中的 help 工作目标将会把可用的make工作目标显示成一份经过排序的四个字段的列表
+{{{
+# help - The default goal
+.PHONY: help
+help:
+	@ $(MAKE) --print-data-base --question |			/
+	  awk '/^[^.%][-A-Za-z0-9_]*:/						/
+	      {print substr($$1, 1, length($$1)-1) }' |		/
+	  sort |											/
+	  pr --omit-pagination --width=80 --columns=4
+}}}
+	- --print-data-base 输出 make 的规则库
+	- --question 避免 make 执行其中的任何命令
+	- awk 过滤器, 手机任何并非以百分比号和点号开头(分别表示模式规则和后缀规则)的工作目标, 以及删掉和外的信息, 最后工作目标列表进行排序, 并以四个字段的格式输出
+* 上面的 help 还有一种做法, 就是对 makefile 文件本身使用 awk 命令, 这需要对被引入(included) 的makefile文件做特殊的处理, 而且不能处理其所产生的规则, 通过让 make 处理这些元素以及汇报其所产生的规则, 就能自动完成所有的工作.
+* .PHONY 常见的特殊工作目标, 表示必要条件不代表一个实际的文件, 应该被视为尚未更新.
+* 特殊工作目标其target非文件, 而是一个假想工作目标 用来修改 make 内部算法的指令. 一共12个特殊工作目标, 三类. 第一类用来在更新工作目标时修改 make 的行为, 第二类动作则好像是 make 的全局标记, 用来忽略相应的工作目标. 最后是 .SUFFIXES 这个工作目标, 用来指定旧式的后缀规则.
+	- .INTERMEDIATE --- 必要条件视为中间文件, make 结束时自动删除
+	- .SECONDARY --- 必要条件视为中间文件, 但不会自动删除.
+	- .PRECIOUS --- 不会再自己被中断时删除该文件
+	- .DELETE_ON_ERROR --- 与规则相应的任何命令那个在运行时发生错误时, 删除该工作目标
+* gcc -M 可以打印出依存关系
+* 一种将自动产生的依存关系纳入 makefile 的方法, 在 makefile 结尾加入如下一行内容
+{{{
+#Automatically generated dependecies foolow - Do Not Edit
+}}}
+	- 第二种方法, 加入一个 include 指令. 编写一个 makefile 工作目标, 其动作是以 -M 选项对所有源文件执行 gcc, 并将结果存入依存文件中. 而后重新执行 make 将依存文件引入 makefile.
+{{{
+depend: count_words.c lexer.c counter.c
+	$(CC) -M $(CPPFLAGS) $^ > $@
+}}}
+	- 为每个源文件产生依存关系, 将之存入相应的依存关系(扩展为 .d 的文件), 并以该 .d 文件为工作目标来加入yi依存规则. 这样当源文件被改变时, make 就需要知道需要更新该 .d 文件( 以及目标文件):
+{{{
+counter.0 counter.d: src/counter.c include/counter.h include/lexer.h
+}}}
+	- 如下的模式规则以及命令脚本来产生这项规则
+{{{
+%.d: %.c
+	$(CC) -M $(CPPFLAGS) $< > $@.$$$$;					\
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;	\
+	rm -f $@.$$$$										\
+}}}
+	- make 会把 include 指令所指定的任何文件视为
