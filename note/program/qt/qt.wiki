@@ -14,6 +14,7 @@
 	[[note/qtbook chapter 14|Qt Book Chapter 14]]<br />
 	[[note/qtbook chapter 15|Qt Book Chapter 15]]<br />
 	[[note/qtbook chapter 16|Qt Book Chapter 16]]<br />
+	[[note/qtbook chapter 20|Qt Book Chapter 20]]<br />
 	[[note/QtClass|Qt Class]]<br />
 	[[note/SpreadSheet|Spread Sheet]]<br />
 	[[classandfuntion|类和函数]]<br />

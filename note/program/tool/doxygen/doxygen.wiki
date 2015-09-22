@@ -386,11 +386,14 @@ int read(int,char *,size_t);
 	* 用于Qt软件的内部文档工具 qdoc 和 KDoc, 使用这两个命令创建 unnested lists.
 
 = Grouping =
+* 三种分组方式: modules, member groups, pages
 * Modules
-	* 将成员组合在一起放在一个单独的页面中
-	* \defgroup 命令定义一个组, 第一个参数为组的标识, 第二个参数为组的名称或者标题
-	* \ingroup 将一个成员放置进一个组
-	* 符号 "@{" 和 "@}" 用于包括一个组的内容
+	* 将内容组合在一起放在一个单独的页面中
+	* 其成员可以是文件, 名字空间, 类, 函数, 变量, 枚举, typedefs, define, 以及其他组.
+	* \defgroup 命令定义一个组, 第一个参数为组的唯一标识, 第二个参数为组的名称或者标题, 其显示于文档内.
+	* \ingroup 将一个成员放置进一个组, 只需将该命令放置于该成员的文档块中即可.
+	* 符号 "@{" 和 "@}" 用于包括一个组的内容, 避免反复使用 \ingroup 命令. 该符号可放置于组定义文档块中, 也可以是单独的文档块中.
+	* 分组可以嵌套.
 	* 如果你不想使用唯一的标签, 你可使用 \addtogroup 代替 \defgroup, 该命令关于组标题的参数可选.
 {{{c++
 /** \addtogroup <label> 
@@ -400,7 +403,38 @@ int read(int,char *,size_t);
 
 /** @}*/
 }}}
-	* 包装实体(如类, 文件, 名字空间)可以放入多个组, 但是成员(如变量, 函数, tpyedef, 枚举)则只能做为一个组的成员
+	* 组合的实体(如类, 文件, 名字空间)可以放入多个组, 但是成员(如变量, 函数, tpyedef, 枚举)则只能做为一个组的成员
+	* 如果一个成员有最高"优先级"的定义, 则将该成员放入该组中. 例如: 显式的 \ingroup 覆盖通过@{ @}实现的隐式分组定义. 相同优先级分组定义的冲突则触发警告, 直到用于一个成员的定义没有显式的文档. 下面的例子将 VarInA 放置组 A 内, 其静默解决了 IntegerVariable 的冲突, 将其放入组 IntVariables, 这是因为第二个 IntegerVariable 实例是未文档化的.
+{{{
+/**
+ * \ingroup A
+ */
+extern int VarInA;
+
+/**
+ * \defgroup IntVariables Global integer variables
+ * @{
+ */
+
+/** an integer variable */
+extern int IntegerVariable;
+
+/**@}*/
+
+....
+
+/**
+ * \defgroup Variables Global variables
+ */
+/**@{*/
+
+/** a variable in group A */
+int VarInA;
+
+int IntegerVariable;
+
+/**@}*/
+}}}
 	* \ref 命令可用于关联至一个组, 该命令第一个参数为组的label.
 	* 优先级: \ingroup, \defgroup, \addtogroup, \weakgroup, 最后一个类似 addtogroup. 一般在头文件使用高优先级的目录, 在源文件使用\weakgroup, 这样就不会复制其层次
 * Member Groups
